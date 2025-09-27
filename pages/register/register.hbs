@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация - Ad.net</title>
+    <link rel="stylesheet" href="RegisterStyle.css"> 
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo"><span>Ad.net</span></div>
+            <nav class="main-nav">
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link">Агенства</a>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item">Список агенств</a>
+                    </div>
+                    </div>
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link">Специалисты</a>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item">Список специалистов</a>
+                    </div>
+                </div>
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link">Проекты</a>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item">Мои проекты</a>
+                    </div>
+                </div>
+            </nav>
+            <div class="auth-buttons">
+                <a href="register.html" class="btn btn-primary">Регистрация</a>
+                <a href="login.html" class="btn btn-secondary">Вход</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="auth-wrapper">
+        <div class="auth-form-container">
+            <button class="close-btn">&times;</button>
+            <form class="auth-form">
+                <h2>{{Title}}</h2>
+                {{{loginInputHtml}}}
+                {{{emailInputHtml}}}
+                {{{passwordInputHtml}}}
+                {{!-- {{{confirmPasswordInputHtml}}} --}}
+                {{!-- <div class="form-group">
+                    <label for="login">Логин</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="login" placeholder="Example_1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="email">Почта</label>
+                    <div class="input-wrapper">
+                        <input type="email" id="email" placeholder="Введите почту">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" placeholder="Введите пароль">
+                        <span class="password-toggle">👁</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="confirm-password" placeholder="Повторите пароль">
+                        <span class="password-toggle">👁</span>
+                    </div>
+                </div> --}}
+                <button type="submit" class="btn-submit">Зарегистрироваться</button>
+                <div class="switch-link">
+                    <a href="login.html">Войти</a>
+                </div>
+            </form>
+        </div>
+        </main>
+
+</body>
+</html>
