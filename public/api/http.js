@@ -1,7 +1,7 @@
 /**
  * Базовый URL всех запросов
  */
-const BASE = "http://localhost:3000/api/v1";
+const BASE = "http://localhost:8080/api/v1";
 
 /**
  * Безопасный JSON-парсер: если сервер вернул не-JSON, вернём сырой текст
