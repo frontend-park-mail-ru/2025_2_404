@@ -1,5 +1,12 @@
 {
+  "name": "your-app",
+  "version": "1.0.0", 
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
   "dependencies": {
-    "dotenv": "^17.2.2"
+    "dotenv": "^17.2.2",
+    "cookie": "^0.6.0"
   }
 }
