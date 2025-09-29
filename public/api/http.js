@@ -35,9 +35,6 @@ export async function request(path, init = {}) {
     credentials: "include", 
   });
 
-  // 204 No Content — пустой ответ
-  if (res.status === 204) return null;
-
   const text = await res.text();
   const data = text ? safeJSON(text) : null;
 
