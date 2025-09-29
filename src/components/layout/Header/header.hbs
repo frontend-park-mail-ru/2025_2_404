@@ -1,0 +1,37 @@
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo"><span>Ad.net</span></div>
+            <nav class="main-nav">
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link">Агенства</a>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item">Список агенств</a>
+                    </div>
+                    </div>
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link">Специалисты</a>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item">Список специалистов</a>
+                    </div>
+                </div>
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link">Проекты</a>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item">Мои проекты</a>
+                    </div>
+                </div>
+            </nav>
+                    {{#if isAuthenticated}}
+            <div class="user-profile">
+                <span class="username">{{user.login}}</span>
+                <img src="{{user.avatar}}" alt="User Avatar" class="avatar">
+                <a href="#" id="logout-btn" class="logout-icon" title="Выйти">🚪</a>
+            </div>
+        {{else}}
+            <div class="auth-buttons">
+                <a href="/register" class="btn btn-primary">Регистрация</a>
+                <a href="/login" class="btn btn-secondary">Вход</a>
+            </div>
+        {{/if}}
+        </div>
+    </header>

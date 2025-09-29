@@ -1,9 +1,9 @@
-import RegisterPage from './pages/register/Register.js';
-import LoginPage from './pages/login/LoginPage.js';
-import AuthService from './services/ServiceAuthentification.js';
-import Header from './pages/header/Header.js';
-import Footer from './pages/footer/Footer.js';
-import Router from './services/Router.js';
+import RegisterPage from './src/pages/register/Register.js';
+import LoginPage from './src/pages/login/LoginPage.js';
+import AuthService from './src/services/api/ServiceAuthentification.js';
+import Header from './src/components/layout/Header/Header.js';
+import Footer from './src/components/layout/Footer/Footer.js';
+import Router from './src/services/router/Router.js';
 
 class App {
     constructor() {
