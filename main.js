@@ -6,65 +6,61 @@ import Footer from './pages/footer/Footer.js';
 import Router from './services/Router.js';
 
 class App {
-    constructor() {
-        this.header = new Header();
-        this.modals = {};
-        this.footer = new Footer();
-        this.currentMod = null;
-        window.app = this;
-    }
-    async start() {
-        await this.header.loadTemplate();
-        this.header.render();
-        AuthService.onAuthChange(() => {
-            this.header.render();
-            if (!AuthService.isAuthenticated()) {
-                this.closeMod();
-            }
-        });
-        this.modals.register = new RegisterPage(() => Router.navigate('/'));
-        this.modals.login = new LoginPage(() => Router.navigate('/'));
-        await this.modals.register.init();
-        await this.modals.login.init();
+  constructor() {
+    this.header = new Header();
+    this.modals = {};
+    this.footer = new Footer();
+    this.currentMod = null;
+    window.app = this;
+  }
+  async start() {
+    await this.header.loadTemplate();
+    this.header.render();
+    AuthService.onAuthChange(() => {
+      this.header.render();
+      if (!AuthService.isAuthenticated()) {
+        this.closeMod();
+      }
+    });
+    this.modals.register = new RegisterPage(() => Router.navigate('/'));
+    this.modals.login = new LoginPage(() => Router.navigate('/'));
+    await this.modals.register.init();
+    await this.modals.login.init();
 
-        Router.start();
+    Router.start();
 
-        await this.footer.loadTemplate();
-        const footerElement = this.footer.render();
-        document.body.appendChild(footerElement);
-    }
+    await this.footer.loadTemplate();
+    const footerElement = this.footer.render();
+    document.body.appendChild(footerElement);
+  }
 
-    handleRouteChange() {
-        const hash = window.location.hash.slice(1) || '/';
-        
-        if (this.currentMod) {
-            this.currentMod.hide();
-            this.currentMod = null;
-        }
+  handleRouteChange() {
+    const hash = window.location.hash.slice(1) || '/';
 
-        if (hash === '/register') {
-            this.currentMod = this.modals.register;
-            this.currentMod.show();
-        } else if (hash === '/login') {
-            this.currentMod = this.modals.login;
-            this.currentMod.show();
-        }
+    if (this.currentMod) {
+      this.currentMod.hide();
+      this.currentMod = null;
     }
 
-    closeMod() {
-        Router.navigate('/');
+    if (hash === '/register') {
+      this.currentMod = this.modals.register;
+      this.currentMod.show();
+    } else if (hash === '/login') {
+      this.currentMod = this.modals.login;
+      this.currentMod.show();
     }
+  }
+
+  closeMod() {
+    Router.navigate('/');
+  }
 }
 
-window.addEventListener('error', (event) => {
-    console.error('Ошибка:', event.error);
-});
-
 document.addEventListener('DOMContentLoaded', () => {
-    const app = new App();
-    app.start().then(() => {
-        if (!window.location.hash) {
-            Router.navigate('/register');
-        }
-    });
+  const app = new App();
+  app.start().then(() => {
+    if (!window.location.hash) {
+      Router.navigate('/register');
+    }
+  });
 });

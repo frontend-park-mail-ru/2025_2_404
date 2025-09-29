@@ -1,23 +1,19 @@
 export default class Footer {
-    constructor() {
-        this.footer = document.createElement('footer');
+  constructor() {
+    this.footer = document.createElement('footer');
+  }
+  async loadTemplate() {
+    const response = await fetch('/pages/footer/footer.hbs');
+    if (!response.ok) {
+      throw new Error('Не удалось загрузить футтер');
     }
-    async loadTemplate() {
-        try {
-            const response = await fetch('/pages/footer/footer.hbs');
-            if (!response.ok){
-                throw new Error('Не удалось загрузить футтер');
-            }
-            const templateText = await response.text();
-            this.template = Handlebars.compile(templateText);
-        } catch (error) {
-            console.error('Ошибка загрузки футтера', error);
-        }
+    const templateText = await response.text();
+    this.template = Handlebars.compile(templateText);
+  }
+  render() {
+    if (this.template) {
+      this.footer.innerHTML = this.template();
     }
-    render() {
-        if (this.template) {
-            this.footer.innerHTML = this.template();
-        }
-        return this.footer;
-    }
+    return this.footer;
+  }
 }

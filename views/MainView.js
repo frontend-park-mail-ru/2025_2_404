@@ -32,7 +32,9 @@ export default class MainAdvertisementView {
         return;
       }
 
-      box.innerHTML = ads.map(ad => `
+      box.innerHTML = ads
+        .map(
+          (ad) => `
         <div class="promo-card">
           <div class="card-content">
             ${ad.file_path ? `<img src="${escapeHtml(ad.file_path)}" class="promo-image">` : ''}
@@ -42,10 +44,13 @@ export default class MainAdvertisementView {
             </div>
           </div>
         </div>
-      `).join('');
+      `,
+        )
+        .join('');
     } catch (e) {
       console.warn('GET /ads error:', e);
-      box.innerHTML = '<div style="color:red">Не удалось загрузить объявления</div>';
+      box.innerHTML =
+        '<div style="color:red">Не удалось загрузить объявления</div>';
     }
   }
 }

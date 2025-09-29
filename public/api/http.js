@@ -1,15 +1,18 @@
 /**
  * Базовый URL всех запросов
  */
-export const BASE = "http://localhost:8080";
+export const BASE = 'http://localhost:8080';
 
 /**
  * @param {string} text
  * @returns {any}
  */
 function safeJSON(text) {
-  try { return JSON.parse(text); }
-  catch { return text; }
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
 }
 
 /**
@@ -19,19 +22,19 @@ function safeJSON(text) {
  * - парсит JSON или возвращает текст
  * - при ошибке кидает объект { status, body }
  *
- * @param {string} path 
+ * @param {string} path
  * @param {RequestInit} [init]
- * @returns {Promise<any>} распарсенный JSON 
+ * @returns {Promise<any>} распарсенный JSON
  * @throws {{status:number, body:any}}
  */
 export async function request(path, init = {}) {
   const res = await fetch(BASE + path, {
     ...init,
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       ...(init.headers || {}),
     },
-    credentials: "include", 
+    credentials: 'include',
   });
 
   const text = await res.text();
@@ -47,7 +50,7 @@ export async function request(path, init = {}) {
  * Шорткаты для удобства.
  */
 export const http = {
-  get:  (path)        => request(path),
-  post: (path, body)  => request(path, { method: "POST", body: JSON.stringify(body ?? {}) }),
+  get: (path) => request(path),
+  post: (path, body) =>
+    request(path, { method: 'POST', body: JSON.stringify(body ?? {}) }),
 };
-

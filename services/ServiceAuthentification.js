@@ -24,7 +24,13 @@ function deleteCookie(name) {
   document.cookie = name + '=; Max-Age=-99999999; path=/';
 }
 
-function safeParse(s) { try { return JSON.parse(s); } catch { return null; } }
+function safeParse(s) {
+  try {
+    return JSON.parse(s);
+  } catch {
+    return null;
+  }
+}
 
 class AuthService {
   constructor() {
@@ -33,15 +39,19 @@ class AuthService {
     this.onAuthChangeCallback = null;
   }
 
-  isAuthenticated() { return !!this.user; }
-  getUser() { return this.user; }
+  isAuthenticated() {
+    return !!this.user;
+  }
+  getUser() {
+    return this.user;
+  }
 
   /**
    * Вход: /signin
    * @param {{email:string, password:string}}
    */
   async login({ email, password }) {
-    const res = await signin({ email, password }); 
+    const res = await signin({ email, password });
     const uiUser = {
       id: res.id,
       email: res.email,
@@ -59,7 +69,7 @@ class AuthService {
    * @param {{user_name:string, email:string, password:string}}
    */
   async register({ user_name, email, password }) {
-    const res = await signup({ user_name, email, password }); 
+    const res = await signup({ user_name, email, password });
     const uiUser = {
       id: res.id,
       email: res.email,

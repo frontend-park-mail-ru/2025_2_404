@@ -1,39 +1,35 @@
 import AuthService from '../../services/ServiceAuthentification.js';
 
 export default class Header {
-    constructor() {
-        this.header = document.createElement('header');
-        document.body.prepend(this.header);
-    }
+  constructor() {
+    this.header = document.createElement('header');
+    document.body.prepend(this.header);
+  }
 
-    async loadTemplate() {
-        try {
-            const response = await fetch('/pages/header/header.hbs');
-            if (!response.ok){
-                throw new Error('Не удалось загрузить хедер');
-            }
-            const templateText = await response.text();
-            this.template = Handlebars.compile(templateText);
-        } catch (error) {
-            console.error('Ошибка загрузки хедера:', error);
-        }
+  async loadTemplate() {
+    const response = await fetch('/pages/header/header.hbs');
+    if (!response.ok) {
+      throw new Error('Не удалось загрузить хедер');
     }
-    render() {
-        const user = AuthService.getUser();
-        const context = {
-            isAuthenticated: AuthService.isAuthenticated(),
-            user: user
-        };
-        this.header.innerHTML = this.template(context);
-        this.attachEvents();
+    const templateText = await response.text();
+    this.template = Handlebars.compile(templateText);
+  }
+  render() {
+    const user = AuthService.getUser();
+    const context = {
+      isAuthenticated: AuthService.isAuthenticated(),
+      user: user,
+    };
+    this.header.innerHTML = this.template(context);
+    this.attachEvents();
+  }
+  attachEvents() {
+    const logoutButton = this.header.querySelector('#logout-btn');
+    if (logoutButton) {
+      logoutButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        AuthService.logout();
+      });
     }
-    attachEvents() {
-        const logoutButton = this.header.querySelector('#logout-btn');
-        if (logoutButton) {
-            logoutButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                AuthService.logout();
-            });
-        }
-    }
+  }
 }
