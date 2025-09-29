@@ -180,12 +180,18 @@ export default class RegisterPage{
             isValidated = false;
             console.error('Ошибка повторного ввода пароля:', passwordCheckError);
         }
-            if (isValidated) {
-                console.log('Форма успешно отправлена!');
-                AuthService.login({ login: loginValue, email: emailValue });
-                this.onClose();
-            } else {
-                console.warn('Форма содержит ошибки');
-            }
+
+        if (isValidated) {
+        console.log('Форма успешно отправлена!');
+        AuthService.register({
+            user_name: loginValue,
+            email: emailValue,
+            password: passwordValue,
+        }).then(() => {
+            this.onClose();
+        }).catch(err => {
+            console.error("Ошибка регистрации:", err);
+        });
         }
+    }
     }

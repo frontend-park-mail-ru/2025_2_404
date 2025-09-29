@@ -78,23 +78,27 @@ export default class LoginPage {
         this.loginInput.attachValidationEvent();
         this.passwordInput.attachValidationEvent();
     }
+
     handleSubmit(event) {
-    if (event){
-        event.preventDefault();
-    }
-    
-    const login = document.getElementById(this.loginInput.id).value;
+    if (event) event.preventDefault();
+
+    const email = document.getElementById(this.loginInput.id).value;
     const password = document.getElementById(this.passwordInput.id).value;
-    
-    const isLoginValid = !this.loginInput.validate(login);
+
+    const isEmailValid = !this.loginInput.validate(email);
     const isPasswordValid = !this.passwordInput.validate(password);
 
-    if (isLoginValid && isPasswordValid) {
-        console.log('Форма входа валидна, выполняем вход...');
-        AuthService.login({ login: login });
-        this.onClose();
-    } else {
+    if (!isEmailValid || !isPasswordValid) {
         console.warn('Форма входа содержит ошибки.');
+        return;
     }
-}
+
+    console.log('Форма входа валидна, выполняем вход...');
+    AuthService.login({ email, password })
+        .then(() => this.onClose())
+        .catch((e) => {
+        const msg = e?.body?.error?.message || 'Не удалось войти';
+        this.passwordInput.showError(msg);
+        });
+    }
 }

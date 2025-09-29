@@ -1,90 +1,86 @@
-
-/**
- * Cookie.
- * @param {string} name - Имя cookie.
- * @param {string} val - Значение cookie.
- * @param {number} days - Срок жизни cookie в днях.
- */
+import { signin, signup } from '../public/api/auth.js';
 
 function setCookie(name, val, days) {
-    let expires = "";
-    if (days) {
-        const date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + (val || "") + expires + "; path=/";
+  let expires = '';
+  if (days) {
+    const date = new Date();
+    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+    expires = '; expires=' + date.toUTCString();
+  }
+  document.cookie = `${name}=${val || ''}${expires}; path=/`;
 }
-
-/**
- * Получает значение cookie по имени.
- * @param {string} name - Имя cookie.
- * @returns {string|null} - Значение cookie или null, если не найдено.
- */
 
 function getCookie(name) {
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
+  const nameEQ = name + '=';
+  const ca = document.cookie.split(';');
+  for (let c of ca) {
+    c = c.trim();
+    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length);
+  }
+  return null;
 }
 
-/**
- * Удаляет cookie по имени.
- * @param {string} name - Имя cookie.
- */
 function deleteCookie(name) {
-    document.cookie = name + '=; Max-Age=-99999999; path=/';
+  document.cookie = name + '=; Max-Age=-99999999; path=/';
 }
+
+function safeParse(s) { try { return JSON.parse(s); } catch { return null; } }
 
 class AuthService {
-    constructor() {
-        this.user = null;
-        const userCookie = getCookie('user');
-        if (userCookie) {
-            try {
-                this.user = JSON.parse(userCookie);
-            } catch (e) {
-                console.error("Не парсится куки юзера:", e);
-                deleteCookie('user');
-            }
-        }
-        this.onAuthChangeCallback = null;
-    }
+  constructor() {
+    const saved = getCookie('user');
+    this.user = saved ? safeParse(saved) : null;
+    this.onAuthChangeCallback = null;
+  }
 
-    isAuthenticated() {
-        return !!this.user;
-    }
+  isAuthenticated() { return !!this.user; }
+  getUser() { return this.user; }
 
-    getUser() {
-        return this.user;
-    }
+  /**
+   * Вход: /signin
+   * @param {{email:string, password:string}}
+   */
+  async login({ email, password }) {
+    const res = await signin({ email, password }); 
+    const uiUser = {
+      id: res.id,
+      email: res.email,
+      login: res.user_name || res.name || res.username || res.login || email,
+      avatar: '',
+    };
+    this.user = uiUser;
+    setCookie('user', JSON.stringify(uiUser), 7);
+    if (this.onAuthChangeCallback) this.onAuthChangeCallback(this.user);
+    return uiUser;
+  }
 
-    login(userData) {
-        const mockUser = {
-            login: userData.login,
-            avatar: ''
-        };
-        this.user = mockUser;
-        setCookie('user', JSON.stringify(mockUser), 7);
-        if (this.onAuthChangeCallback) {
-            this.onAuthChangeCallback(this.user);
-        }
-    }
-    logout() {
-        this.user = null;
-        deleteCookie('user');
-        if (this.onAuthChangeCallback) {
-            this.onAuthChangeCallback(null);
-        }
-    }
-    onAuthChange(callback) {
-        this.onAuthChangeCallback = callback;
-    }
+  /**
+   * Регистрация: /signup
+   * @param {{user_name:string, email:string, password:string}}
+   */
+  async register({ user_name, email, password }) {
+    const res = await signup({ user_name, email, password }); 
+    const uiUser = {
+      id: res.id,
+      email: res.email,
+      login: res.user_name || res.name || user_name,
+      avatar: '',
+    };
+    this.user = uiUser;
+    setCookie('user', JSON.stringify(uiUser), 7);
+    if (this.onAuthChangeCallback) this.onAuthChangeCallback(this.user);
+    return uiUser;
+  }
+
+  logout() {
+    this.user = null;
+    deleteCookie('user');
+    if (this.onAuthChangeCallback) this.onAuthChangeCallback(null);
+  }
+
+  onAuthChange(callback) {
+    this.onAuthChangeCallback = callback;
+  }
 }
 
 export default new AuthService();
