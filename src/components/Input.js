@@ -1,4 +1,18 @@
+/**
+ * Компонент input с валидацией и переключением видимости пароля
+ * @class
+ */
 export default class Input{
+    /**
+     * Создает экземпляр input
+     * @param {Object} config - Конфигурация input
+     * @param {string} config.id - ID элемента
+     * @param {string} [config.type="text"] - Тип input
+     * @param {string} config.label - Текст label
+     * @param {string} config.placeholder - Placeholder
+     * @param {boolean} [config.showPasswordToggle=false] - Показывать ли переключатель видимости пароля
+     * @param {Function} [config.validationFn] - Функция валидации
+     */
     constructor({id, type = "text", label, placeholder, showPasswordToggle = false, validationFn}) {
         this.id = id; 
         this.type = showPasswordToggle ? 'password' : type; 
@@ -8,6 +22,10 @@ export default class Input{
         this.validationFn = validationFn;
     }
     
+    /**
+     * Рендерит HTML компонента
+     * @returns {string} HTML строка
+     */
     render(){
         const initialIcon = '👁'; 
         return `
@@ -21,6 +39,12 @@ export default class Input{
             </div>
         `;
     }
+
+    /**
+     * Валидирует значение
+     * @param {string} value - Значение для валидации
+     * @returns {string|null} Сообщение об ошибке или null если валидно
+     */
     validate(value){
         if (!this.validationFn){
             return null;
@@ -41,7 +65,11 @@ export default class Input{
         }
         return errorMessage;
     }
-    
+
+    /**
+     * Показывает сообщение об ошибке
+     * @param {string} message - Текст ошибки
+     */
     showError(message) {
         const errorEl = document.getElementById(`error-${this.id}`);
         const inputEl = document.getElementById(this.id);
@@ -54,7 +82,10 @@ export default class Input{
              inputEl.classList.remove('input-valid');
         }
     }
-    
+
+    /**
+     * Очищает сообщение об ошибке
+     */
     clearError() {
         const errorEl = document.getElementById(`error-${this.id}`);
         const inputEl = document.getElementById(this.id);
@@ -65,6 +96,10 @@ export default class Input{
              inputEl.classList.remove('input-error');
         }
     }
+
+    /**
+     * Добавляет функциональность переключения видимости пароля
+     */
     PasswordToggle() {
     const toggle = document.querySelector(`#${this.id} + .password-toggle`); 
     if (toggle) {

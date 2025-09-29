@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/Input.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/Input.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Компонент input с валидацией и переключением видимости пароля
+ * @class
+ */
+export default class Input{
+    /**
+     * Создает экземпляр input
+     * @param {Object} config - Конфигурация input
+     * @param {string} config.id - ID элемента
+     * @param {string} [config.type="text"] - Тип input
+     * @param {string} config.label - Текст label
+     * @param {string} config.placeholder - Placeholder
+     * @param {boolean} [config.showPasswordToggle=false] - Показывать ли переключатель видимости пароля
+     * @param {Function} [config.validationFn] - Функция валидации
+     */
+    constructor({id, type = "text", label, placeholder, showPasswordToggle = false, validationFn}) {
+        this.id = id; 
+        this.type = showPasswordToggle ? 'password' : type; 
+        this.label = label;
+        this.placeholder = placeholder;
+        this.showPasswordToggle = showPasswordToggle; 
+        this.validationFn = validationFn;
+    }
+    
+    /**
+     * Рендерит HTML компонента
+     * @returns {string} HTML строка
+     */
+    render(){
+        const initialIcon = '👁'; 
+        return `
+            &lt;div class="form-group">
+                &lt;label for="${this.id}">${this.label}&lt;/label>
+                &lt;div class="input-wrapper">
+                    &lt;input type="${this.type}" id="${this.id}" placeholder="${this.placeholder}">
+                    ${this.showPasswordToggle ? `&lt;span class="password-toggle" role="button" aria-controls="${this.id}">${initialIcon}&lt;/span>` : ''}
+                &lt;/div>
+                &lt;div class="error-message" id="error-${this.id}">&lt;/div>
+            &lt;/div>
+        `;
+    }
+
+    /**
+     * Валидирует значение
+     * @param {string} value - Значение для валидации
+     * @returns {string|null} Сообщение об ошибке или null если валидно
+     */
+    validate(value){
+        if (!this.validationFn){
+            return null;
+        }
+        const errorMessage = this.validationFn(value);
+        const inputEl = document.getElementById(this.id);
+        if (!inputEl){
+            return errorMessage;
+        } 
+        inputEl.classList.remove('input-valid', 'input-error');
+        
+        if (errorMessage) {
+            this.showError(errorMessage);
+            inputEl.classList.add('input-error');
+        } else {
+            this.clearError();
+            inputEl.classList.add('input-valid');
+        }
+        return errorMessage;
+    }
+
+    /**
+     * Показывает сообщение об ошибке
+     * @param {string} message - Текст ошибки
+     */
+    showError(message) {
+        const errorEl = document.getElementById(`error-${this.id}`);
+        const inputEl = document.getElementById(this.id);
+        if (errorEl) {
+            errorEl.textContent = message;
+            errorEl.style.color = 'red';
+        }
+        if (inputEl) {
+             inputEl.classList.add('input-error');
+             inputEl.classList.remove('input-valid');
+        }
+    }
+
+    /**
+     * Очищает сообщение об ошибке
+     */
+    clearError() {
+        const errorEl = document.getElementById(`error-${this.id}`);
+        const inputEl = document.getElementById(this.id);
+        if (errorEl) {
+            errorEl.textContent = '';
+        }
+        if (inputEl) {
+             inputEl.classList.remove('input-error');
+        }
+    }
+
+    /**
+     * Добавляет функциональность переключения видимости пароля
+     */
+    PasswordToggle() {
+    const toggle = document.querySelector(`#${this.id} + .password-toggle`); 
+    if (toggle) {
+        toggle.addEventListener('click', () => {
+            const inputEl = document.getElementById(this.id);
+            if (inputEl.type === 'password') {
+                inputEl.type = 'text';
+                toggle.textContent = '👁'; 
+            } else {
+                inputEl.type = 'password';
+                toggle.textContent = '👁'; 
+            }
+        });
+    }
+    }
+    attachValidationEvent() {
+        const inputEl = document.getElementById(this.id);
+        if (inputEl) {
+            inputEl.addEventListener('blur', () => {
+                this.validate(inputEl.value);
+            });
+            inputEl.addEventListener('input', () => {
+                this.clearError();
+            });
+        }
+        if (this.showPasswordToggle) { 
+            this.PasswordToggle();
+        }
+    }
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AuthService.html">AuthService</a></li><li><a href="Router.html">Router</a></li><li><a href="module.exports.html">exports</a></li></ul><h3>Global</h3><ul><li><a href="global.html#PasswordToggle">PasswordToggle</a></li><li><a href="global.html#Submit">Submit</a></li><li><a href="global.html#attachEvents">attachEvents</a></li><li><a href="global.html#clear">clear</a></li><li><a href="global.html#clearError">clearError</a></li><li><a href="global.html#deleteCookie">deleteCookie</a></li><li><a href="global.html#getCookie">getCookie</a></li><li><a href="global.html#handleSubmit">handleSubmit</a></li><li><a href="global.html#hide">hide</a></li><li><a href="global.html#init">init</a></li><li><a href="global.html#loadTemplate">loadTemplate</a></li><li><a href="global.html#render">render</a></li><li><a href="global.html#setCookie">setCookie</a></li><li><a href="global.html#show">show</a></li><li><a href="global.html#showError">showError</a></li><li><a href="global.html#validate">validate</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Mon Sep 29 2025 03:51:40 GMT+0300 (Москва, стандартное время)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

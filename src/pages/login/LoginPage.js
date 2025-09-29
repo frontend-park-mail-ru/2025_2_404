@@ -2,7 +2,15 @@ import Input from '../../components/Input.js';
 import Button from '../../components/Button.js';
 import AuthService from '../../services/api/ServiceAuthentification.js'
 
+/**
+ * Страница входа в систему
+ * @class
+ */
 export default class LoginPage {
+    /**
+     * Создает экземпляр страницы входа
+     * @param {Function} onClose - Callback при закрытии модального окна
+     */
     constructor(onClose) {
         this.onClose = onClose;
         this.modalElement = null;
@@ -33,6 +41,11 @@ export default class LoginPage {
 
         this.init();
     }
+
+    /**
+     * Инициализирует страницу
+     * @async
+     */
     async init() {
         try {
             const response = await fetch('/src/pages/login/LoginPage.hbs');
@@ -45,6 +58,11 @@ export default class LoginPage {
             console.error('Ошибка загрузки входа:', error);
         }
     }
+
+    /**
+     * Рендерит страницу входа
+     * @returns {string} HTML строка
+     */
     render() {
         const context = {
             Title: 'Вход',
@@ -54,6 +72,10 @@ export default class LoginPage {
         };
         return this.template(context);
     }
+
+    /**
+     * Показывает модальное окно входа
+     */
     show() {
         if (!this.modalElement) {
             this.modalElement = document.createElement('div');
@@ -64,11 +86,19 @@ export default class LoginPage {
         }
         this.modalElement.style.display = 'flex';
     }
+
+    /**
+     * Скрывает модальное окно входа
+     */
     hide() {
         if (this.modalElement) {
             this.modalElement.style.display = 'none';
         }
     }
+
+    /**
+     * Прикрепляет обработчики событий
+     */
     attachEvents() {
         this.modalElement.querySelector('.close-btn').addEventListener('click', this.onClose);
         const submitEl = document.getElementById(this.submitButton.id);
@@ -78,6 +108,11 @@ export default class LoginPage {
         this.loginInput.attachValidationEvent();
         this.passwordInput.attachValidationEvent();
     }
+
+    /**
+     * Обрабатывает отправку формы
+     * @param {Event} [event] - Событие отправки формы
+     */
     handleSubmit(event) {
     if (event){
         event.preventDefault();

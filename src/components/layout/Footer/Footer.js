@@ -1,7 +1,21 @@
+/**
+ * Компонент футера
+ * @class
+ */
 export default class Footer {
+    /**
+     * Создает экземпляр футера
+     * @constructor
+     */
     constructor() {
         this.footer = document.createElement('footer');
     }
+
+    /**
+     * Загружает шаблон футера
+     * @async
+     * @throws {Error} Если не удалось загрузить шаблон
+     */
     async loadTemplate() {
         try {
             const response = await fetch('/src/components/layout/Footer/footer.hbs');
@@ -14,6 +28,11 @@ export default class Footer {
             console.error('Ошибка загрузки футтера', error);
         }
     }
+
+    /**
+     * Рендерит футер
+     * @returns {HTMLElement} DOM элемент футера
+     */
     render() {
         if (this.template) {
             this.footer.innerHTML = this.template();

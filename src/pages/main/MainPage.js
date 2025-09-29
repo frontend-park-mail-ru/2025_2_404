@@ -1,3 +1,7 @@
+/**
+ * Главная страница приложения
+ * @class
+ */
 export default class MainPage {
     constructor() {
         this.headerTemp = null;

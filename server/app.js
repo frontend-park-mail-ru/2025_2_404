@@ -10,7 +10,10 @@ const routes = {
   "/": path.join(ROOT, "index.html"),
 };
 
-
+/**
+ * HTTP сервер для статических файлов
+ * @module app
+ */
 http.createServer((request, response) => {
   let filePath = routes[request.url] || path.join(ROOT, request.url);
 

@@ -2,20 +2,40 @@ import LoginView from "../../views/LoginView.js";
 import RegisterView from "../../views/RegisterView.js";
 import MainAdvertisementView from "../../views/MainView.js";
 
+/**
+ * Маршрутизатор для Single Page Application
+ * @class
+ */
 export class Router {
     #views = new Map();
     #currentView = null;
     isLoading = false;
 
+    /**
+     * Создает экземпляр маршрутизатора
+     * @constructor
+     */
     constructor() {
         this.#views.set('/', MainAdvertisementView);
         this.#views.set('/login', LoginView);
         this.#views.set('/register', RegisterView);
         window.router = this;
     }
+
+    /**
+     * Переход по указанному пути
+     * @param {string} path - Путь для навигации
+     */
     navigate(path) {
         window.location.hash = path;
     }
+
+    /**
+     * Открывает View по указанному пути
+     * @param {string} path - Путь
+     * @param {Object} [data={}] - Данные для передачи во View
+     * @async
+     */
     async open(path, data = {}) {
         if (this.isLoading){
             return;
@@ -37,6 +57,9 @@ export class Router {
         this.isLoading = false;
     }
 
+    /**
+     * Запускает маршрутизатор
+     */
     start() {
         window.addEventListener('hashchange', () => {
             const path = window.location.hash.slice(1) || '/';

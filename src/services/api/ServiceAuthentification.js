@@ -5,7 +5,6 @@
  * @param {string} val - Значение cookie.
  * @param {number} days - Срок жизни cookie в днях.
  */
-
 function setCookie(name, val, days) {
     let expires = "";
     if (days) {
@@ -21,7 +20,6 @@ function setCookie(name, val, days) {
  * @param {string} name - Имя cookie.
  * @returns {string|null} - Значение cookie или null, если не найдено.
  */
-
 function getCookie(name) {
     const nameEQ = name + "=";
     const ca = document.cookie.split(';');
@@ -41,7 +39,20 @@ function deleteCookie(name) {
     document.cookie = name + '=; Max-Age=-99999999; path=/';
 }
 
+/**
+ * Сервис аутентификации пользователя
+ * @class
+ * @example
+ * // Проверка авторизации
+ * if (AuthService.isAuthenticated()) {
+ *   console.log('User is logged in');
+ * }
+ */
 class AuthService {
+    /**
+     * Создает экземпляр сервиса аутентификации
+     * @constructor
+     */
     constructor() {
         this.user = null;
         const userCookie = getCookie('user');
@@ -56,14 +67,27 @@ class AuthService {
         this.onAuthChangeCallback = null;
     }
 
+    /**
+     * Проверяет, авторизован ли пользователь
+     * @returns {boolean} true если пользователь авторизован
+     */
     isAuthenticated() {
         return !!this.user;
     }
 
+    /**
+     * Возвращает данные текущего пользователя
+     * @returns {Object|null} Объект пользователя или null
+     */
     getUser() {
         return this.user;
     }
 
+    /**
+     * Выполняет вход пользователя
+     * @param {Object} userData - Данные пользователя
+     * @param {string} userData.login - Логин пользователя
+     */
     login(userData) {
         const mockUser = {
             login: userData.login,
@@ -75,6 +99,10 @@ class AuthService {
             this.onAuthChangeCallback(this.user);
         }
     }
+
+    /**
+     * Выполняет выход пользователя
+     */
     logout() {
         this.user = null;
         deleteCookie('user');
@@ -82,6 +110,11 @@ class AuthService {
             this.onAuthChangeCallback(null);
         }
     }
+
+    /**
+     * Устанавливает callback при изменении статуса авторизации
+     * @param {Function} callback - Функция обратного вызова
+     */
     onAuthChange(callback) {
         this.onAuthChangeCallback = callback;
     }

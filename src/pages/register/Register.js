@@ -2,7 +2,15 @@ import Input from '../../components/Input.js';
 import Button from '../../components/Button.js';
 import AuthService from '../../services/api/ServiceAuthentification.js'
 
+/**
+ * Страница регистрации
+ * @class
+ */
 export default class RegisterPage{
+    /**
+     * Создает экземпляр страницы регистрации
+     * @param {Function} onClose - Callback при закрытии модального окна
+     */
     constructor (onClose){
         this.onClose = onClose;
         this.modalEl = null;
@@ -97,6 +105,11 @@ export default class RegisterPage{
         this.init();
         
     }
+
+    /**
+     * Инициализирует страницу регистрации
+     * @async
+     */
     async init() {
         try {
             const response = await fetch('/src/pages/register/register.hbs');
@@ -110,6 +123,11 @@ export default class RegisterPage{
             console.error('Ошибка загрузки шаблона:', error);
         }
     }
+
+    /**
+     * Рендерит страницу регистрации
+     * @returns {string} HTML строка
+     */
     render() {
         
         const context = {
@@ -123,6 +141,9 @@ export default class RegisterPage{
         return this.template(context);
     }
 
+    /**
+     * Показывает модальное окно регистрации
+     */
     show() {
         if (!this.modalEl) {
             this.modalEl = document.createElement('div');
@@ -134,12 +155,18 @@ export default class RegisterPage{
         this.modalEl.style.display = 'flex';
     }
 
+    /**
+     * Скрывает модальное окно регистрации
+     */
     hide() {
         if (this.modalEl) {
             this.modalEl.style.display = 'none';
         }
     }
 
+    /**
+     * Прикрепляет обработчики событий
+     */
     attachEvents() {
         this.modalEl.querySelector('.close-btn').addEventListener('click', this.onClose);
         const submitEl = document.getElementById(this.submitButton.id);
@@ -151,6 +178,11 @@ export default class RegisterPage{
         this.passwordInput.attachValidationEvent();
         this.passwordCheckInput.attachValidationEvent();
     }
+
+    /**
+     * Обрабатывает отправку формы регистрации
+     * @param {Event} [event] - Событие отправки формы
+     */
     Submit(event) {
         if (event) {
             event.preventDefault(); 
