@@ -6,7 +6,7 @@ import { http } from "./http.js";
  * @throws {{status:number, body:any}}
  */
 export async function listAds() {
-  const data = await http.get("/");
+  const data = await http.get("/ads");
   const raw = Array.isArray(data?.ads) ? data.ads : [];
 
   return raw.map(item => ({
