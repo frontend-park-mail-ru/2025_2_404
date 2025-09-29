@@ -1,10 +1,9 @@
 /**
  * Базовый URL всех запросов
  */
-const BASE = "http://localhost:8080/api/v1";
+export const BASE = "http://localhost:3000";
 
 /**
- * Безопасный JSON-парсер: если сервер вернул не-JSON, вернём сырой текст
  * @param {string} text
  * @returns {any}
  */
@@ -20,9 +19,9 @@ function safeJSON(text) {
  * - парсит JSON или возвращает текст
  * - при ошибке кидает объект { status, body }
  *
- * @param {string} path относительный путь, например "/auth/signin"
+ * @param {string} path 
  * @param {RequestInit} [init]
- * @returns {Promise<any>} распарсенный JSON (или null для 204)
+ * @returns {Promise<any>} распарсенный JSON 
  * @throws {{status:number, body:any}}
  */
 export async function request(path, init = {}) {

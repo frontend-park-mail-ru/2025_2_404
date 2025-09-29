@@ -26,7 +26,7 @@ export default class MainAdvertisementView {
     box.innerHTML = '<div style="opacity:.6">Загружаем объявления…</div>';
 
     try {
-      const ads = await listAds(); // Array<Ad>
+      const ads = await listAds();
       if (!Array.isArray(ads) || ads.length === 0) {
         box.innerHTML = '<div style="opacity:.6">Пока нет объявлений</div>';
         return;
@@ -35,7 +35,7 @@ export default class MainAdvertisementView {
       box.innerHTML = ads.map(ad => `
         <div class="promo-card">
           <div class="card-content">
-            ${ad.file_path ? `<img src="${escapeHtml(ad.file_path)}" alt="" class="promo-image">` : ''}
+            ${ad.file_path ? `<img src="${BASE}/${ad.file_path}" class="promo-image">` : ''}
             <div class="promo-text">
               <h2>${escapeHtml(ad.title)}</h2>
               <p>${escapeHtml(ad.text)}</p>

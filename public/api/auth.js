@@ -1,4 +1,3 @@
-// public/api/auth.js
 import { request } from "./http.js";
 
 /**
