@@ -50,8 +50,8 @@ class AuthService {
    * Вход: /signin
    * @param {{email:string, password:string}}
    */
-  async login({ email, password }) {
-    const res = await signin({ email, password });
+  async login({ email, password, user_name }) {
+    const res = await signin({ email, password, user_name });
     const uiUser = {
       id: res.id,
       email: res.email,

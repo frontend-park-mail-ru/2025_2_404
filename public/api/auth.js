@@ -17,7 +17,7 @@ export function signup(data) {
 
 /**
  * Вход пользователя.
- * @param {{email:string, password:string}} data
+ * @param {{email:string, password:string, user_name:string}} data
  */
 export function signin(data) {
   return request('/signin', {
@@ -25,6 +25,7 @@ export function signin(data) {
     body: JSON.stringify({
       email: data.email,
       password: data.password,
+      user_name: data.user_name,
     }),
   });
 }

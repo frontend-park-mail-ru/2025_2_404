@@ -23,13 +23,37 @@ export default class Header {
     this.header.innerHTML = this.template(context);
     this.attachEvents();
   }
-  attachEvents() {
-    const logoutButton = this.header.querySelector('#logout-btn');
-    if (logoutButton) {
-      logoutButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        AuthService.logout();
-      });
+  showLogoutError() {
+      const message = 'Ошибка: Невозможно выйти из аккаунта (тестовый режим)';
+      const errorDiv = document.createElement('div');
+      errorDiv.textContent = message;
+      errorDiv.id = 'logout-error-message';
+      errorDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #dad4d4ff;
+        border-color:  #7C54E8;
+        color: white;
+        padding: 15px;
+        border-radius: 5px;
+        z-index: 10000;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      `;
+      document.body.appendChild(errorDiv);
+      setTimeout(() => {
+        errorDiv.remove();
+      }, 3000);
+    }
+
+    attachEvents() {
+      const logoutButton = this.header.querySelector('#logout-btn');
+      if (logoutButton) {
+        logoutButton.addEventListener('click', (e) => {
+          e.preventDefault();
+
+          this.showLogoutError(); 
+        });
     }
   }
 }
