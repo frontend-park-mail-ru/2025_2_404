@@ -1,7 +1,7 @@
     <main class="auth-wrapper">
         <div class="auth-form-container">
             <button class="close-btn">&times;</button>
-            <form class="auth-form">
+            <form class="auth-form" id="register-form">
                 <h2>{{Title}}</h2>
                 {{{loginInputHtml}}}
                 {{{emailInputHtml}}}
@@ -9,7 +9,7 @@
                 {{{passwordCheckInputHtml}}}
                 {{{submitButtonHtml}}}
                 <div class="switch-link">
-                    <a href="/login">Войти</a>
+                    <p>Уже есть аккаунт? <button type="button" id="switch-to-login-btn" class="link-button">Войти</button></p>
                 </div>
             </form>
         </div>

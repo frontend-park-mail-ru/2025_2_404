@@ -1,0 +1,28 @@
+<div class="projects-page">
+  <div class="projects-header">
+    <h1>Мои проекты</h1>
+    <button class="btn btn-secondary" id="new-campaign-btn">
+      <span class="plus-icon">+</span> Новая кампания
+    </button>
+  </div>
+
+  <div class="projects-list">
+    {{#each projects}}
+      <div class="project-card" data-id="{{this.id}}">
+        <div class="card-header">
+          <div class="card-title">
+            <h3>Рекламное объявление №{{this.date}}</h3>
+            <div class="platform-icons">
+            </div>
+          </div>
+          <div class="card-menu">...</div>
+        </div>
+        <div class="card-meta">
+          <span class="status {{this.statusClass}}">{{this.statusText}}</span>
+          <span class="meta-item">Создано {{this.date}}</span>
+          <span class="meta-item">{{this.domain}}</span>
+        </div>
+      </div>
+    {{/each}}
+  </div>
+</div>
