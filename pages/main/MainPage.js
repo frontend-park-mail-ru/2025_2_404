@@ -1,32 +1,24 @@
-import AuthService from '../../services/ServiceAuthentification.js';
-import { router } from '../../main.js';
-
 export default class MainPage {
   constructor() {
-    this.template = null;
+    this.headerTemp = null;
+    this.mainTemp = null;
   }
-
   async loadTemplate() {
-    if (AuthService.isAuthenticated()) {
-        return;
+    if (this.template) return;
+    try {
+      const mainResponse = await fetch('/pages/main/MainPage.hbs');
+      if (!mainResponse.ok) {
+        throw new Error('Ошибка загрузки главной страницы');
+      }
+      this.template = Handlebars.compile(await mainResponse.text());
+    } catch (error) {
+        console.error(error);
+        this.template = Handlebars.compile('<h1>Ошибка загрузки страницы</h1>');
     }
-    const mainResponse = await fetch('/pages/main/MainPage.hbs');
-    if (!mainResponse.ok) {
-      throw new Error('Ошибка загрузки главной страницы');
-    }
-    const mainText = await mainResponse.text();
-    this.template = Handlebars.compile(mainText);
   }
 
-  render() {
-    if (AuthService.isAuthenticated()) {
-      router.navigate('/projects');
-      return '<div>Перенаправление в ваши проекты...</div>';
-    }
-
-    if (!this.template) {
-      return '<div>Загрузка страницы...</div>';
-    }
+  async render() {
+    await this.loadTemplate();
     return this.template();
   }
 
@@ -35,11 +27,6 @@ export default class MainPage {
     faqItems.forEach(item => {
       const question = item.querySelector('.faq-question');
       question.addEventListener('click', () => {
-        faqItems.forEach(otherItem => {
-          if (otherItem !== item) {
-            otherItem.classList.remove('active');
-          }
-        });
         item.classList.toggle('active');
       });
     });

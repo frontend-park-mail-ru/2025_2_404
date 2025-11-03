@@ -2,7 +2,8 @@ export default class ProjectDetailPage {
   constructor(router, projectId) {
     this.projectId = projectId;
   }
-  render() {
+  
+  async render() {
     return `
       <div style="text-align: center; padding: 80px;">
           <h1>Рекламная кампания №${this.projectId}</h1>

@@ -6,10 +6,10 @@ export default class ProjectsPage {
   }
 
   async loadTemplate() {
+    if (this.template) return;
     const response = await fetch('/pages/projects/ProjectsPage.hbs');
     if (!response.ok) throw new Error('Не удалось загрузить шаблон проектов');
-    const templateText = await response.text();
-    this.template = Handlebars.compile(templateText);
+    this.template = Handlebars.compile(await response.text());
   }
   getMockProjects() {
     return [
@@ -30,8 +30,8 @@ export default class ProjectsPage {
     ];
   }
 
-  render() {
-    if (!this.template) return 'Загрузка...';
+  async render() {
+    await this.loadTemplate();
 
     const projectsData = this.getMockProjects();
     return this.template({ projects: projectsData });
@@ -40,10 +40,9 @@ export default class ProjectsPage {
   attachEvents() {
     const projectCards = document.querySelectorAll('.project-card');
     projectCards.forEach(card => {
-      card.addEventListener('click', () => {
+      card.addEventListener('click', (e) => {
         const projectId = card.dataset.id;
         if (projectId) {
-          router.navigate(`/projects/${projectId}`);
         }
       });
     });

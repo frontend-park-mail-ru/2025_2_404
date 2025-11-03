@@ -13,14 +13,18 @@ export default class ProfilePage {
   }
 
   async loadTemplate() {
-    const response = await fetch('/pages/profile/ProfilePage.hbs');
-    if (!response.ok) {
-      throw new Error('Не удалось загрузить шаблон страницы профиля');
+    if (this.template) return;
+    try {
+      const response = await fetch('/pages/profile/ProfilePage.hbs');
+      if (!response.ok) {
+        throw new Error('Не удалось загрузить шаблон страницы профиля');
+      }
+      this.template = Handlebars.compile(await response.text());
+    } catch (error) {
+      console.error(error);
+      this.template = Handlebars.compile('<h1>Ошибка загрузки профиля</h1>');
     }
-    const templateText = await response.text();
-    this.template = Handlebars.compile(templateText);
   }
-
   initComponents() {
     try {
       this.components.loginInput = new Input({
@@ -114,10 +118,9 @@ export default class ProfilePage {
     }
   }
 
-  render() {
-    if (!this.template) {
-      return '<div>Загрузка...</div>';
-    }
+  async render() {
+    await this.loadTemplate();
+
     this.user = AuthService.getUser();
     if (!this.user) {
       router.navigate('/');
@@ -138,10 +141,8 @@ export default class ProfilePage {
       deleteButtonHtml: this.components.deleteButton?.render() || '',
       logoutButtonHtml: this.components.logoutButton?.render() || ''
     };
-    
     return this.template(context);
   }
-
   attachEvents() {
     const componentKeys = [
       'loginInput', 'emailInput', 'passwordInput', 'firstNameInput', 

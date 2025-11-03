@@ -5,9 +5,11 @@ import ProfilePage from './pages/profile/ProfilePage.js';
 import LoginPage from './pages/login/LoginPage.js';
 import RegisterPage from './pages/register/Register.js';
 import AuthService from './services/ServiceAuthentification.js';
-import Footer from './pages/footer/Footer.js'
+import Footer from './pages/footer/Footer.js';
 import ProjectsPage from './pages/projects/ProjectsPage.js';
 import ProjectDetailPage from './pages/projects/ProjectDetailPage.js';
+import BalancePage from './pages/balance/BalancePage.js';
+
 const appContainer = document.getElementById('app');
 if (!appContainer) {
     throw new Error('Не найден корневой элемент #app!');
@@ -18,14 +20,16 @@ const routes = {
   '/profile': ProfilePage,
   '/projects': ProjectsPage,
   '/projects/:id': ProjectDetailPage,
+  '/balance': BalancePage,
 };
 
 const router = new Router(routes, appContainer);
 const header = new Header();
 const footer = new Footer();
+
 function onAuthSuccess() {
   header.render();
-  router.navigate('/');
+  router.navigate('/projects');
 }
 
 let loginModal = null;
@@ -83,28 +87,52 @@ function showRegisterModal() {
   registerModal.init().then(() => registerModal.show());
 }
 
-
 async function initializeApp() {
-  document.addEventListener('click', (e) => {
-    if (e.target.closest('#login-btn-header')) {
-        e.preventDefault();
-        showLoginModal();
-    }
-    if (e.target.closest('#register-btn-header')) {
-        e.preventDefault();
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('a');
+  if (link && link.hasAttribute('href')) {
+    const href = link.getAttribute('href');
+    if (href === '/register' || href === '/login') {
+      e.preventDefault();
+      if (href === '/register') {
         showRegisterModal();
+      } else if (href === '/login') {
+        showLoginModal();
+      }
+      return;
     }
-    if (e.target.closest('#logout-btn')) {
-        e.preventDefault();
-        AuthService.logout();
-        header.render();
-        router.navigate('/');
+    if (href.startsWith('/') && link.target !== '_blank') {
+      e.preventDefault();
+      router.navigate(href); 
+      return; 
     }
-    if (e.target.closest('#try-btn')) {
+        const target = e.target;
+    if (target.closest('#try-btn')) {
+      e.preventDefault();
+      if (AuthService.isAuthenticated()) {
+        router.navigate('/projects');
+      } else {
+        showLoginModal();
+      }
+    }
+  }
+  const target = e.target;
+  if (target.closest('#login-btn-header')) {
       e.preventDefault();
       showLoginModal();
-    }
-  });
+  } else if (target.closest('#login-for-projects-btn')) {
+      e.preventDefault();
+      showLoginModal();
+  } else if (target.closest('#register-btn-header')) {
+      e.preventDefault();
+      showRegisterModal();
+  } else if (target.closest('#logout-btn')) {
+      e.preventDefault();
+      AuthService.logout();
+      header.render();
+      router.navigate('/');
+  }
+});
 
   AuthService.onAuthChange(() => {
     header.render();
