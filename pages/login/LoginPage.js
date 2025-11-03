@@ -3,9 +3,12 @@ import Button from '../components/Button.js';
 import AuthService from '../../services/ServiceAuthentification.js';
 
 export default class LoginPage {
-  constructor(onClose) {
-    this.onClose = onClose;
+  constructor({ onSuccess, onCancel, onSwitchToRegister }) {
+    this.onSuccess = onSuccess;
+    this.onCancel = onCancel;
+    this.onSwitchToRegister = onSwitchToRegister;
     this.modalElement = null;
+
     this.loginInput = new Input({
       id: 'login-email',
       label: 'Почта',
@@ -28,19 +31,24 @@ export default class LoginPage {
     this.submitButton = new Button({
       id: 'login-submit',
       text: 'Войти',
-      onClick: () => this.handleSubmit(),
+      type: 'submit'
     });
-
     this.init();
   }
+
   async init() {
-    const response = await fetch('/pages/login/LoginPage.hbs');
-    if (!response.ok) {
-      throw new Error('HTTP ошибка' + response.status);
+    try {
+      const response = await fetch('/pages/login/LoginPage.hbs');
+      if (!response.ok) {
+        throw new Error('HTTP ошибка ' + response.status);
+      }
+      const templateText = await response.text();
+      this.template = Handlebars.compile(templateText);
+    } catch (error) {
+      console.error("Не удалось загрузить шаблон для LoginPage:", error);
     }
-    const templateText = await response.text();
-    this.template = Handlebars.compile(templateText);
   }
+
   render() {
     const context = {
       Title: 'Вход',
@@ -50,6 +58,7 @@ export default class LoginPage {
     };
     return this.template(context);
   }
+
   show() {
     if (!this.modalElement) {
       this.modalElement = document.createElement('div');
@@ -60,37 +69,44 @@ export default class LoginPage {
     }
     this.modalElement.style.display = 'flex';
   }
+
   hide() {
     if (this.modalElement) {
-      this.modalElement.style.display = 'none';
+      this.modalElement.remove();
+      this.modalElement = null;
     }
   }
+
   attachEvents() {
-    this.modalElement
-      .querySelector('.close-btn')
-      .addEventListener('click', this.onClose);
-    const submitEl = document.getElementById(this.submitButton.id);
-    if (submitEl) {
-      submitEl.addEventListener('click', this.handleSubmit.bind(this));
+    this.modalElement.querySelector('.close-btn').addEventListener('click', this.onCancel);
+    const form = this.modalElement.querySelector('#login-form');
+    if (form) {
+      form.addEventListener('submit', (event) => this.handleSubmit(event));
+    }
+    const switchBtn = this.modalElement.querySelector('#switch-to-register-btn');
+    if (switchBtn) {
+      switchBtn.addEventListener('click', this.onSwitchToRegister);
     }
     this.loginInput.attachValidationEvent();
     this.passwordInput.attachValidationEvent();
   }
 
   handleSubmit(event) {
-    if (event) event.preventDefault();
-
+    event.preventDefault();
+    
     const email = document.getElementById(this.loginInput.id).value;
     const password = document.getElementById(this.passwordInput.id).value;
-
     const isEmailValid = !this.loginInput.validate(email);
     const isPasswordValid = !this.passwordInput.validate(password);
 
     if (!isEmailValid || !isPasswordValid) {
       return;
     }
+
     AuthService.login({ email, password })
-      .then(() => this.onClose())
+      .then(() => {
+        this.onSuccess();
+      })
       .catch((e) => {
         const msg = e?.body?.error?.message || 'Не удалось войти';
         this.passwordInput.showError(msg);

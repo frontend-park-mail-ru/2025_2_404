@@ -1,4 +1,3 @@
-import { signin, signup } from '../public/api/auth.js';
 
 function setCookie(name, val, days) {
   let expires = '';
@@ -42,44 +41,50 @@ class AuthService {
   isAuthenticated() {
     return !!this.user;
   }
+
   getUser() {
     return this.user;
   }
 
-  /**
-   * Вход: /signin
-   * @param {{email:string, password:string}}
-   */
-  async login({ email, password, user_name }) {
-    const res = await signin({ email, password, user_name });
-    const uiUser = {
-      id: res.id,
-      email: res.email,
-      login: res.user_name || res.name || res.username || res.login || email,
-      avatar: '',
+  async login({ email, password }) {
+    const fakeUser = {
+      id: Date.now(),
+      email: email,
+      username: email.split('@')[0] || 'TestUser',
+      avatar: 'kit.jpg',
+      registrationDate: new Date().toLocaleDateString('ru-RU'),
+      adCount: Math.floor(Math.random() * 10),
+      firstName: '',
+      lastName: '',
+      company: '',
+      phone: ''
     };
-    this.user = uiUser;
-    setCookie('user', JSON.stringify(uiUser), 7);
+    this.user = fakeUser;
+    setCookie('user', JSON.stringify(fakeUser), 7);
     if (this.onAuthChangeCallback) this.onAuthChangeCallback(this.user);
-    return uiUser;
+    return Promise.resolve(fakeUser);
   }
 
-  /**
-   * Регистрация: /signup
-   * @param {{user_name:string, email:string, password:string}}
-   */
-  async register({ user_name, email, password }) {
-    const res = await signup({ user_name, email, password });
-    const uiUser = {
-      id: res.id,
-      email: res.email,
-      login: res.user_name || res.name || user_name,
-      avatar: '',
+  async register({ user_name, email }) {
+
+    const fakeUser = {
+      id: Date.now(),
+      email: email,
+      username: user_name,
+      avatar: 'kit.jpg',
+      registrationDate: new Date().toLocaleDateString('ru-RU'),
+      adCount: 0,
+      firstName: '',
+      lastName: '',
+      company: '',
+      phone: ''
     };
-    this.user = uiUser;
-    setCookie('user', JSON.stringify(uiUser), 7);
+
+    this.user = fakeUser;
+    setCookie('user', JSON.stringify(fakeUser), 7);
     if (this.onAuthChangeCallback) this.onAuthChangeCallback(this.user);
-    return uiUser;
+    
+    return Promise.resolve(fakeUser);
   }
 
   logout() {
@@ -90,6 +95,11 @@ class AuthService {
 
   onAuthChange(callback) {
     this.onAuthChangeCallback = callback;
+  }
+  
+  deleteAccount() {
+    this.logout();
+    return Promise.resolve({ message: 'Account deleted' });
   }
 }
 

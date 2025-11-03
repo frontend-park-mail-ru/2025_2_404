@@ -4,24 +4,31 @@ export default class MainPage {
     this.mainTemp = null;
   }
   async loadTemplate() {
-    const headerResponse = await fetch('/pages/header/header.hbs');
-    if (!headerResponse.ok) {
-      throw new Error('ошибка загрузки хедера');
+    if (this.template) return;
+    try {
+      const mainResponse = await fetch('/pages/main/MainPage.hbs');
+      if (!mainResponse.ok) {
+        throw new Error('Ошибка загрузки главной страницы');
+      }
+      this.template = Handlebars.compile(await mainResponse.text());
+    } catch (error) {
+        console.error(error);
+        this.template = Handlebars.compile('<h1>Ошибка загрузки страницы</h1>');
     }
-    const headerText = await headerResponse.text();
-    this.headerTemp = Handlebars.compile(headerText);
-    const mainResponse = await fetch('/pages/main/MainPage.hbs');
-    if (!mainResponse.ok) {
-      throw new Error('Ошибка загрузки главной страницы');
-    }
-    const mainText = await mainResponse.text();
-    this.mainTemp = Handlebars.compile(mainText);
   }
-  render() {
-    if (!this.headerTemp || !this.mainTemp) {
-      return '<div>Loading page...</div>';
-    }
-    const mainHtml = this.mainTemp();
-    return mainHtml;
+
+  async render() {
+    await this.loadTemplate();
+    return this.template();
+  }
+
+  attachEvents() {
+    const faqItems = document.querySelectorAll('.faq-item');
+    faqItems.forEach(item => {
+      const question = item.querySelector('.faq-question');
+      question.addEventListener('click', () => {
+        item.classList.toggle('active');
+      });
+    });
   }
 }

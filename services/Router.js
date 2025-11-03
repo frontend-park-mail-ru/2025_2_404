@@ -1,64 +1,47 @@
-import LoginView from '../views/LoginView.js';
-import RegisterView from '../views/RegisterView.js';
-import MainAdvertisementView from '../views/MainView.js';
-
-export class Router {
-  #views = new Map();
-  #currentView = null;
-  isLoading = false;
-
-  constructor() {
-    this.#views.set('/', MainAdvertisementView);
-    this.#views.set('/login', LoginView);
-    this.#views.set('/register', RegisterView);
-    window.router = this;
+export default class Router {
+  constructor(routes, rootElement) {
+    this.routes = routes;
+    this.rootElement = rootElement;
+    window.addEventListener('popstate', () => this.loadRoute());
   }
   navigate(path) {
-    window.location.hash = path;
-  }
-  async open(path, data = {}) {
-    if (this.isLoading) {
+    if (window.location.pathname === path) {
       return;
     }
-    this.isLoading = true;
-    if (this.#currentView?.clear) {
-      this.#currentView.clear();
-    }
-    const isModal = path === '/login' || path === '/register';
-    const viewPath = isModal ? '/' : path;
-    const TypeView = this.#views.get(viewPath);
-    if (!TypeView) {
-      console.error(`не найдено по адресу: ${viewPath}`);
-      this.isLoading = false;
-      return;
-    }
-    this.#currentView = new TypeView();
-    await this.#currentView.render(data);
-    this.isLoading = false;
+    history.pushState({}, '', path);
+    this.loadRoute();
   }
 
-  start() {
-    window.addEventListener('hashchange', () => {
-      const path = window.location.hash.slice(1) || '/';
-      if (window.app) {
-        window.app.handleRouteChange();
+  async loadRoute() {
+    const currentPath = window.location.pathname;
+    let routeFound = null;
+    for (const routePath in this.routes) {
+      const routeRegex = new RegExp(`^${routePath.replace(/:\w+/g, '([^/]+)')}$`);
+      const match = currentPath.match(routeRegex);
+      if (match) {
+        routeFound = {
+          component: this.routes[routePath],
+          params: match.slice(1)
+        };
+        break;
       }
-    });
-    document.addEventListener('click', (e) => {
-      const link = e.target.closest('a');
-      if (link && link.pathname) {
-        e.preventDefault();
-        this.navigate(link.pathname);
+    }
+
+    if (routeFound) {
+      const page = new routeFound.component(this, ...routeFound.params);
+      
+      try {
+        const html = await page.render();
+        this.rootElement.innerHTML = html;
+        if (typeof page.attachEvents === 'function') {
+          page.attachEvents();
+        }
+      } catch (error) {
+        console.error("Ошибка при рендеринге маршрута:", error);
+        this.rootElement.innerHTML = '<h1>Произошла ошибка при загрузке страницы</h1>';
       }
-    });
-    const initHash = window.location.hash.slice(1) || '/';
-    this.open('/');
-    if (window.app) {
-      window.app.handleRouteChange();
     } else {
-      setTimeout(() => window.app.handleRouteChange(), 100);
+      this.rootElement.innerHTML = '<h1>404: Страница не найдена</h1>';
     }
   }
 }
-
-export default new Router();
