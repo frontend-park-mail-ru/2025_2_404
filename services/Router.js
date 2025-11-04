@@ -51,7 +51,7 @@ export default class Router {
         page.attachEvents();
       }
     } else {
-      this.rootElement.innerHTML = '<h1>404: Страница не найдена</h1>';
+      this.rootElement.innerHTML = '<h1> 404: Страница не найдена</h1>';
     }
   }
 }

@@ -1,5 +1,6 @@
-import { getAdById, deleteAd, updateAd } from '../../public/api/ads.js';
+import { getAdById, deleteAd } from '../../public/api/ads.js';
 import ConfirmationModal from '../components/ConfirmationModal.js';
+import { validateAdForm } from '../../public/utils/ValidateAdForm.js';
 
 export default class ProjectDetailPage {
   constructor(router, projectId) {
@@ -8,25 +9,24 @@ export default class ProjectDetailPage {
     this.template = null;
   }
 
-  /** Загружает шаблон страницы */
+  /** Загрузка шаблона страницы */
   async loadTemplate() {
     const response = await fetch('/pages/projects/ProjectDetailPage.hbs');
     if (!response.ok) throw new Error('Не удалось загрузить шаблон ProjectDetailPage');
-    const templateText = await response.text();
-    this.template = Handlebars.compile(templateText);
+    const text = await response.text();
+    this.template = Handlebars.compile(text);
   }
 
   /** Рендер страницы */
   async render() {
     if (!this.template) return 'Загрузка...';
-
     try {
       const ad = await getAdById(this.projectId);
       return this.template({ project: ad });
     } catch (err) {
-      console.error('Ошибка при загрузке:', err);
+      console.error('Ошибка при загрузке проекта:', err);
       return `
-        <div style="padding: 40px; text-align:center">
+        <div style="padding:40px; text-align:center;">
           <h2>Не удалось загрузить проект</h2>
           <p>${err.body?.message || err.statusText || 'Ошибка сервера'}</p>
         </div>
@@ -34,90 +34,134 @@ export default class ProjectDetailPage {
     }
   }
 
-  /** Навешивает события */
+  /** Навешивает события после вставки шаблона в DOM */
   attachEvents() {
-    // Кнопка "Назад"
+    console.log('[ProjectDetailPage] attachEvents вызван');
+
+    /** Кнопка Назад */
     const backBtn = document.querySelector('#back-btn');
     backBtn?.addEventListener('click', (e) => {
       e.preventDefault();
       this.router.navigate('/projects');
     });
 
-    // Кнопка "Сохранить изменения"
-    const editBtn = document.querySelector('#edit-btn');
-    if (editBtn) {
-      editBtn.textContent = 'Сохранить изменения';
-      editBtn.addEventListener('click', async () => {
-        const title = document.querySelector('#title-input')?.value.trim();
-        const desc = document.querySelector('#desc-input')?.value.trim();
-        const site = document.querySelector('#site-input')?.value.trim();
-        const img = document.querySelector('#img-input')?.value.trim();
-
-        if (!title || !desc) {
-          const modal = new ConfirmationModal({
-            message: 'Поля "Заголовок" и "Описание" обязательны!',
-            onConfirm: null,
-          });
-          modal.show();
-          return;
-        }
-
-        try {
-          // Отправляем обновлённые данные
-          await updateAd(this.projectId, {
-            title,
-            content: desc,
-            target_url: site,
-            img_bin: img,
-          });
-
-          // ✅ Модалка при успешном сохранении
-          const modal = new ConfirmationModal({
-            message: 'Изменения успешно сохранены!',
-            onConfirm: () => this.router.navigate('/projects'),
-          });
-          modal.show();
-        } catch (err) {
-          console.error('Ошибка при сохранении:', err);
-          const modal = new ConfirmationModal({
-            message: 'Не удалось сохранить изменения. Попробуйте позже.',
-            onConfirm: null,
-          });
-          modal.show();
-        }
-      });
-    }
-
-    // Кнопка "Удалить"
+    /** Кнопка Удалить */
     const deleteBtn = document.querySelector('#delete-btn');
-    if (deleteBtn) {
-      deleteBtn.addEventListener('click', () => {
-        const modal = new ConfirmationModal({
-          message: 'Вы уверены, что хотите удалить это объявление?',
-          onConfirm: async () => {
-            try {
-              await deleteAd(this.projectId);
-              this.router.navigate('/projects');
-            } catch (err) {
-              console.error('Ошибка при удалении:', err);
-              const errorModal = new ConfirmationModal({
-                message: 'Не удалось удалить объявление. Попробуйте позже.',
-                onConfirm: null,
-              });
-              errorModal.show();
-            }
-          },
-          onCancel: () => {},
-        });
-        modal.show();
+    deleteBtn?.addEventListener('click', () => {
+      const modal = new ConfirmationModal({
+        message: 'Вы уверены, что хотите удалить это объявление?',
+        onConfirm: async () => {
+          try {
+            await deleteAd(this.projectId);
+            this.router.navigate('/projects');
+          } catch (err) {
+            console.error('Ошибка при удалении:', err);
+            new ConfirmationModal({
+              message: 'Не удалось удалить объявление. Попробуйте позже.',
+            }).show();
+          }
+        },
+        onCancel: () => {},
       });
+      modal.show();
+    });
+
+    /** Кнопка Отредактировать (сохранить изменения) */
+    const editBtn = document.querySelector('#edit-btn');
+    if (!editBtn) {
+      console.warn('[ProjectDetailPage] Кнопка #edit-btn не найдена');
+      return;
     }
 
-    // Обновление предпросмотра
+    editBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('[ProjectDetailPage] Нажата кнопка "Отредактировать"');
+
+      // Получаем значения полей
+      const title = document.getElementById('title-input')?.value.trim() || '';
+      const desc = document.getElementById('desc-input')?.value.trim() || '';
+      const site = document.getElementById('site-input')?.value.trim() || '';
+      const budget = document.getElementById('budget-input')?.value.trim() || '';
+      const imgFile = document.getElementById('img-file')?.files[0] || null;
+
+      console.table({ title, desc, site, budget, imgFile });
+
+      // Очистка прошлых ошибок
+      document.querySelectorAll('.error-msg').forEach((el) => el.remove());
+      document.querySelectorAll('.input-error').forEach((el) => el.classList.remove('input-error'));
+
+      // Валидация
+
+      const errors = validateAdForm({
+          title,
+          description: desc,
+          domain: site,
+          budget,
+          file: imgFile,
+        });
+      if (Object.keys(errors).length > 0) {
+        console.warn('[ProjectDetailPage] Ошибки валидации:', errors);
+        for (const [key, msg] of Object.entries(errors)) {
+          const input =
+            document.getElementById(`${key}-input`) ||
+            document.querySelector(`.${key}`);
+          if (input) {
+            input.classList.add('input-error');
+            const err = document.createElement('small');
+            err.textContent = msg;
+            err.classList.add('error-msg');
+            input.insertAdjacentElement('afterend', err);
+          }
+        }
+        return;
+      }
+
+      // Создание FormData для multipart/form-data
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('content', desc);
+      formData.append('target_url', site);
+      formData.append('budget', budget);
+      if (imgFile) formData.append('image', imgFile);
+
+      console.log('[ProjectDetailPage] Отправка данных на сервер...');
+      for (let [key, value] of formData.entries()) {
+        console.log('FormData:', key, value);
+      }
+
+      try {
+        const token = localStorage.getItem('token');
+
+        const response = await fetch(`http://localhost:8080/ads/${this.projectId}`, {
+          method: 'PUT',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          body: formData,
+          credentials: 'include',
+        });
+
+        console.log('[ProjectDetailPage] Ответ сервера:', response.status);
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`Ошибка при сохранении: ${text}`);
+        }
+
+        new ConfirmationModal({
+          message: 'Изменения успешно сохранены!',
+          onConfirm: () => this.router.navigate('/projects'),
+        }).show();
+      } catch (err) {
+        console.error('[ProjectDetailPage] Ошибка при сохранении:', err);
+        new ConfirmationModal({
+          message: 'Ошибка при загрузке изображения. Попробуйте позже.',
+        }).show();
+      }
+    });
+
+    /** Обновление предпросмотра при изменении полей */
     const titleInput = document.querySelector('#title-input');
     const descInput = document.querySelector('#desc-input');
-    const siteInput = document.querySelector('#site-input');
-    const imgInput = document.querySelector('#img-input');
+    const imgInput = document.getElementById('img-file');
     const previewTitle = document.querySelector('.preview-card h4');
     const previewDesc = document.querySelector('.preview-card p');
     const previewImg = document.querySelector('.preview-card img');
@@ -130,13 +174,16 @@ export default class ProjectDetailPage {
       previewDesc.textContent = descInput.value || 'Без описания';
     });
 
-    siteInput?.addEventListener('input', () => {
-      previewDesc.textContent = `${descInput.value}\nСайт: ${siteInput.value}`;
-    });
-
-    imgInput?.addEventListener('input', () => {
-      previewImg.src =
-        imgInput.value || 'https://via.placeholder.com/300x200?text=Нет+изображения';
+    imgInput?.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        console.log('[ProjectDetailPage] Выбрано изображение:', file.name);
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          previewImg.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
     });
   }
 }

@@ -1,4 +1,4 @@
-import { http } from './http.js';
+import { BASE, http } from './http.js';
 
 /**
  * Получить список всех объявлений
@@ -64,4 +64,28 @@ export async function updateAd(ad_id, adData) {
  */
 export async function deleteAd(adId) {
   return http.delete(`/ads/${adId}`);
+}
+
+
+// Новая функция для загрузки файла
+export async function uploadImage(file) {
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const token = localStorage.getItem('token');
+
+  const res = await fetch(`${BASE}/auth/upload-image`, {
+    method: 'POST',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Ошибка при загрузке изображения: ${text}`);
+  }
+
+  return await res.json(); 
 }

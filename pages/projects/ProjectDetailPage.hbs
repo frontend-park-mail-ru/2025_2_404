@@ -22,8 +22,11 @@
       <input id="budget-input" type="number" value="{{project.budget}}" placeholder="Введите сумму">
       <small>Не меньше 100₽</small>
 
-      <label for="img-input">Изображение (URL)</label>
-      <input id="img-input" type="url" value="{{project.image}}" placeholder="Введите ссылку на изображение">
+
+      <label for="img-file">Изображение (JPG, PNG)</label>
+      <input id="img-file" type="file" accept="image/jpeg, image/png" />
+      <small>Поддерживаются JPG и PNG (до 10MB)</small>
+
 
       <label>Даты проведения</label>
       <div class="dates">
@@ -37,7 +40,7 @@
       {{#if isNew}}
         <button id="edit-btn" type="button" class="btn btn-primary">Создать кампанию</button>
       {{else}}
-        <button id="edit-btn" type="button" class="btn btn-primary">Отредактировать</button>
+        <button id="edit-btn" type="button" class="btn btn-primary">Сохранить изменения</button>
         <button id="delete-btn" type="button" class="btn btn-danger">Удалить</button>
       {{/if}}
     </div>
