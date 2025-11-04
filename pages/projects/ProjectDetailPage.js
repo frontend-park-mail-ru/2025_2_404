@@ -34,10 +34,8 @@ export default class ProjectDetailPage {
     }
   }
 
-  /** Навешивает события после вставки шаблона в DOM */
+  /** Навешивает события */
   attachEvents() {
-    console.log('[ProjectDetailPage] attachEvents вызван');
-
     /** Кнопка Назад */
     const backBtn = document.querySelector('#back-btn');
     backBtn?.addEventListener('click', (e) => {
@@ -66,46 +64,51 @@ export default class ProjectDetailPage {
       modal.show();
     });
 
-    /** Кнопка Отредактировать (сохранить изменения) */
+    /** Кнопка Сохранить изменения */
     const editBtn = document.querySelector('#edit-btn');
-    if (!editBtn) {
-      console.warn('[ProjectDetailPage] Кнопка #edit-btn не найдена');
-      return;
-    }
+    if (!editBtn) return;
 
     editBtn.addEventListener('click', async (e) => {
       e.preventDefault();
-      e.stopPropagation();
-      console.log('[ProjectDetailPage] Нажата кнопка "Отредактировать"');
 
-      // Получаем значения полей
-      const title = document.getElementById('title-input')?.value.trim() || '';
-      const desc = document.getElementById('desc-input')?.value.trim() || '';
-      const site = document.getElementById('site-input')?.value.trim() || '';
-      const budget = document.getElementById('budget-input')?.value.trim() || '';
-      const imgFile = document.getElementById('img-file')?.files[0] || null;
+      const title = document.getElementById('title-input').value.trim();
+      const desc = document.getElementById('desc-input').value.trim();
+      const site = document.getElementById('site-input').value.trim();
+      const budget = document.getElementById('budget-input').value.trim();
+      const imgFile = document.getElementById('img-file')?.files[0]; // файл изображения
 
+      console.log('Отправка данных на сервер...');
       console.table({ title, desc, site, budget, imgFile });
 
-      // Очистка прошлых ошибок
+      // Очистка старых ошибок
       document.querySelectorAll('.error-msg').forEach((el) => el.remove());
-      document.querySelectorAll('.input-error').forEach((el) => el.classList.remove('input-error'));
+      document.querySelectorAll('.input-error').forEach((el) =>
+        el.classList.remove('input-error')
+      );
 
-      // Валидация
-
+      // Валидация данных
       const errors = validateAdForm({
-          title,
-          description: desc,
-          domain: site,
-          budget,
-          file: imgFile,
-        });
+        title,
+        description: desc,
+        domain: site,
+        budget,
+      });
+
+      // Маппинг id полей формы
+      const fieldMap = {
+        title: 'title-input',
+        description: 'desc-input',
+        domain: 'site-input',
+        budget: 'budget-input',
+        image: 'img-file',
+      };
+
+      // Если есть ошибки — подсветим поля и покажем текст
       if (Object.keys(errors).length > 0) {
-        console.warn('[ProjectDetailPage] Ошибки валидации:', errors);
         for (const [key, msg] of Object.entries(errors)) {
+          const mappedId = fieldMap[key] || `${key}-input`;
           const input =
-            document.getElementById(`${key}-input`) ||
-            document.querySelector(`.${key}`);
+            document.getElementById(mappedId) || document.querySelector(`.${key}`);
           if (input) {
             input.classList.add('input-error');
             const err = document.createElement('small');
@@ -114,10 +117,11 @@ export default class ProjectDetailPage {
             input.insertAdjacentElement('afterend', err);
           }
         }
+        console.warn('Ошибки валидации:', errors);
         return;
       }
 
-      // Создание FormData для multipart/form-data
+      // Формируем multipart/form-data
       const formData = new FormData();
       formData.append('title', title);
       formData.append('content', desc);
@@ -125,22 +129,20 @@ export default class ProjectDetailPage {
       formData.append('budget', budget);
       if (imgFile) formData.append('image', imgFile);
 
-      console.log('[ProjectDetailPage] Отправка данных на сервер...');
-      for (let [key, value] of formData.entries()) {
-        console.log('FormData:', key, value);
-      }
+
 
       try {
         const token = localStorage.getItem('token');
 
         const response = await fetch(`http://localhost:8080/ads/${this.projectId}`, {
           method: 'PUT',
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
           body: formData,
           credentials: 'include',
         });
 
-        console.log('[ProjectDetailPage] Ответ сервера:', response.status);
         if (!response.ok) {
           const text = await response.text();
           throw new Error(`Ошибка при сохранении: ${text}`);
@@ -151,14 +153,14 @@ export default class ProjectDetailPage {
           onConfirm: () => this.router.navigate('/projects'),
         }).show();
       } catch (err) {
-        console.error('[ProjectDetailPage] Ошибка при сохранении:', err);
+        console.error('Ошибка при сохранении:', err);
         new ConfirmationModal({
-          message: 'Ошибка при загрузке изображения. Попробуйте позже.',
+          message: 'Ошибка при сохранении. Попробуйте позже.',
         }).show();
-      }
+      }  
     });
 
-    /** Обновление предпросмотра при изменении полей */
+    /** Предпросмотр изображения */
     const titleInput = document.querySelector('#title-input');
     const descInput = document.querySelector('#desc-input');
     const imgInput = document.getElementById('img-file');
@@ -177,7 +179,6 @@ export default class ProjectDetailPage {
     imgInput?.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) {
-        console.log('[ProjectDetailPage] Выбрано изображение:', file.name);
         const reader = new FileReader();
         reader.onload = (event) => {
           previewImg.src = event.target.result;
