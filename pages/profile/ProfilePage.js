@@ -10,22 +10,22 @@ export default class ProfilePage {
   constructor() {
     this.template = null;
     this.user = null;
-    this.components = {}; 
+    this.components = {};
+    this.selectedFile = null;
   }
 
   async loadTemplate() {
     if (this.template) return;
     try {
       const response = await fetch('/pages/profile/ProfilePage.hbs');
-      if (!response.ok) {
-        throw new Error('Не удалось загрузить шаблон страницы профиля');
-      }
+      if (!response.ok) throw new Error('Не удалось загрузить шаблон страницы профиля');
       this.template = Handlebars.compile(await response.text());
     } catch (error) {
       console.error(error);
       this.template = Handlebars.compile('<h1>Ошибка загрузки профиля</h1>');
     }
   }
+
   initComponents() {
     this.components = {
       loginInput: new Input({
@@ -83,30 +83,30 @@ export default class ProfilePage {
         value: this.user?.role || 'advertiser',
       }),
       saveButton: new Button({
-        id: 'profile-save',
+        id: 'profile-save-btn',
         text: 'Сохранить изменения',
         variant: 'primary',
         onClick: (e) => {
-            e.preventDefault();
-            this.handleSave();
+          e.preventDefault();
+          this.handleSave();
         },
       }),
       deleteButton: new Button({
-        id: 'profile-delete',
+        id: 'profile-delete-btn',
         text: 'Удалить аккаунт',
         variant: 'danger',
         onClick: (e) => {
-            e.preventDefault();
-            this.handleDelete();
+          e.preventDefault();
+          this.handleDelete();
         },
       }),
       logoutButton: new Button({
-        id: 'profile-logout',
+        id: 'profile-logout-btn',
         text: 'Выйти',
         variant: 'secondary',
         onClick: (e) => {
-            e.preventDefault();
-            this.handleLogout();
+          e.preventDefault();
+          this.handleLogout();
         },
       })
     };
@@ -124,6 +124,7 @@ export default class ProfilePage {
       const res = await http.get('/profile/');
       const clientData = res.data?.client;
       if (!clientData) throw new Error("Данные клиента не найдены");
+
       this.user = {
         id: clientData.id,
         username: clientData.user_name,
@@ -133,7 +134,7 @@ export default class ProfilePage {
         company: clientData.company || '',
         phone: clientData.phone || '',
         role: clientData.role || 'advertiser',
-        avatar: clientData.avatar || '/kit.jpg'
+        avatar: clientData.img_path || '/kit.jpg'
       };
 
     } catch (error) {
@@ -144,7 +145,6 @@ export default class ProfilePage {
     }
 
     this.initComponents();
-
     const context = {
       ...this.user,
       loginInputHtml: this.components.loginInput.render(),
@@ -162,7 +162,7 @@ export default class ProfilePage {
     
     return this.template(context);
   }
-
+  
   attachEvents() {
     Object.values(this.components).forEach(component => {
       if (component.attachEvents) {
@@ -172,28 +172,51 @@ export default class ProfilePage {
           component.attachValidationEvent();
       }
     });
+
+    const avatarUploadInput = document.getElementById('avatar-upload');
+    const avatarImage = document.getElementById('profile-avatar-img');
+
+    if (avatarUploadInput && avatarImage) {
+      avatarUploadInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          this.selectedFile = file;
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            avatarImage.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
   }
 
   async handleSave() {
     if (!this.user) return;
-    const updatedData = {
-      user_name: document.getElementById('profile-login')?.value || '',
-      email: document.getElementById('profile-email')?.value || '',
-      firstName: document.getElementById('profile-firstname')?.value || '',
-      lastName: document.getElementById('profile-lastname')?.value || '',
-      company: document.getElementById('profile-company')?.value || '',
-      phone: document.getElementById('profile-phone')?.value || '',
-      role: document.getElementById('user-role')?.value || 'advertiser',
-    };
+
+    const formData = new FormData();
+    
+    formData.append('user_name', document.getElementById('profile-login')?.value || '');
+    formData.append('email', document.getElementById('profile-email')?.value || '');
+    formData.append('firstName', document.getElementById('profile-firstname')?.value || '');
+    formData.append('lastName', document.getElementById('profile-lastname')?.value || '');
+    formData.append('company', document.getElementById('profile-company')?.value || '');
+    formData.append('phone', document.getElementById('profile-phone')?.value || '');
+    formData.append('role', document.getElementById('user-role')?.value || 'advertiser');
     
     const password = document.getElementById('profile-password')?.value;
     if (password) {
-        updatedData.password = password;
+        formData.append('password', password);
+    }
+    
+    if (this.selectedFile) {
+        formData.append('img', this.selectedFile, this.selectedFile.name);
     }
 
     try {
-      await http.put('/profile/', updatedData);
+      await http.putFormData('/profile/', formData);
       await header.update();
+      router.loadRoute();
 
     } catch(error) {
       console.error("Ошибка сохранения профиля:", error);
