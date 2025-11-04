@@ -1,45 +1,52 @@
-/**
- * Базовый URL
- */
+
 export const BASE = "http://localhost:8080";
 
 /**
  * Унифицированный HTTP-запрос
  */
-export async function request(path, init = {}) {
+async function request(path, init = {}) {
   const token = localStorage.getItem('token');
+  const headers = init.headers || {};
 
-  const res = await fetch(BASE + path, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(init.headers || {}),
-    },
-  });
-
-  const text = await res.text();
-  let data = null;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = text;
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
   }
 
-  if (!res.ok) throw { status: res.status, body: data };
+  const config = {
+    ...init,
+    headers,
+  };
+  
+  const res = await fetch(BASE + path, config);
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw { status: res.status, body: data };
+  }
   return data;
 }
 
 export const http = {
   get: (path) => request(path),
+  
   post: (path, body) =>
-    request(path, { method: 'POST', body: JSON.stringify(body ?? {}) }),
+    request(path, { 
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body ?? {}) 
+    }),
+  
   put: (path, body) =>
-    request(path, { method: 'PUT', body: JSON.stringify(body ?? {}) }),
+    request(path, { 
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body ?? {}) 
+    }),
+  putFormData: (path, formData) =>
+    request(path, {
+      method: 'PUT',
+      body: formData,
+    }),
+  
   delete: (path) => request(path, { method: 'DELETE' }),
 };
-
-
-export async function deleteAd(adId) {
-  return http.delete(`/ads/${adId}`);
-}
