@@ -1,0 +1,55 @@
+<div class="project-detail-page">
+  <div class="form-card">
+    <h2>
+      {{#if isNew}}
+        Создание кампании
+      {{else}}
+        Редактирование кампании
+      {{/if}}
+    </h2>
+    <div class="form">
+    <form id="{{#if isNew}}create-form{{else}}edit-form{{/if}}">
+      <label for="title-input">Заголовок</label>
+      <input id="title-input" type="text" value="{{project.title}}" placeholder="Введите заголовок">
+
+      <label for="desc-input">Описание</label>
+      <textarea id="desc-input" class="ad-form" placeholder="Введите описание">{{project.description}}</textarea>
+
+      <label for="site-input">Ссылка на сайт</label>
+      <input id="site-input" type="url" value="{{project.domain}}" placeholder="Введите ссылку на сайт">
+
+      <label for="budget-input">Бюджет</label>
+      <input id="budget-input" type="number" value="{{project.budget}}" placeholder="Введите сумму">
+      <small>Не меньше 100₽</small>
+
+      <label for="img-input">Изображение (URL)</label>
+      <input id="img-input" type="url" value="{{project.image}}" placeholder="Введите ссылку на изображение">
+
+      <label>Даты проведения</label>
+      <div class="dates">
+        <input type="date" value="{{project.dateStart}}">
+        <input type="date" value="{{project.dateEnd}}">
+      </div>
+    </div>
+     <div class="form-actions">
+      <button id="back-btn" class="btn btn-secondary">Назад</button>
+
+      {{#if isNew}}
+        <button id="edit-btn" type="button" class="btn btn-primary">Создать кампанию</button>
+      {{else}}
+        <button id="edit-btn" type="button" class="btn btn-primary">Отредактировать</button>
+        <button id="delete-btn" type="button" class="btn btn-danger">Удалить</button>
+      {{/if}}
+    </div>
+
+    </form>
+  </div>
+  
+
+  <div class="preview-card">
+    <h3>Предпросмотр</h3>
+    <img src="{{project.image}}" alt="Превью" class="preview-image">
+    <h4>{{project.title}}</h4>
+    <p>{{project.description}}</p>
+  </div>
+</div>
