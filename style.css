@@ -1086,3 +1086,64 @@ textarea {
   border-radius: 12px;
   margin-bottom: 16px;
 }
+
+.logo-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.profile-dropdown {
+    position: relative;
+    cursor: pointer;
+    padding-bottom: 15px; 
+    margin-bottom: -15px;
+}
+
+.profile-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0;
+    background-color: var(--white);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 8px;
+    min-width: 200px;
+    z-index: 1100;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.profile-dropdown:hover .profile-dropdown-menu {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.profile-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: var(--text-color);
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+    font-weight: 500;
+}
+
+.profile-dropdown-item:hover {
+    background-color: var(--light-purple);
+    color: var(--primary-purple);
+}
+
+.profile-dropdown-item svg {
+    width: 20px;
+    height: 20px;
+}
+
+.profile-dropdown-item:hover svg path {
+    stroke: var(--primary-purple);
+}

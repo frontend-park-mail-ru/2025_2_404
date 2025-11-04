@@ -4,23 +4,26 @@ import Select from '../components/Select.js';
 import AuthService from '../../services/ServiceAuthentification.js';
 import ConfirmationModal from '../components/ConfirmationModal.js';
 import { router } from '../../main.js';
+import { http } from '../../public/api/http.js';
 
 export default class ProfilePage {
   constructor() {
     this.template = null;
-    this.user = null;
+    this.user = null; 
     this.components = {}; 
   }
 
   async loadTemplate() {
-    const response = await fetch('/pages/profile/ProfilePage.hbs');
-    if (!response.ok) {
-      throw new Error('Не удалось загрузить шаблон страницы профиля');
+    if (this.template) return;
+    try {
+      const response = await fetch('/pages/profile/ProfilePage.hbs');
+      if (!response.ok) throw new Error('Не удалось загрузить шаблон');
+      this.template = Handlebars.compile(await response.text());
+    } catch (error) {
+      console.error(error);
+      this.template = Handlebars.compile('<h1>Ошибка загрузки профиля</h1>');
     }
-    const templateText = await response.text();
-    this.template = Handlebars.compile(templateText);
   }
-
   initComponents() {
     try {
       this.components.loginInput = new Input({
@@ -114,15 +117,38 @@ export default class ProfilePage {
     }
   }
 
-  render() {
-    if (!this.template) {
-      return '<div>Загрузка...</div>';
-    }
-    this.user = AuthService.getUser();
-    if (!this.user) {
+  async render() {
+    if (!AuthService.isAuthenticated()) {
       router.navigate('/');
-      return '<div>Вы не авторизованы. Перенаправление...</div>';
+      return '<div>Доступ запрещен. Перенаправление...</div>';
     }
+    
+    await this.loadTemplate();
+
+    try {
+      const res = await http.get('/profile/');
+      const clientData = res.data?.client;
+      if (!clientData) throw new Error("Данные клиента не найдены");
+
+      this.user = {
+        id: clientData.id,
+        username: clientData.user_name,
+        email: clientData.email,
+        firstName: clientData.firstName || '',
+        lastName: clientData.lastName || '',
+        company: clientData.company || '',
+        phone: clientData.phone || '',
+        role: clientData.role || 'advertiser',
+        avatar: clientData.avatar || '/kit.jpg'
+      };
+
+    } catch (error) {
+      console.error("Ошибка при загрузке профиля:", error);
+      AuthService.logout();
+      router.navigate('/');
+      return '<h1>Ошибка загрузки профиля. Попробуйте войти снова.</h1>';
+    }
+
     this.initComponents();
     const context = {
       ...this.user,
@@ -141,7 +167,6 @@ export default class ProfilePage {
     
     return this.template(context);
   }
-
   attachEvents() {
     const componentKeys = [
       'loginInput', 'emailInput', 'passwordInput', 'firstNameInput', 
@@ -169,13 +194,29 @@ export default class ProfilePage {
     }
   }
 
-  handleSave() {
-    if (this.user) {
-      this.user.firstName = document.getElementById('profile-firstname')?.value || '';
-      this.user.lastName = document.getElementById('profile-lastname')?.value || '';
-      this.user.company = document.getElementById('profile-company')?.value || '';
-      this.user.phone = document.getElementById('profile-phone')?.value || '';
-      this.user.role = document.getElementById('user-role')?.value || 'advertiser';
+   async handleSave() {
+    if (!this.user) return;
+    const updatedData = {
+      user_name: document.getElementById('profile-login')?.value || '',
+      email: document.getElementById('profile-email')?.value || '',
+      firstName: document.getElementById('profile-firstname')?.value || '',
+      lastName: document.getElementById('profile-lastname')?.value || '',
+      company: document.getElementById('profile-company')?.value || '',
+      phone: document.getElementById('profile-phone')?.value || '',
+      role: document.getElementById('user-role')?.value || 'advertiser',
+    };
+    
+    const password = document.getElementById('profile-password')?.value;
+    if (password) {
+        updatedData.password = password;
+    }
+
+    try {
+        await http.put('/profile/', updatedData);
+        router.loadRoute();
+
+    } catch(error) {
+        console.error("Ошибка сохранения профиля:", error);
     }
   }
   

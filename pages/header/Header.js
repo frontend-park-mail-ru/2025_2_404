@@ -1,4 +1,5 @@
 import AuthService from '../../services/ServiceAuthentification.js';
+import { http } from '../../public/api/http.js';
 
 export default class Header {
   constructor() {
@@ -22,25 +23,35 @@ export default class Header {
     }
   }
 
-  render() {
+  render(context) {
     if (!this.template) {
-        this.header.innerHTML = '<div>Loading header...</div>';
+        this.header.innerHTML = '<div>Загрузка хедера...</div>';
         return;
     }
-    const user = AuthService.getUser();
-    const context = {
-      isAuthenticated: AuthService.isAuthenticated(),
-      user: user,
-    };
     this.header.innerHTML = this.template(context);
+  }
 
-    const avatar = this.header.querySelector('.avatar');
-    if (avatar) {
-      avatar.addEventListener('click', (e) => {
-        e.preventDefault();
-        window.history.pushState({}, '', '/profile');
-        window.dispatchEvent(new Event('popstate'));
-      });
+  async update() {
+    let user = null;
+    if (AuthService.isAuthenticated()) {
+        try {
+            const res = await http.get('/profile/'); 
+            const clientData = res.data?.client;
+            
+            if (clientData) {
+                user = { 
+                    username: clientData.user_name, 
+                    avatar: clientData.avatar || '/kit.jpg' 
+                };
+            }
+        } catch (error) {
+            console.error("Ошибка загрузки данных для хедера (возможно, токен истек)", error);
+            AuthService.logout(); 
+        }
     }
+    this.render({
+        isAuthenticated: !!user,
+        user: user
+    });
   }
 }
