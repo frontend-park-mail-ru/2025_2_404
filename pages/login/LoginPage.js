@@ -91,25 +91,40 @@ export default class LoginPage {
     this.passwordInput.attachValidationEvent();
   }
 
-  handleSubmit(event) {
-    event.preventDefault();
-    
-    const email = document.getElementById(this.loginInput.id).value;
-    const password = document.getElementById(this.passwordInput.id).value;
-    const isEmailValid = !this.loginInput.validate(email);
-    const isPasswordValid = !this.passwordInput.validate(password);
+handleSubmit(event) {
+  event.preventDefault();
+  
+  const email = document.getElementById(this.loginInput.id).value;
+  const password = document.getElementById(this.passwordInput.id).value;
+  const isEmailValid = !this.loginInput.validate(email);
+  const isPasswordValid = !this.passwordInput.validate(password);
 
-    if (!isEmailValid || !isPasswordValid) {
-      return;
-    }
-
-    AuthService.login({ email, password })
-      .then(() => {
-        this.onSuccess();
-      })
-      .catch((e) => {
-        const msg = e?.body?.error?.message || 'Не удалось войти';
-        this.passwordInput.showError(msg);
-      });
+  if (!isEmailValid || !isPasswordValid) {
+    return;
   }
+  const submitButton = document.getElementById(this.submitButton.id);
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = 'Загрузка...';
+  }
+
+  AuthService.login({ email, password })
+    .then(() => {
+      this.onSuccess();
+    })
+    .catch((error) => {
+      const msg = error.message || 'Не удалось войти';
+      this.passwordInput.showError(msg);
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Войти';
+      }
+    })
+    .finally(() => {
+      if (submitButton && !this.modalElement) {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Войти';
+      }
+    });
+}
 }
