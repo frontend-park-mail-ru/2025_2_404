@@ -5,15 +5,19 @@
 
   <div class="profile-card">
     <div class="profile-content">
-      <div class="profile-sidebar">
-        <img {{!-- src="{{avatarUrl}}"  --}} src="/kit.jpg" alt="Аватар пользователя" class="profile-avatar">
-        {{{roleSelectHtml}}}
-        <div class="profile-info">
-          <p><strong>Дата регистрации:</strong> {{registrationDate}}</p>
-          <p><strong>Количество реклам:</strong> {{adCount}}</p>
-          
-        </div>
-      </div>
+<div class="profile-sidebar">
+  <img src="{{avatar}}" alt="Аватар пользователя" class="profile-avatar" id="profile-avatar-img">
+  <label for="avatar-upload" class="btn btn-secondary" style="width: 100%; margin: 10px 0; text-align: center; cursor: pointer;">
+    Сменить аватар
+  </label>
+  <input type="file" id="avatar-upload" accept="image/png, image/jpeg, image/gif" style="display: none;">
+
+  {{{roleSelectHtml}}}
+  <div class="profile-info">
+    <p><strong>Дата регистрации:</strong> {{registrationDate}}</p>
+    <p><strong>Количество реклам:</strong> {{adCount}}</p>
+  </div>
+</div>
 
       <div class="profile-main">
         <h2>{{username}}</h2>

@@ -11,7 +11,7 @@ export default class ProfilePage {
     this.template = null;
     this.user = null;
     this.components = {};
-    this.selectedFile = null;
+    this.selectedFile = null; 
   }
 
   async loadTemplate() {
@@ -120,22 +120,24 @@ export default class ProfilePage {
     
     await this.loadTemplate();
 
-    try {
-      const res = await http.get('/profile/');
-      const clientData = res.data?.client;
-      if (!clientData) throw new Error("Данные клиента не найдены");
+  try {
+  const res = await http.get('/profile/');
+  const clientData = res.data?.client;
+  if (!clientData) throw new Error("Данные клиента не найдены");
 
-      this.user = {
-        id: clientData.id,
-        username: clientData.user_name,
-        email: clientData.email,
-        firstName: clientData.firstName || '',
-        lastName: clientData.lastName || '',
-        company: clientData.company || '',
-        phone: clientData.phone || '',
-        role: clientData.role || 'advertiser',
-        avatar: clientData.img_path || '/kit.jpg'
-      };
+  // --- ВРЕМЕННОЕ ИСПРАВЛЕНИЕ С ЗАГЛУШКАМИ ---
+  this.user = {
+    id: clientData.id,
+    username: clientData.user_name,
+    email: clientData.email,
+    // Если поле с бэка не пришло, используем временное значение
+    firstName: clientData.firstName || 'Иван',
+    lastName: clientData.lastName || 'Иванов',
+    company: clientData.company || 'AdNet Inc.',
+    phone: clientData.phone || '+7 (999) 123-45-67',
+    role: clientData.role || 'advertiser',
+    avatar: clientData.img_path || '/kit.jpg'
+  };
 
     } catch (error) {
       console.error("Ошибка при загрузке профиля:", error);
@@ -165,14 +167,9 @@ export default class ProfilePage {
   
   attachEvents() {
     Object.values(this.components).forEach(component => {
-      if (component.attachEvents) {
-        component.attachEvents();
-      }
-      if (component.attachValidationEvent) {
-          component.attachValidationEvent();
-      }
+      if (component.attachEvents) component.attachEvents();
+      if (component.attachValidationEvent) component.attachValidationEvent();
     });
-
     const avatarUploadInput = document.getElementById('avatar-upload');
     const avatarImage = document.getElementById('profile-avatar-img');
 
@@ -212,7 +209,7 @@ export default class ProfilePage {
     if (this.selectedFile) {
         formData.append('img', this.selectedFile, this.selectedFile.name);
     }
-
+    
     try {
       await http.putFormData('/profile/', formData);
       await header.update();
