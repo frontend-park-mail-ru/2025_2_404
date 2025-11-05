@@ -16,27 +16,6 @@ export default class ProjectDetailPage {
     this.template = Handlebars.compile(text);
   }
 
-  // async render() {
-  //   if (!this.template) return 'Загрузка...';
-
-  //   try {
-  //     const ad = await getAdById(this.projectId);
-  //     if (!ad) throw new Error('Нет данных об объявлении');
-
-  //     // image_url уже готов — просто передаём в шаблон
-  //     return this.template({ project: ad, isNew: false });
-  //   } catch (err) {
-  //     console.error('Ошибка при загрузке проекта:', err);
-  //     return `
-  //       <div style="padding:40px; text-align:center;">
-  //         <h2>Не удалось загрузить проект</h2>
-  //         <p>${err.body?.message || err.statusText || 'Ошибка сервера'}</p>
-  //       </div>
-  //     `;
-  //   }
-  // }
-
-
     async render() {
     if (!this.template) return 'Загрузка...';
 
@@ -50,7 +29,7 @@ export default class ProjectDetailPage {
       if (!imageUrl) {
         imageUrl = DEFAULT_IMG;
       } else if (!imageUrl.startsWith('data:image') && !imageUrl.startsWith('http')) {
-        // сервер вернул base64-строку без префикса
+
         imageUrl = `data:image/jpeg;base64,${imageUrl}`;
       }
 

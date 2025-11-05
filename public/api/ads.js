@@ -1,15 +1,11 @@
 // ads.js
 import { BASE, http } from './http.js';
 
-/**
- * Преобразует поля от сервера в корректный URL для отображения изображения
- */
 function normalizeImageUrl(ad, image) {
-  // если сервер передал base64-строку
-  if (image && typeof image === 'string') {
-    const v = image.trim();
+  const SERVER_BASE = 'http://89.208.230.119:8000'; 
 
-    // JPEG → обычно /9j/, PNG → iVBOR
+  if (typeof image === 'string') {
+    const v = image.trim();
     if (v.startsWith('/9j/') || v.startsWith('iVBOR')) {
       return `data:image/jpeg;base64,${v}`;
     }
@@ -18,14 +14,12 @@ function normalizeImageUrl(ad, image) {
     }
   }
 
-  // иначе пробуем img_bin (путь)
   if (ad.img_bin) {
     const clean = String(ad.img_bin).replace(/^\/?ad\//, 'ad/');
-    return `http://localhost:8000/${clean}`;
+    return `${SERVER_BASE}/${clean}`;
   }
 
-  // fallback
-  return 'https://via.placeholder.com/300x200?text=Нет+изображения';
+  return `${SERVER_BASE}/public/assets/default.jpg`;
 }
 
 /**
