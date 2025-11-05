@@ -170,13 +170,16 @@ export default class ProfilePage {
       if (component.attachEvents) component.attachEvents();
       if (component.attachValidationEvent) component.attachValidationEvent();
     });
-    const avatarUploadInput = document.getElementById('avatar-upload');
+        const avatarUploadInput = document.getElementById('avatar-upload');
     const avatarImage = document.getElementById('profile-avatar-img');
 
     if (avatarUploadInput && avatarImage) {
       avatarUploadInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file) {
+          // --- ДОБАВЬ ЭТОТ CONSOLE.LOG ---
+          console.log('Файл выбран:', file); 
+          
           this.selectedFile = file;
           const reader = new FileReader();
           reader.onload = (e) => {
@@ -186,7 +189,7 @@ export default class ProfilePage {
         }
       });
     }
-  }
+}
 
   async handleSave() {
     if (!this.user) return;
@@ -205,7 +208,7 @@ export default class ProfilePage {
     if (password) {
         formData.append('password', password);
     }
-    
+    console.log('Перед отправкой, this.selectedFile =', this.selectedFile);
     if (this.selectedFile) {
         formData.append('img', this.selectedFile, this.selectedFile.name);
     }
