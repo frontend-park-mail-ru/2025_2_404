@@ -24,6 +24,7 @@ const routes = {
   '/projects/create': CreateProjectPage,
   '/projects/:id': ProjectDetailPage,
 };
+//'bez tebz'
 
 const router = new Router(routes, appContainer);
 const header = new Header();
