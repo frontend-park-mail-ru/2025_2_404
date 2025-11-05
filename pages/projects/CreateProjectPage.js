@@ -115,7 +115,7 @@ export default class CreateProjectPage {
 
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:8080/ads/', {
+        const response = await fetch('http://89.208.230.119:8080/ads/', {
           method: 'POST',
           headers: {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),

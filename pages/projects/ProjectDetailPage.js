@@ -169,7 +169,7 @@ export default class ProjectDetailPage {
       try {
         const token = localStorage.getItem('token');
 
-        const response = await fetch(`http://localhost:8080/ads/${this.projectId}`, {
+        const response = await fetch(`http://89.208.230.119:8080/ads/${this.projectId}`, {
           method: 'PUT',
           headers: {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
