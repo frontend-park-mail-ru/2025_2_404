@@ -166,7 +166,7 @@ export default class ProjectDetailPage {
     const imgInput = document.getElementById('img-file');
     const previewTitle = document.querySelector('.preview-card h4');
     const previewDesc = document.querySelector('.preview-card p');
-    const previewImg = document.querySelector('.preview-card img');
+    const previewImg = document.querySelector('.preview-image');
 
     titleInput?.addEventListener('input', () => {
       previewTitle.textContent = titleInput.value || 'Без названия';
