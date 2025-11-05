@@ -2,7 +2,7 @@ const http = require("http");
 const { randomUUID } = require("crypto");
 const url = require("url");
 
-const PORT = 3000;
+const PORT = 8000;
 const PREFIX = "/api/v1";
 const FRONT_ORIGIN = "http://localhost:8000";
 
