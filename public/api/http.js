@@ -1,18 +1,15 @@
-/**
- * Базовый URL
- */
 export const BASE = "http://localhost:8080";
 
-/**
- * Унифицированный HTTP-запрос
- */
+
 export async function request(path, init = {}) {
   const token = localStorage.getItem('token');
+
+  const isFormData = init.body instanceof FormData;
 
   const res = await fetch(BASE + path, {
     ...init,
     headers: {
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init.headers || {}),
     },
@@ -32,14 +29,8 @@ export async function request(path, init = {}) {
 
 export const http = {
   get: (path) => request(path),
-  post: (path, body) =>
-    request(path, { method: 'POST', body: JSON.stringify(body ?? {}) }),
-  put: (path, body) =>
-    request(path, { method: 'PUT', body: JSON.stringify(body ?? {}) }),
+  post: (path, body) => request(path, { method: 'POST', body: body instanceof FormData ? body : JSON.stringify(body ?? {}) }),
+  put: (path, body) => request(path, { method: 'PUT', body: body instanceof FormData ? body : JSON.stringify(body ?? {}) }),
   delete: (path) => request(path, { method: 'DELETE' }),
 };
 
-
-export async function deleteAd(adId) {
-  return http.delete(`/ads/${adId}`);
-}
