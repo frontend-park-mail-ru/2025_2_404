@@ -4,7 +4,7 @@ import Select from '../components/Select.js';
 import AuthService from '../../services/ServiceAuthentification.js';
 import ConfirmationModal from '../components/ConfirmationModal.js';
 import { router, header } from '../../main.js';
-import { http } from '../../public/api/http.js';
+import { http } from '../../public/api/http1.js';
 
 export default class ProfilePage {
   constructor() {

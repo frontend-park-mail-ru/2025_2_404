@@ -1,4 +1,4 @@
-import { http } from './http.js';
+import { http } from './http1.js';
 
 /**
  * Получить список всех объявлений

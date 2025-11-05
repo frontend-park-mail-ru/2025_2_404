@@ -1,5 +1,5 @@
 import { signin, signup, logout as apiLogout } from '../public/api/auth.js';
-import { http } from '../public/api/http.js';
+import { http } from '../public/api/http1.js';
 
 class AuthService {
   constructor() {

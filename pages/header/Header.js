@@ -1,5 +1,5 @@
 import AuthService from '../../services/ServiceAuthentification.js';
-import { http } from '../../public/api/http.js';
+import { http } from '../../public/api/http1.js';
 
 export default class Header {
   constructor() {
