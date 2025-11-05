@@ -55,3 +55,19 @@ export default class Router {
     }
   }
 }
+      
+//       try {
+//         const html = await page.render();
+//         this.rootElement.innerHTML = html;
+//         if (typeof page.attachEvents === 'function') {
+//           page.attachEvents();
+//         }
+//       } catch (error) {
+//         console.error("Ошибка при рендеринге маршрута:", error);
+//         this.rootElement.innerHTML = '<h1>Произошла ошибка при загрузке страницы</h1>';
+//       }
+//     } else {
+//       this.rootElement.innerHTML = '<h1>404: Страница не найдена</h1>';
+//     }
+//   }
+// }

@@ -1,0 +1,50 @@
+<div class="balance-page">
+  <div class="profile-header">
+    <a href="/">Главная</a> > <span>Мой баланс</span>
+  </div>
+
+  <div class="balance-summary">
+    <div class="current-balance">
+      <h1>
+        Ваш баланс: <span class="amount">{{balance}} ₽</span>
+      </h1>
+    </div>
+    <div class="balance-actions">
+      <button id="add-funds-btn" class="btn btn-primary">Пополнить</button>
+      <button id="withdraw-btn" class="btn btn-primary">Вывести</button>
+    </div>
+  </div>
+
+<button class="btn date-filter" id="date-range-picker">
+    <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12.0833 1.25V4.58333M5.41667 1.25V4.58333M1.25 7.91667H16.25M2.91667 2.91667H14.5833C15.5038 2.91667 16.25 3.66286 16.25 4.58333V16.25C16.25 17.1705 15.5038 17.9167 14.5833 17.9167H2.91667C1.99619 17.9167 1.25 17.1705 1.25 16.25V4.58333C1.25 3.66286 1.99619 2.91667 2.91667 2.91667Z" stroke="#F3F3F3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Выберите период
+</button>
+  
+  <button class="btn" id="reset-filter-btn" style="display: none; background-color: #f3f4f6;">Сбросить фильтр</button>
+
+<div class="period-summary" id="period-summary-container">
+  <div class="summary-card">
+    <p>Траты</p>
+    <span class="amount" id="summary-spent">0 ₽</span>
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="spent-progress" style="width: 0%;"></div>
+    </div>
+    
+    <span class="date-range" id="summary-date-range"></span>
+  </div>
+  <div class="summary-card">
+    <p>Зачисления</p>
+    <span class="amount" id="summary-earned">0 ₽</span>
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="earned-progress" style="width: 0%;"></div>
+    </div>
+
+    <span class="date-range" id="summary-date-range-earned"></span>
+  </div>
+</div>
+
+  <div id="transaction-list-container"></div>
+  <div class="pagination" id="pagination-container"></div>
+</div>

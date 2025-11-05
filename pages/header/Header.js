@@ -54,4 +54,16 @@ export default class Header {
         user: user
     });
   }
+  // render() {
+  //   if (!this.template) {
+  //       this.header.innerHTML = '<div>Loading header...</div>';
+  //       return;
+  //   }
+  //   const user = AuthService.getUser();
+  //   const context = {
+  //     isAuthenticated: AuthService.isAuthenticated(),
+  //     user: user,
+  //   };
+  //   this.header.innerHTML = this.template(context);
+  // }
 }

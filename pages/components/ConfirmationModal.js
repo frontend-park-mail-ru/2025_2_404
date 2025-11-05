@@ -13,6 +13,10 @@ export default class ConfirmationModal {
       variant: 'secondary',
       onClick: () => {
         if (this.onConfirm) this.onConfirm();
+      // text: 'Да, удалить',
+      // variant: 'secondary',
+      // onClick: () => {
+      //   this.onConfirm();
         this.hide();
       },
     });

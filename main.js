@@ -1,5 +1,3 @@
-// main.js
-
 import Router from './services/Router.js';
 import Header from './pages/header/Header.js';
 import MainPage from './pages/main/MainPage.js';
@@ -11,6 +9,7 @@ import Footer from './pages/footer/Footer.js';
 import ProjectsPage from './pages/projects/ProjectsPage.js';
 import ProjectDetailPage from './pages/projects/ProjectDetailPage.js';
 import CreateProjectPage from './pages/projects/CreateProjectPage.js';
+import BalancePage from './pages/balance/BalancePage.js';
 
 const appContainer = document.getElementById('app');
 if (!appContainer) {
@@ -23,8 +22,9 @@ const routes = {
   '/projects': ProjectsPage,
   '/projects/create': CreateProjectPage,
   '/projects/:id': ProjectDetailPage,
-};
 //'bez tebz'
+  '/balance': BalancePage,
+};
 
 const router = new Router(routes, appContainer);
 const header = new Header();
@@ -32,9 +32,11 @@ const footer = new Footer();
 
 function onAuthSuccess() {
   header.update();
+
+
+  // header.render();
   router.navigate('/projects');
 }
-
 
 let loginModal = null;
 let registerModal = null;
@@ -90,34 +92,84 @@ function showRegisterModal() {
   });
   registerModal.init().then(() => registerModal.show());
 }
+// async function initializeApp() {
+//   document.addEventListener('click', (e) => {
+//     const link = e.target.closest('a');
+//     if (link && link.hasAttribute('href')) {
+//       const href = link.getAttribute('href');
+//       if (href.startsWith('/') && link.target !== '_blank') {
+//         e.preventDefault();
+//         router.navigate(href);
+//         return;
+//       }
+//     }
+    
+//     const target = e.target;
+//     if (target.closest('#login-btn-header') || target.closest('#try-btn')) {
+//         e.preventDefault();
+//         showLoginModal();
+//     } else if (target.closest('#register-btn-header')) {
+//         e.preventDefault();
+//         showRegisterModal();
+//     } else if (target.closest('#logout-btn')) {
+//         e.preventDefault();
+//         AuthService.logout();
+//         header.update(); 
+//         router.navigate('/');
+//     }
+//   });
+//   AuthService.onAuthChange(() => {
+//     header.update(); 
+
 async function initializeApp() {
-  document.addEventListener('click', (e) => {
-    const link = e.target.closest('a');
-    if (link && link.hasAttribute('href')) {
-      const href = link.getAttribute('href');
-      if (href.startsWith('/') && link.target !== '_blank') {
-        e.preventDefault();
-        router.navigate(href);
-        return;
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('a');
+  if (link && link.hasAttribute('href')) {
+    const href = link.getAttribute('href');
+    if (href === '/register' || href === '/login') {
+      e.preventDefault();
+      if (href === '/register') {
+        showRegisterModal();
+      } else if (href === '/login') {
+        showLoginModal();
+      }
+      return;
+    }
+    if (href.startsWith('/') && link.target !== '_blank') {
+      e.preventDefault();
+      router.navigate(href); 
+      return; 
+    }
+        const target = e.target;
+    if (target.closest('#try-btn')) {
+      e.preventDefault();
+      if (AuthService.isAuthenticated()) {
+        router.navigate('/projects');
+      } else {
+        showLoginModal();
       }
     }
-    
-    const target = e.target;
-    if (target.closest('#login-btn-header') || target.closest('#try-btn')) {
-        e.preventDefault();
-        showLoginModal();
-    } else if (target.closest('#register-btn-header')) {
-        e.preventDefault();
-        showRegisterModal();
-    } else if (target.closest('#logout-btn')) {
-        e.preventDefault();
-        AuthService.logout();
-        header.update(); 
-        router.navigate('/');
-    }
-  });
+  }
+  const target = e.target;
+  if (target.closest('#login-btn-header')) {
+      e.preventDefault();
+      showLoginModal();
+  } else if (target.closest('#login-for-projects-btn')) {
+      e.preventDefault();
+      showLoginModal();
+  } else if (target.closest('#register-btn-header')) {
+      e.preventDefault();
+      showRegisterModal();
+  } else if (target.closest('#logout-btn')) {
+      e.preventDefault();
+      AuthService.logout();
+      header.render();
+      router.navigate('/');
+  }
+});
+
   AuthService.onAuthChange(() => {
-    header.update(); 
+    header.render();
   });
 
   await Promise.all([
@@ -125,9 +177,11 @@ async function initializeApp() {
     footer.loadTemplate()
   ]);
   
-  header.update(); 
-  document.body.appendChild(footer.render()); 
+  // header.update(); 
 
+
+  header.render(); 
+  document.body.appendChild(footer.render()); 
   router.loadRoute();
 }
 
