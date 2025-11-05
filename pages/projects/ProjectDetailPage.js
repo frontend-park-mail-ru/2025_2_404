@@ -4,12 +4,11 @@ import { validateAdForm } from '../../public/utils/ValidateAdForm.js';
 
 export default class ProjectDetailPage {
   constructor(router, projectId) {
-    this.router = router;
-    this.projectId = projectId;
-    this.template = null;
+  this.router = router;
+  this.projectId = projectId;
+  this.template = null;
   }
 
-  /** Загрузка шаблона страницы */
   async loadTemplate() {
     const response = await fetch('/pages/projects/ProjectDetailPage.hbs');
     if (!response.ok) throw new Error('Не удалось загрузить шаблон ProjectDetailPage');
@@ -17,12 +16,48 @@ export default class ProjectDetailPage {
     this.template = Handlebars.compile(text);
   }
 
-  /** Рендер страницы */
-  async render() {
+  // async render() {
+  //   if (!this.template) return 'Загрузка...';
+
+  //   try {
+  //     const ad = await getAdById(this.projectId);
+  //     if (!ad) throw new Error('Нет данных об объявлении');
+
+  //     // image_url уже готов — просто передаём в шаблон
+  //     return this.template({ project: ad, isNew: false });
+  //   } catch (err) {
+  //     console.error('Ошибка при загрузке проекта:', err);
+  //     return `
+  //       <div style="padding:40px; text-align:center;">
+  //         <h2>Не удалось загрузить проект</h2>
+  //         <p>${err.body?.message || err.statusText || 'Ошибка сервера'}</p>
+  //       </div>
+  //     `;
+  //   }
+  // }
+
+
+    async render() {
     if (!this.template) return 'Загрузка...';
+
     try {
       const ad = await getAdById(this.projectId);
-      return this.template({ project: ad });
+      if (!ad) throw new Error('Нет данных об объявлении');
+
+      const DEFAULT_IMG = 'http://localhost:8000/frontend/public/assets/default.jpg';
+      
+      let imageUrl = ad.image_url || ad.image || '';
+      if (!imageUrl) {
+        imageUrl = DEFAULT_IMG;
+      } else if (!imageUrl.startsWith('data:image') && !imageUrl.startsWith('http')) {
+        // сервер вернул base64-строку без префикса
+        imageUrl = `data:image/jpeg;base64,${imageUrl}`;
+      }
+
+      return this.template({
+        project: { ...ad, image_url: imageUrl },
+        isNew: false,
+      });
     } catch (err) {
       console.error('Ошибка при загрузке проекта:', err);
       return `
@@ -75,7 +110,7 @@ export default class ProjectDetailPage {
       const desc = document.getElementById('desc-input').value.trim();
       const site = document.getElementById('site-input').value.trim();
       const budget = document.getElementById('budget-input').value.trim();
-      const imgFile = document.getElementById('img-file')?.files[0]; // файл изображения
+      const imgFile = document.getElementById('img-file')?.files[0]; 
 
       console.log('Отправка данных на сервер...');
       console.table({ title, desc, site, budget, imgFile });

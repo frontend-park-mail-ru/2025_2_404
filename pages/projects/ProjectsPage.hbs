@@ -12,17 +12,16 @@
       <div class="project-card" data-id="{{this.id}}">
         <div class="card-header">
           <div class="card-title">
-            <h3>Рекламное объявление №{{this.date}}</h3>
+            <h3>Рекламное объявление №{{this.id}}</h3>
             <div class="platform-icons">
             </div>
           </div>
         </div>
         <div class="card-meta">
-          <span class="status {{this.statusClass}}">{{this.statusText}}</span>
-          <span class="meta-item">Создано {{this.date}}</span>
           <span class="meta-item">{{this.domain}}</span>
         </div>
       </div>
+
     {{/each}}
     {{else}}
       <p style="text-align:center; padding:20px; margin-top: 80px; font-size: 30px">У вас пока нет проектов</p>

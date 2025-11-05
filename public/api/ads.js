@@ -1,91 +1,70 @@
+// ads.js
 import { BASE, http } from './http.js';
 
 /**
- * Получить список всех объявлений
+ * Преобразует поля от сервера в корректный URL для отображения изображения
+ */
+function normalizeImageUrl(ad, image) {
+  // если сервер передал base64-строку
+  if (image && typeof image === 'string') {
+    const v = image.trim();
+
+    // JPEG → обычно /9j/, PNG → iVBOR
+    if (v.startsWith('/9j/') || v.startsWith('iVBOR')) {
+      return `data:image/jpeg;base64,${v}`;
+    }
+    if (v.startsWith('data:image')) {
+      return v;
+    }
+  }
+
+  // иначе пробуем img_bin (путь)
+  if (ad.img_bin) {
+    const clean = String(ad.img_bin).replace(/^\/?ad\//, 'ad/');
+    return `http://localhost:8000/${clean}`;
+  }
+
+  // fallback
+  return 'https://via.placeholder.com/300x200?text=Нет+изображения';
+}
+
+/**
+ * Получить список объявлений
  */
 export async function listAds() {
   const res = await http.get('/ads/');
   const ads = res.data?.ads || [];
 
-  return ads.map(ad => ({
+  return ads.map((ad) => ({
     id: ad.add_id,
     title: ad.title,
     description: ad.content,
-    image: ad.img_bin || 'https://via.placeholder.com/300x200?text=Нет+изображения',
     domain: ad.target_url || '',
-    date: '',
-    statusText: 'Активно',
-    statusClass: 'active',
+    image_url: normalizeImageUrl(ad, ad.image), // на случай если image есть в списке
   }));
 }
 
 /**
- * Получить одно объявление по ID
+ * Получить конкретное объявление
  */
 export async function getAdById(ad_id) {
   const res = await http.get(`/ads/${ad_id}`);
   const ad = res.data?.ad || {};
+  const image = res.data?.image || null; // ← base64 строка из корня data
 
   return {
     id: ad.add_id,
     title: ad.title,
     description: ad.content,
-    image: ad.img_bin || 'https://via.placeholder.com/300x200?text=Нет+изображения',
-    domain: ad.target_url || '',
+    domain: ad.target_url,
+    budget: ad.amount_for_ad,
+    image_url: normalizeImageUrl(ad, image), // ← ключевой момент
   };
 }
 
 /**
- * Создать новое объявление
- */
-export async function createAd(adData) {
-  const cleanData = { ...adData };
-  delete cleanData.id;
-  delete cleanData.client_id;
-  delete cleanData.budget;
-
-  return http.post('/ads/', cleanData);
-}
-
-/**
- * Обновить существующее объявление
- */
-export async function updateAd(ad_id, adData) {
-  const cleanData = { ...adData };
-  delete cleanData.id;
-  delete cleanData.client_id;
-  delete cleanData.budget;
-
-  return http.put(`/ads/${ad_id}`, cleanData);
-}
-
-/**
- * Удалить объявление
+ * Удаление объявления
  */
 export async function deleteAd(adId) {
   return http.delete(`/ads/${adId}`);
-}
-
-
-// Новая функция для загрузки файла
-export async function uploadImage(file) {
-  const formData = new FormData();
-  formData.append('image', file);
-
-  const token = localStorage.getItem('token');
-
-  const res = await fetch(`${BASE}/auth/upload-image`, {
-    method: 'POST',
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: formData,
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Ошибка при загрузке изображения: ${text}`);
-  }
-
-  return await res.json(); 
 }

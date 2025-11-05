@@ -734,6 +734,18 @@ footer {
     text-align: center;
 }
 
+.card-title h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-dark, #222);
+  margin: 0;
+}
+
+
+.card-meta {
+  font-size: 14px;
+}
+
 .confirmation-modal h2 {
     font-size: 24px;
     margin-top: 0;
@@ -1143,4 +1155,73 @@ input.input-error,
 textarea.input-error {
   border-color: #e63946 !important;
   box-shadow: 0 0 0 2px rgba(230, 57, 70, 0.15);
+}
+
+.image-upload {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.upload-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #d1c4ff; 
+  border-radius: 16px;
+  background-color: #faf8ff;
+  color: #7c54e8;
+  padding: 40px 20px;
+  transition: all 0.25s ease;
+  cursor: pointer;
+  text-align: center;
+}
+
+.upload-box:hover {
+  background-color: #f3f0ff;
+  border-color: #b79aff;
+  box-shadow: 0 0 0 4px rgba(180, 147, 255, 0.15);
+}
+
+.upload-icon {
+  font-size: 48px;
+  color: #7c54e8;
+  margin-bottom: 8px;
+  user-select: none;
+}
+
+.upload-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: #7c54e8;
+}
+
+.upload-hint {
+  text-align: center;
+  font-size: 13px;
+  color: #a0aec0;
+}
+
+.upload-preview {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  border-radius: 12px;
+  object-fit: cover;
+  margin-top: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease;
+}
+
+.upload-preview:hover {
+  transform: scale(1.02);
+}
+
+.upload-box.dragover {
+  border-color: #ff73af;
+  background-color: #fff5fa;
+  color: #ff73af;
 }

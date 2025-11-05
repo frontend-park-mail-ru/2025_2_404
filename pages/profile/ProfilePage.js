@@ -179,6 +179,7 @@ export default class ProfilePage {
     }
   }
   
+  
   handleDelete() {
     const modal = new ConfirmationModal({
       message: `Вы уверены, что хотите удалить аккаунт ${this.user?.username || 'пользователя'}?`,
