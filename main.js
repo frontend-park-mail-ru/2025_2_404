@@ -1,3 +1,5 @@
+// main.js
+
 import Router from './services/Router.js';
 import Header from './pages/header/Header.js';
 import MainPage from './pages/main/MainPage.js';
@@ -5,7 +7,7 @@ import ProfilePage from './pages/profile/ProfilePage.js';
 import LoginPage from './pages/login/LoginPage.js';
 import RegisterPage from './pages/register/Register.js';
 import AuthService from './services/ServiceAuthentification.js';
-import Footer from './pages/footer/Footer.js'
+import Footer from './pages/footer/Footer.js';
 import ProjectsPage from './pages/projects/ProjectsPage.js';
 import ProjectDetailPage from './pages/projects/ProjectDetailPage.js';
 import CreateProjectPage from './pages/projects/CreateProjectPage.js';
@@ -22,15 +24,17 @@ const routes = {
   '/projects/create': CreateProjectPage,
   '/projects/:id': ProjectDetailPage,
 };
+//'bez tebz'
 
 const router = new Router(routes, appContainer);
 const header = new Header();
 const footer = new Footer();
-async function onAuthSuccess() {
-  await AuthService.loadProfile();
-  header.render();
+
+function onAuthSuccess() {
+  header.update();
   router.navigate('/projects');
 }
+
 
 let loginModal = null;
 let registerModal = null;
@@ -86,42 +90,44 @@ function showRegisterModal() {
   });
   registerModal.init().then(() => registerModal.show());
 }
-
-
 async function initializeApp() {
   document.addEventListener('click', (e) => {
-    if (e.target.closest('#login-btn-header')) {
+    const link = e.target.closest('a');
+    if (link && link.hasAttribute('href')) {
+      const href = link.getAttribute('href');
+      if (href.startsWith('/') && link.target !== '_blank') {
+        e.preventDefault();
+        router.navigate(href);
+        return;
+      }
+    }
+    
+    const target = e.target;
+    if (target.closest('#login-btn-header') || target.closest('#try-btn')) {
         e.preventDefault();
         showLoginModal();
-    }
-    if (e.target.closest('#register-btn-header')) {
+    } else if (target.closest('#register-btn-header')) {
         e.preventDefault();
         showRegisterModal();
-    }
-    if (e.target.closest('#logout-btn')) {
+    } else if (target.closest('#logout-btn')) {
         e.preventDefault();
         AuthService.logout();
-        header.render();
+        header.update(); 
         router.navigate('/');
     }
-    if (e.target.closest('#try-btn')) {
-      e.preventDefault();
-      showLoginModal();
-    }
   });
-
   AuthService.onAuthChange(() => {
-    header.render();
+    header.update(); 
   });
 
   await Promise.all([
     header.loadTemplate(),
     footer.loadTemplate()
   ]);
-
-  await AuthService.loadProfile();
-  header.render(); 
+  
+  header.update(); 
   document.body.appendChild(footer.render()); 
+
   router.loadRoute();
 }
 

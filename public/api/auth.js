@@ -1,40 +1,26 @@
-import { request } from './http.js';
+import { http } from './http1.js';
 
-/**
- * Регистрация пользователя
- */
+
 export async function signup(data) {
-  const res = await request('/auth/signup', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  });
 
+  const res = await http.post('/auth/signup', data);
   const token = res.data?.token;
   if (token) {
     localStorage.setItem('token', token);
   }
-  return res;
-}
 
-/**
- * Вход пользователя
- */
+  return res; 
+}
 export async function signin(data) {
-  const res = await request('/auth/signin', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  });
-
+  const res = await http.post('/auth/signin', data);
   const token = res.data?.token;
   if (token) {
     localStorage.setItem('token', token);
   }
-  return res;
+  
+  return res; 
 }
 
-/**
- * Выход
- */
 export function logout() {
   localStorage.removeItem('token');
 }
