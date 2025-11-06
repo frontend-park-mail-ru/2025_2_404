@@ -4,6 +4,7 @@ import { http } from '../../public/api/http1.js';
 export default class Header {
   constructor() {
     this.header = document.createElement('header');
+    this.header.classList.add('header');
     document.body.prepend(this.header);
     this.template = null;
   }

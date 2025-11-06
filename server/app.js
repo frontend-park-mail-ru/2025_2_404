@@ -26,6 +26,7 @@ http
     let contentType = 'text/html; charset=utf-8';
     if (ext === '.css') contentType = 'text/css; charset=utf-8';
     if (ext === '.js') contentType = 'text/javascript; charset=utf-8';
+    if (ext === '.svg') contentType = 'image/svg+xml'; 
 
     fs.readFile(filePath, (error, content) => {
       if (error) {
