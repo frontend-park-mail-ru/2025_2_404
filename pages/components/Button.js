@@ -6,7 +6,7 @@ export default class Button {
     this.variant = variant;
   }
   render() {
-    return `<button class="btn btn-${this.variant}" id="${this.id}" type="submit">${this.text}</button>`;
+    return `<button class="btn btn--${this.variant}" id="${this.id}" type="submit">${this.text}</button>`;
   }
   attachEvents() {
     const button = document.getElementById(this.id);
