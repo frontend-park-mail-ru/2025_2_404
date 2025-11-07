@@ -23,20 +23,37 @@ export default class ProjectDetailPage {
     }
   }
 
-  async render() {
-    await this.loadTemplate();
-    try {
-      this.project = await adsRepository.getById(this.projectId);
-      return this.template({
-        project: this.project,
-        isNew: false,
-        lastUpdated: !navigator.onLine && this.project.timestamp ? this.project.timestamp : null,
-      });
-    } catch (err) {
-      console.error(`Ошибка при рендеринге проекта ID ${this.projectId}:`, err);
-      return this.template({ error: err.message });
+async render() {
+  await this.loadTemplate();
+  try {
+    const projectData = await adsRepository.getById(this.projectId);
+    if (!projectData) throw new Error('Нет данных об объявлении');
+
+    const DEFAULT_IMG = '/public/assets/default.jpg'; 
+    let imageUrl = projectData.image_url || projectData.image || '';
+    
+    if (!imageUrl) {
+      imageUrl = DEFAULT_IMG;
+    } else if (
+      !imageUrl.startsWith('data:image') &&
+      !imageUrl.startsWith('http') &&
+      !imageUrl.startsWith('/')
+    ) {
+      imageUrl = `data:image/jpeg;base64,${imageUrl}`;
     }
+    
+    this.project = { ...projectData, image_url: imageUrl };
+
+    return this.template({
+      project: this.project,
+      isNew: false,
+      lastUpdated: !navigator.onLine && this.project.timestamp ? this.project.timestamp : null,
+    });
+  } catch (err) {
+    console.error(`Ошибка при рендеринге проекта ID ${this.projectId}:`, err);
+    return this.template({ error: err.message || 'Не удалось загрузить проект' });
   }
+}
 
   attachEvents() {
     document.querySelector('#back-btn')?.addEventListener('click', (e) => {
@@ -101,9 +118,9 @@ export default class ProjectDetailPage {
       formData.append('title', title);
       formData.append('content', desc);
       formData.append('target_url', site);
-      formData.append('amount_for_ad', budget);
+      formData.append('budget', budget);
       if (imgFile) {
-        formData.append('img', imgFile);
+        formData.append('image', imgFile);
       }
 
       try {

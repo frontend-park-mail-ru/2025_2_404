@@ -96,13 +96,14 @@ export default class CreateProjectPage {
         }
         return;
       }
-
       const formData = new FormData();
       formData.append('title', title);
-      formData.append('content', desc);
+      formData.append('content', desc); 
       formData.append('target_url', site);
-      formData.append('amount_for_ad', budget); 
-      if (imgFile) formData.append('img', imgFile);
+      formData.append('budget', budget);
+      if (imgFile) {
+        formData.append('image', imgFile);
+      }
 
       try {
         await adsRepository.create(formData);
