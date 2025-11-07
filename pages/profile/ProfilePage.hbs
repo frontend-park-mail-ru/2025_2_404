@@ -7,7 +7,7 @@
     <div class="profile-content">
       <div class="profile-sidebar">
         <img id="profile-avatar-preview" src="{{avatar}}" alt="Аватар пользователя" class="profile-avatar">
-        <label for="profile-avatar-upload" class="btn btn-secondary" style="width: 100%; margin: 10px 0; text-align: center; cursor: pointer;">
+        <label for="profile-avatar-upload" class="btn btn-secondary" style="width: 130px%; margin: 10px 0; text-align: center; cursor: pointer;">
           Сменить аватар
         </label>
         <input type="file" id="profile-avatar-upload" accept="image/png, image/jpeg, image/gif" style="display: none;">
@@ -21,15 +21,12 @@
 
       <div class="profile-main">
         <h2>{{username}}</h2>
-
-        <!-- ▼▼▼ ВОТ ЭТОТ БЛОК НУЖНО ДОБАВИТЬ ▼▼▼ -->
         {{#if lastUpdated}}
           <div class="offline-data-indicator">
             <p>Вы в офлайн-режиме. Данные могут быть неактуальны.</p>
             <small>Последнее обновление: {{formatDate lastUpdated}}</small>
           </div>
         {{/if}}
-        <!-- ▲▲▲ КОНЕЦ НОВОГО БЛОКА ▲▲▲ -->
 
         <form id="profile-form">
           <div class="profile-form-fields">

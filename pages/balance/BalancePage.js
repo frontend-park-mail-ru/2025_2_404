@@ -49,7 +49,6 @@ export default class BalancePage {
     }
   }
   async fetchFromServer() {
-    console.log("Пытаемся получить свежие данные о балансе...");
     return new Promise(resolve => {
         setTimeout(() => {
             const serverData = {

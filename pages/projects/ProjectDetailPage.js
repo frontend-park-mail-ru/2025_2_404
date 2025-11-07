@@ -53,7 +53,6 @@ export default class ProjectDetailPage {
             router.navigate('/projects');
           } catch (err) {
             console.error('Ошибка при удалении:', err);
-            alert('Не удалось удалить объявление. Попробуйте позже.');
           }
         },
       });
