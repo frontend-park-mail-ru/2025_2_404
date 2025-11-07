@@ -50,5 +50,5 @@ http
     });
   })
   .listen(PORT, '0.0.0.0', () => {
-    console.log(`Сервер запущен: http://localhost:${PORT}`);
+    console.log(`Сервер запущен: http://89.208.230.119:${PORT}`);
   });

@@ -4,7 +4,7 @@ const url = require("url");
 
 const PORT = 8000;
 const PREFIX = "/api/v1";
-const FRONT_ORIGIN = "http://localhost:8000";
+const FRONT_ORIGIN = "http://89.208.230.119:8000";
 
 const users = [];        
 const ads = [];           
@@ -158,5 +158,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Mock API running at http://localhost:${PORT}${PREFIX}`);
+  console.log(`Mock API running at http://89.208.230.119:${PORT}${PREFIX}`);
 });

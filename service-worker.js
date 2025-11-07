@@ -67,7 +67,7 @@ self.addEventListener('activate', (event) => {
 });
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-  if (url.hostname.includes(':8080') || url.hostname === 'localhost') {
+  if (url.hostname.includes(':8080') || url.hostname === '89.208.230.119') {
     if (event.request.method !== 'GET') {
       event.respondWith(fetch(event.request));
       return;
