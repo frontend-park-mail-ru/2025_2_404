@@ -1,31 +1,26 @@
-import { request } from './http.js';
+import { http } from './http1.js';
 
-/**
- * Регистрация пользователя.
- * @param {{email:string, password:string, user_name:string}} data
- */
-export function signup(data) {
-  return request('/signup', {
-    method: 'POST',
-    body: JSON.stringify({
-      email: data.email,
-      password: data.password,
-      user_name: data.user_name,
-    }),
-  });
+
+export async function signup(data) {
+
+  const res = await http.post('/auth/signup', data);
+  const token = res.data?.token;
+  if (token) {
+    localStorage.setItem('token', token);
+  }
+
+  return res; 
+}
+export async function signin(data) {
+  const res = await http.post('/auth/signin', data);
+  const token = res.data?.token;
+  if (token) {
+    localStorage.setItem('token', token);
+  }
+  
+  return res; 
 }
 
-/**
- * Вход пользователя.
- * @param {{email:string, password:string, user_name:string}} data
- */
-export function signin(data) {
-  return request('/signin', {
-    method: 'POST',
-    body: JSON.stringify({
-      email: data.email,
-      password: data.password,
-      user_name: data.user_name,
-    }),
-  });
+export function logout() {
+  localStorage.removeItem('token');
 }

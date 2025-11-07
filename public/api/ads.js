@@ -1,19 +1,64 @@
-import { http } from './http.js';
+// ads.js
+import { BASE, http } from './http.js';
+
+function normalizeImageUrl(ad, image) {
+  const SERVER_BASE = 'http://89.208.230.119:8000'; 
+
+  if (typeof image === 'string') {
+    const v = image.trim();
+    if (v.startsWith('/9j/') || v.startsWith('iVBOR')) {
+      return `data:image/jpeg;base64,${v}`;
+    }
+    if (v.startsWith('data:image')) {
+      return v;
+    }
+  }
+
+  if (ad.img_bin) {
+    const clean = String(ad.img_bin).replace(/^\/?ad\//, 'ad/');
+    return `${SERVER_BASE}/${clean}`;
+  }
+
+  return `${SERVER_BASE}/public/assets/default.jpg`;
+}
 
 /**
- * Получить список объявлений.
- * @returns {Promise<Ad[]>}
- * @throws {{status:number, body:any}}
+ * Получить список объявлений
  */
 export async function listAds() {
-  const data = await http.get('/ads');
-  const raw = Array.isArray(data?.ads) ? data.ads : [];
+  const res = await http.get('/ads/');
+  const ads = res.data?.ads || [];
 
-  return raw.map((item) => ({
-    ad_id: item.add_id ?? '',
-    creator_id: item.creater_id ?? '',
-    file_path: item.file_path ?? '',
-    title: item.title ?? '',
-    text: item.text ?? '',
+  return ads.map((ad) => ({
+    id: ad.add_id,
+    title: ad.title,
+    description: ad.content,
+    domain: ad.target_url || '',
+    image_url: normalizeImageUrl(ad, ad.image), // на случай если image есть в списке
   }));
+}
+
+/**
+ * Получить конкретное объявление
+ */
+export async function getAdById(ad_id) {
+  const res = await http.get(`/ads/${ad_id}`);
+  const ad = res.data?.ad || {};
+  const image = res.data?.image || null; // ← base64 строка из корня data
+
+  return {
+    id: ad.add_id,
+    title: ad.title,
+    description: ad.content,
+    domain: ad.target_url,
+    budget: ad.amount_for_ad,
+    image_url: normalizeImageUrl(ad, image), // ← ключевой момент
+  };
+}
+
+/**
+ * Удаление объявления
+ */
+export async function deleteAd(adId) {
+  return http.delete(`/ads/${adId}`);
 }

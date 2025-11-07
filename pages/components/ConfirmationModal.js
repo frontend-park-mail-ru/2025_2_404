@@ -9,25 +9,32 @@ export default class ConfirmationModal {
 
     this.confirmButton = new Button({
       id: 'confirm-btn',
-      text: 'Да, удалить',
+      text: this.onCancel ? 'Да, удалить' : 'Ок',
       variant: 'secondary',
       onClick: () => {
-        this.onConfirm();
+        if (this.onConfirm) this.onConfirm();
+      // text: 'Да, удалить',
+      // variant: 'secondary',
+      // onClick: () => {
+      //   this.onConfirm();
         this.hide();
       },
     });
 
-    this.cancelButton = new Button({
-      id: 'cancel-btn',
-      text: 'Нет, оставить',
-      variant: 'primary',
-      onClick: () => {
-        if (this.onCancel) {
+    if (this.onCancel) {
+      this.cancelButton = new Button({
+        id: 'cancel-btn',
+        text: 'Нет, оставить',
+        variant: 'primary',
+        onClick: () => {
           this.onCancel();
-        }
-        this.hide();
-      },
-    });
+          this.hide();
+        },
+      });
+    } else {
+      this.cancelButton = null;
+    }
+
   }
 
   render() {
@@ -36,7 +43,7 @@ export default class ConfirmationModal {
         <p>${this.message}</p>
         <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
           ${this.confirmButton.render()}
-          ${this.cancelButton.render()}
+          ${this.cancelButton ? this.cancelButton.render() : ''}
         </div>
       </div>
     `;
@@ -61,7 +68,10 @@ export default class ConfirmationModal {
   }
 
   attachEvents() {
-    this.confirmButton.attachEvents();
+  this.confirmButton.attachEvents();
+  if (this.cancelButton) {
     this.cancelButton.attachEvents();
   }
+}
+
 }

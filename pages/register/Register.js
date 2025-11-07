@@ -11,13 +11,13 @@ export default class RegisterPage {
     this.loginInput = new Input({
       id: 'login',
       label: 'Логин',
-      placeholder: 'Example_1',
+      placeholder: 'Введите логин',
       validationFn: (value) => {
         value = value.trim();
         if (!value) return 'Логин обязателен для заполнения';
         if (value.length < 4) return 'Логин должен содержать минимум 4 символа';
         if (value.length > 20) return 'Логин должен содержать максимум 20 символов';
-        if (!/^[a-zA-Z0-9_]+$/.test(value)) return 'Логин может содержать только английские буквы, цифры и символ _';
+        if (!/^[a-zA-Z0-9_]+$/.test(value)) return 'Логин может содержать только латиницу, цифры и _';
         const UpperCase = /[A-Z]/.test(value);
         const LowerCase = /[a-z]/.test(value);
         if (!UpperCase && !LowerCase) return 'Логин должен содержать хотя бы одну букву';
@@ -49,15 +49,15 @@ export default class RegisterPage {
         if (value.length > 100) return 'Пароль слишком длинный';
         const UpperCase = /[A-Z]/.test(value);
         const LowerCase = /[a-z]/.test(value);
-        if (!UpperCase || !LowerCase) return 'Пароль должен содержать буквы разного регистра (заглавные и строчные)';
+        if (!UpperCase || !LowerCase) return 'Пароль должен содержать буквы разного регистра';
         const SpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value);
-        if (!SpecialChar) return 'Пароль должен содержать хотя бы один спецсимвол (!@#$%^&* и т.д.)';
+        if (!SpecialChar) return 'Пароль должен содержать хотя бы один спецсимвол';
         return null;
       },
     });
     this.passwordCheckInput = new Input({
       id: 'passwordCheck',
-      label: '',
+      label: 'Повторите пароль',
       placeholder: 'Повторите пароль',
       showPasswordToggle: true,
       validationFn: (value) => {
@@ -113,7 +113,7 @@ export default class RegisterPage {
   }
 
   attachEvents() {
-    this.modalEl.querySelector('.close-btn').addEventListener('click', this.onCancel);
+    this.modalEl.querySelector('.auth__close-btn').addEventListener('click', this.onCancel);
     
     const form = this.modalEl.querySelector('#register-form');
     if (form) {

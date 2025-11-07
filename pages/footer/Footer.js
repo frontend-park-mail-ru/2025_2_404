@@ -1,6 +1,7 @@
 export default class Footer {
   constructor() {
     this.footer = document.createElement('footer');
+    this.footer.classList.add('footer');
   }
   async loadTemplate() {
     const response = await fetch('/pages/footer/footer.hbs');

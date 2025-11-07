@@ -78,7 +78,7 @@ export default class LoginPage {
   }
 
   attachEvents() {
-    this.modalElement.querySelector('.close-btn').addEventListener('click', this.onCancel);
+    this.modalElement.querySelector('.auth__close-btn').addEventListener('click', this.onCancel);
     const form = this.modalElement.querySelector('#login-form');
     if (form) {
       form.addEventListener('submit', (event) => this.handleSubmit(event));

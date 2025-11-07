@@ -8,6 +8,7 @@ import AuthService from './services/ServiceAuthentification.js';
 import Footer from './pages/footer/Footer.js';
 import ProjectsPage from './pages/projects/ProjectsPage.js';
 import ProjectDetailPage from './pages/projects/ProjectDetailPage.js';
+import CreateProjectPage from './pages/projects/CreateProjectPage.js';
 import BalancePage from './pages/balance/BalancePage.js';
 
 const appContainer = document.getElementById('app');
@@ -19,6 +20,7 @@ const routes = {
   '/': MainPage,
   '/profile': ProfilePage,
   '/projects': ProjectsPage,
+  '/projects/create': CreateProjectPage,
   '/projects/:id': ProjectDetailPage,
   '/balance': BalancePage,
 };
@@ -28,7 +30,7 @@ const header = new Header();
 const footer = new Footer();
 
 function onAuthSuccess() {
-  header.render();
+  header.update();
   router.navigate('/projects');
 }
 
@@ -142,7 +144,7 @@ document.addEventListener('click', (e) => {
     header.loadTemplate(),
     footer.loadTemplate()
   ]);
-
+  
   header.render(); 
   document.body.appendChild(footer.render()); 
   router.loadRoute();

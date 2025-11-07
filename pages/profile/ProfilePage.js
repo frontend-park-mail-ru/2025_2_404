@@ -3,22 +3,22 @@ import Button from '../components/Button.js';
 import Select from '../components/Select.js';
 import AuthService from '../../services/ServiceAuthentification.js';
 import ConfirmationModal from '../components/ConfirmationModal.js';
-import { router } from '../../main.js';
+import { router, header } from '../../main.js';
+import { http } from '../../public/api/http1.js';
 
 export default class ProfilePage {
   constructor() {
     this.template = null;
     this.user = null;
-    this.components = {}; 
+    this.components = {};
+    this.selectedFile = null; 
   }
 
   async loadTemplate() {
     if (this.template) return;
     try {
       const response = await fetch('/pages/profile/ProfilePage.hbs');
-      if (!response.ok) {
-        throw new Error('Не удалось загрузить шаблон страницы профиля');
-      }
+      if (!response.ok) throw new Error('Не удалось загрузить шаблон страницы профиля');
       this.template = Handlebars.compile(await response.text());
     } catch (error) {
       console.error(error);
