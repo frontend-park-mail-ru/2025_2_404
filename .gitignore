@@ -1,5 +1,3 @@
 /node_modules
 /server/mockApi.js
 *.css.map
-docker-compose.yml
-Dockerfile
