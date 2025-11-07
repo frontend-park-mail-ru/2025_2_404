@@ -78,21 +78,6 @@ export default class ProfilePage {
         value: this.user?.phone || '',
       });
 
-      this.components.roleSelect = new Select({
-        id: 'user-role',
-        label: 'Тип аккаунта',
-        options: [
-          { value: 'advertiser', text: 'Рекламодатель' },
-          { value: 'publisher', text: 'Рекламораспространитель' }
-        ],
-        value: this.user?.role || 'advertiser',
-        onChange: (e) => {
-          if (this.user) {
-            this.user.role = e.target.value;
-          }
-        }
-      });
-
       this.components.saveButton = new Button({
         id: 'profile-save',
         text: 'Сохранить изменения',
@@ -136,7 +121,6 @@ export default class ProfilePage {
       lastNameInputHtml: this.components.lastNameInput?.render() || '',
       companyInputHtml: this.components.companyInput?.render() || '',
       phoneInputHtml: this.components.phoneInput?.render() || '',
-      roleSelectHtml: this.components.roleSelect?.render() || '',
       saveButtonHtml: this.components.saveButton?.render() || '',
       deleteButtonHtml: this.components.deleteButton?.render() || '',
       logoutButtonHtml: this.components.logoutButton?.render() || ''
@@ -159,7 +143,7 @@ export default class ProfilePage {
 attachEvents() {
     const componentKeys = [
       'loginInput', 'emailInput', 'passwordInput', 'firstNameInput', 
-      'lastNameInput', 'companyInput', 'phoneInput', 'roleSelect',
+      'lastNameInput', 'companyInput', 'phoneInput',
       'saveButton', 'deleteButton', 'logoutButton'
     ];
 

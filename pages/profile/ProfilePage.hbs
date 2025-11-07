@@ -4,7 +4,7 @@
   </div>
 
   <div class="profile-card">
-    <form id="profile-form"> <!-- <<<<<<< ТЕГ FORM ОТКРЫВАЕТСЯ РАНЬШЕ -->
+    <form id="profile-form"> 
       <div class="profile-content">
         <div class="profile-sidebar">
           <img src="{{avatar}}" alt="Аватар пользователя" class="profile-avatar" id="profile-avatar-img">
@@ -14,7 +14,6 @@
           <!-- Убедитесь, что у вас есть id="profile-avatar-upload", а не просто "avatar-upload" -->
           <input type="file" id="profile-avatar-upload" accept="image/png, image/jpeg, image/gif" style="display: none;">
 
-          {{{roleSelectHtml}}}
           <div class="profile-info">
             <p><strong>Дата регистрации:</strong> {{registrationDate}}</p>
             <p><strong>Количество реклам:</strong> {{adCount}}</p>
