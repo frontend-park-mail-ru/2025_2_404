@@ -17,7 +17,7 @@ export default class RegisterPage {
         if (!value) return 'Логин обязателен для заполнения';
         if (value.length < 4) return 'Логин должен содержать минимум 4 символа';
         if (value.length > 20) return 'Логин должен содержать максимум 20 символов';
-        if (!/^[a-zA-Z0-9_]+$/.test(value)) return 'Логин может содержать только английские буквы, цифры и символ _';
+        if (!/^[a-zA-Z0-9_]+$/.test(value)) return 'Логин может содержать только латиницу, цифры и _';
         const UpperCase = /[A-Z]/.test(value);
         const LowerCase = /[a-z]/.test(value);
         if (!UpperCase && !LowerCase) return 'Логин должен содержать хотя бы одну букву';
@@ -49,7 +49,7 @@ export default class RegisterPage {
         if (value.length > 100) return 'Пароль слишком длинный';
         const UpperCase = /[A-Z]/.test(value);
         const LowerCase = /[a-z]/.test(value);
-        if (!UpperCase || !LowerCase) return 'Пароль должен содержать буквы разного регистра (заглавные и строчные)';
+        if (!UpperCase || !LowerCase) return 'Пароль должен содержать буквы разного регистра';
         const SpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value);
         if (!SpecialChar) return 'Пароль должен содержать хотя бы один спецсимвол (!@#$%^&* и т.д.)';
         return null;
