@@ -143,7 +143,20 @@ export default class ProfilePage {
     };
     return this.template(context);
   }
-  attachEvents() {
+  handleFileChange(event) {
+  if (event.target.files && event.target.files[0]) {
+    this.selectedFile = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const previewElement = document.getElementById('profile-avatar-preview');
+      if (previewElement) {
+        previewElement.src = e.target.result;
+      }
+    };
+    reader.readAsDataURL(this.selectedFile);
+  }
+}
+attachEvents() {
     const componentKeys = [
       'loginInput', 'emailInput', 'passwordInput', 'firstNameInput', 
       'lastNameInput', 'companyInput', 'phoneInput', 'roleSelect',
@@ -151,35 +164,43 @@ export default class ProfilePage {
     ];
 
     componentKeys.forEach(key => {
-      const component = this.components[key];
-      if (component && component.attachEvents && typeof component.attachEvents === 'function') {
-        try {
-          component.attachEvents();
-        } catch (error) {
-          console.error(`Ошибка в attachEvents для ${key}:`, error);
+        const component = this.components[key];
+        if (component && component.attachEvents) {
+            component.attachEvents();
         }
-      } else {
-        console.warn(`Компонент ${key} не найден или не имеет attachEvents`);
-      }
     });
-    if (this.components.loginInput && this.components.loginInput.attachValidationEvent) {
-      this.components.loginInput.attachValidationEvent();
+    const fileInput = document.getElementById('profile-avatar-upload');
+    if (fileInput) {
+      fileInput.addEventListener('change', this.handleFileChange.bind(this));
     }
-    if (this.components.emailInput && this.components.emailInput.attachValidationEvent) {
-      this.components.emailInput.attachValidationEvent();
-    }
-  }
+}
 
-  handleSave() {
-    if (this.user) {
-      this.user.firstName = document.getElementById('profile-firstname')?.value || '';
-      this.user.lastName = document.getElementById('profile-lastname')?.value || '';
-      this.user.company = document.getElementById('profile-company')?.value || '';
-      this.user.phone = document.getElementById('profile-phone')?.value || '';
-      this.user.role = document.getElementById('user-role')?.value || 'advertiser';
+async handleSave() {
+    const formData = new FormData();
+
+    formData.append('user_name', document.getElementById('profile-login')?.value || '');
+    formData.append('email', document.getElementById('profile-email')?.value || '');
+    
+    formData.append('UserFirstName', document.getElementById('profile-firstname')?.value || '');
+    formData.append('UserLastName', document.getElementById('profile-lastname')?.value || '');
+    formData.append('Company', document.getElementById('profile-company')?.value || '');
+    formData.append('Phone', document.getElementById('profile-phone')?.value || '');
+    const password = document.getElementById('profile-password')?.value;
+    if (password && password !== '********') { 
+      formData.append('password', password);
     }
-  }
-  
+
+    if (this.selectedFile) {
+      formData.append('image', this.selectedFile);
+    }
+    try {
+      await AuthService.updateProfile(formData);
+      router.loadRoute(); 
+    } catch (error) {
+      console.error('Ошибка при обновлении профиля:', error);
+
+    }
+}
   handleDelete() {
     const modal = new ConfirmationModal({
       message: `Вы уверены, что хотите удалить аккаунт ${this.user?.username || 'пользователя'}?`,

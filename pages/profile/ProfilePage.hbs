@@ -4,24 +4,25 @@
   </div>
 
   <div class="profile-card">
-    <div class="profile-content">
-<div class="profile-sidebar">
-  <img src="{{avatar}}" alt="Аватар пользователя" class="profile-avatar" id="profile-avatar-img">
-  <label for="avatar-upload" class="btn btn--secondary" style="width: 100%; margin: 10px 0; text-align: center; cursor: pointer;">
-    Сменить аватар
-  </label>
-  <input type="file" id="avatar-upload" accept="image/png, image/jpeg, image/gif" style="display: none;">
+    <form id="profile-form"> <!-- <<<<<<< ТЕГ FORM ОТКРЫВАЕТСЯ РАНЬШЕ -->
+      <div class="profile-content">
+        <div class="profile-sidebar">
+          <img src="{{avatar}}" alt="Аватар пользователя" class="profile-avatar" id="profile-avatar-img">
+          <label for="avatar-upload" class="btn btn--secondary" style="width: 100%; margin: 10px 0; text-align: center; cursor: pointer;">
+            Сменить аватар
+          </label>
+          <!-- Убедитесь, что у вас есть id="profile-avatar-upload", а не просто "avatar-upload" -->
+          <input type="file" id="profile-avatar-upload" accept="image/png, image/jpeg, image/gif" style="display: none;">
 
-  {{{roleSelectHtml}}}
-  <div class="profile-info">
-    <p><strong>Дата регистрации:</strong> {{registrationDate}}</p>
-    <p><strong>Количество реклам:</strong> {{adCount}}</p>
-  </div>
-</div>
+          {{{roleSelectHtml}}}
+          <div class="profile-info">
+            <p><strong>Дата регистрации:</strong> {{registrationDate}}</p>
+            <p><strong>Количество реклам:</strong> {{adCount}}</p>
+          </div>
+        </div>
 
-      <div class="profile-main">
-        <h2>{{username}}</h2>
-        <form id="profile-form">
+        <div class="profile-main">
+          <h2>{{username}}</h2>
           <div class="profile-form-fields">
             {{{loginInputHtml}}}
             {{{emailInputHtml}}}
@@ -30,16 +31,16 @@
             {{{companyInputHtml}}}
             {{{phoneInputHtml}}}
           </div>
-        </form>
+        </div>
       </div>
-    </div>
 
-      <div class="profile-form-footer">
+      <div class="profile-form-footer"> <!-- <<<<<<< ТЕПЕРЬ ФУТЕР ВНУТРИ ФОРМЫ -->
         <div class="footer-actions-left">
           {{{deleteButtonHtml}}}
           {{{logoutButtonHtml}}}
         </div>
         {{{saveButtonHtml}}}
       </div>
+    </form> <!-- <<<<<<< И ФОРМА ЗАКРЫВАЕТСЯ ПОСЛЕ ВСЕХ ЭЛЕМЕНТОВ -->
   </div>
 </div>
