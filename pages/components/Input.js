@@ -37,14 +37,14 @@ export default class Input {
     if (!inputEl) {
       return errorMessage;
     }
-    inputEl.classList.remove('input-valid', 'input-error');
+    inputEl.classList.remove('input--valid', 'input--error');
 
     if (errorMessage) {
       this.showError(errorMessage);
-      inputEl.classList.add('input-error');
+      inputEl.classList.add('input--error');
     } else {
       this.clearError();
-      inputEl.classList.add('input-valid');
+      inputEl.classList.add('input--valid');
     }
     return errorMessage;
   }
@@ -57,8 +57,8 @@ export default class Input {
       errorEl.style.color = 'red';
     }
     if (inputEl) {
-      inputEl.classList.add('input-error');
-      inputEl.classList.remove('input-valid');
+      inputEl.classList.add('input--error');
+      inputEl.classList.remove('input--valid');
     }
   }
 
@@ -69,7 +69,7 @@ export default class Input {
       errorEl.textContent = '';
     }
     if (inputEl) {
-      inputEl.classList.remove('input-error');
+      inputEl.classList.remove('input--error');
     }
   }
   PasswordToggle() {

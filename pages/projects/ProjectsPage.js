@@ -37,7 +37,7 @@ export default class ProjectsPage {
     });
 
     // Навигация на карточку
-    document.querySelectorAll('.project-card').forEach(card => {
+    document.querySelectorAll('.projects__card').forEach(card => {
       card.addEventListener('click', (e) => {
         if (e.target.closest('.btn-delete')) return; 
         const projectId = card.dataset.id;
@@ -77,7 +77,7 @@ export default class ProjectsPage {
   async refreshList() {
     try {
       const ads = await listAds();
-      const projectsListContainer = document.querySelector('.projects-list');
+      const projectsListContainer = document.querySelector('.projects__list');
 
       if (!projectsListContainer) return;
 
@@ -89,16 +89,11 @@ export default class ProjectsPage {
       projectsListContainer.innerHTML = ads
         .map(
           (ad) => `
-          <div class="project-card" data-id="${ad.id}">
-            <div class="card-header">
-              <div class="card-title">
-                <h3>${ad.title}</h3>
-              </div>
-              <div class="card-actions">
-                <button class="btn btn-delete" data-id="${ad.id}">Удалить</button>
-              </div>
+          <div class="projects__card" data-id="${ad.id}">
+            <div class="projects__card-title">
+               ${ad.title} 
             </div>
-            <div class="card-meta">
+            <div class="projects__card-meta">
               <span class="status ${ad.statusClass}">${ad.statusText}</span>
               <span class="meta-item">${ad.domain}</span>
             </div>

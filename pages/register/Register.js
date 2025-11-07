@@ -11,7 +11,7 @@ export default class RegisterPage {
     this.loginInput = new Input({
       id: 'login',
       label: 'Логин',
-      placeholder: 'Example_1',
+      placeholder: 'Введите логин',
       validationFn: (value) => {
         value = value.trim();
         if (!value) return 'Логин обязателен для заполнения';
@@ -57,7 +57,7 @@ export default class RegisterPage {
     });
     this.passwordCheckInput = new Input({
       id: 'passwordCheck',
-      label: '',
+      label: 'Повторите пароль',
       placeholder: 'Повторите пароль',
       showPasswordToggle: true,
       validationFn: (value) => {
@@ -113,7 +113,7 @@ export default class RegisterPage {
   }
 
   attachEvents() {
-    this.modalEl.querySelector('.close-btn').addEventListener('click', this.onCancel);
+    this.modalEl.querySelector('.auth__close-btn').addEventListener('click', this.onCancel);
     
     const form = this.modalEl.querySelector('#register-form');
     if (form) {

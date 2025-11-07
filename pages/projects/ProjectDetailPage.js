@@ -95,9 +95,9 @@ export default class ProjectDetailPage {
       console.table({ title, desc, site, budget, imgFile });
 
       // Очистка старых ошибок
-      document.querySelectorAll('.error-msg').forEach((el) => el.remove());
-      document.querySelectorAll('.input-error').forEach((el) =>
-        el.classList.remove('input-error')
+      document.querySelectorAll('.error-message').forEach((el) => el.remove());
+      document.querySelectorAll('.input--error').forEach((el) =>
+        el.classList.remove('input--error')
       );
 
       // Валидация данных
@@ -124,10 +124,10 @@ export default class ProjectDetailPage {
           const input =
             document.getElementById(mappedId) || document.querySelector(`.${key}`);
           if (input) {
-            input.classList.add('input-error');
+            input.classList.add('input--error');
             const err = document.createElement('small');
             err.textContent = msg;
-            err.classList.add('error-msg');
+            err.classList.add('error-message');
             input.insertAdjacentElement('afterend', err);
           }
         }
@@ -178,9 +178,9 @@ export default class ProjectDetailPage {
     const titleInput = document.querySelector('#title-input');
     const descInput = document.querySelector('#desc-input');
     const imgInput = document.getElementById('img-file');
-    const previewTitle = document.querySelector('.preview-card h4');
-    const previewDesc = document.querySelector('.preview-card p');
-    const previewImg = document.querySelector('.preview-image');
+    const previewTitle = document.querySelector('.ads__preview-card h4');
+    const previewDesc = document.querySelector('.ads__preview-card p');
+    const previewImg = document.querySelector('.ads__preview-image');
 
     titleInput?.addEventListener('input', () => {
       previewTitle.textContent = titleInput.value || 'Без названия';

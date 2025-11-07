@@ -31,9 +31,9 @@ export default class MainPage {
   }
 
   attachEvents() {
-    const faqItems = document.querySelectorAll('.faq-item');
+    const faqItems = document.querySelectorAll('.landing__faq-item');
     faqItems.forEach(item => {
-      const question = item.querySelector('.faq-question');
+      const question = item.querySelector('.landing__faq-question');
       question.addEventListener('click', () => {
         faqItems.forEach(otherItem => {
           if (otherItem !== item) {

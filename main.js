@@ -22,7 +22,6 @@ const routes = {
   '/projects': ProjectsPage,
   '/projects/create': CreateProjectPage,
   '/projects/:id': ProjectDetailPage,
-//'bez tebz'
   '/balance': BalancePage,
 };
 
@@ -32,9 +31,6 @@ const footer = new Footer();
 
 function onAuthSuccess() {
   header.update();
-
-
-  // header.render();
   router.navigate('/projects');
 }
 
@@ -92,34 +88,6 @@ function showRegisterModal() {
   });
   registerModal.init().then(() => registerModal.show());
 }
-// async function initializeApp() {
-//   document.addEventListener('click', (e) => {
-//     const link = e.target.closest('a');
-//     if (link && link.hasAttribute('href')) {
-//       const href = link.getAttribute('href');
-//       if (href.startsWith('/') && link.target !== '_blank') {
-//         e.preventDefault();
-//         router.navigate(href);
-//         return;
-//       }
-//     }
-    
-//     const target = e.target;
-//     if (target.closest('#login-btn-header') || target.closest('#try-btn')) {
-//         e.preventDefault();
-//         showLoginModal();
-//     } else if (target.closest('#register-btn-header')) {
-//         e.preventDefault();
-//         showRegisterModal();
-//     } else if (target.closest('#logout-btn')) {
-//         e.preventDefault();
-//         AuthService.logout();
-//         header.update(); 
-//         router.navigate('/');
-//     }
-//   });
-//   AuthService.onAuthChange(() => {
-//     header.update(); 
 
 async function initializeApp() {
 document.addEventListener('click', (e) => {
@@ -177,9 +145,6 @@ document.addEventListener('click', (e) => {
     footer.loadTemplate()
   ]);
   
-  // header.update(); 
-
-
   header.render(); 
   document.body.appendChild(footer.render()); 
   router.loadRoute();

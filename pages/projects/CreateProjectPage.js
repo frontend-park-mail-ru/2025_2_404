@@ -33,9 +33,9 @@ export default class CreateProjectPage {
     const siteInput = document.querySelector('#site-input');
     const budgetInput = document.querySelector('#budget-input');
     const imgInput = document.querySelector('#img-file');
-    const previewTitle = document.querySelector('.preview-card h4');
-    const previewDesc = document.querySelector('.preview-card p');
-    const previewImg = document.querySelector('.preview-card img');
+    const previewTitle = document.querySelector('.ads__preview-card h4');
+    const previewDesc = document.querySelector('.ads__preview-card p');
+    const previewImg = document.querySelector('.ads__preview-card img');
 
     // предпросмотр
     titleInput?.addEventListener('input', () => {
@@ -72,8 +72,8 @@ export default class CreateProjectPage {
       const imgFile = imgInput.files[0];
 
       // валидация
-      document.querySelectorAll('.error-msg').forEach((el) => el.remove());
-      document.querySelectorAll('.input-error').forEach((el) => el.classList.remove('input-error'));
+      document.querySelectorAll('.error-message').forEach((el) => el.remove());
+      document.querySelectorAll('.input--error').forEach((el) => el.classList.remove('input--error'));
 
       const errors = validateAdForm({
         title,
@@ -94,10 +94,10 @@ export default class CreateProjectPage {
         for (const [key, msg] of Object.entries(errors)) {
           const input = document.getElementById(fieldMap[key]);
           if (input) {
-            input.classList.add('input-error');
+            input.classList.add('input--error');
             const err = document.createElement('small');
             err.textContent = msg;
-            err.classList.add('error-msg');
+            err.classList.add('error-message');
             input.insertAdjacentElement('afterend', err);
           }
         }
