@@ -51,7 +51,7 @@ export default class RegisterPage {
         const LowerCase = /[a-z]/.test(value);
         if (!UpperCase || !LowerCase) return 'Пароль должен содержать буквы разного регистра';
         const SpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value);
-        if (!SpecialChar) return 'Пароль должен содержать хотя бы один спецсимвол (!@#$%^&* и т.д.)';
+        if (!SpecialChar) return 'Пароль должен содержать хотя бы один спецсимвол';
         return null;
       },
     });
