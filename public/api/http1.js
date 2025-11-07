@@ -1,9 +1,6 @@
 
-export const BASE = "http://89.208.230.119:8080";
+export const BASE = "http://localhost:8080";
 
-/**
- * Унифицированный HTTP-запрос
- */
 async function request(path, init = {}) {
   const token = localStorage.getItem('token');
   const headers = init.headers || {};

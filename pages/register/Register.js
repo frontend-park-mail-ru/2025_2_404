@@ -32,7 +32,7 @@ export default class RegisterPage {
         value = value.trim();
         if (!value) return 'Email обязателен для заполнения';
         if (value.length > 100) return 'Почта слишком длинная, введите другую';
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const emailRegex = /^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         if (!emailRegex.test(value)) return 'Введите корректный email';
         return null;
       },
@@ -129,34 +129,38 @@ export default class RegisterPage {
     this.passwordCheckInput.attachValidationEvent();
   }
 
-  Submit(event) {
-    event.preventDefault();
-    
-    let isValidated = true;
-    const loginValue = document.getElementById(this.loginInput.id).value;
-    const emailValue = document.getElementById(this.emailInput.id).value;
-    const passwordValue = document.getElementById(this.passwordInput.id).value;
-    const passwordCheckValue = document.getElementById(this.passwordCheckInput.id).value;
-    
-    if (this.loginInput.validate(loginValue)) isValidated = false;
-    if (this.emailInput.validate(emailValue)) isValidated = false;
-    if (this.passwordInput.validate(passwordValue)) isValidated = false;
-    if (this.passwordCheckInput.validate(passwordCheckValue)) isValidated = false;
+async Submit(event) {
+  event.preventDefault();
+  let isValidated = true;
+  const loginValue = document.getElementById(this.loginInput.id).value;
+  const emailValue = document.getElementById(this.emailInput.id).value;
+  const passwordValue = document.getElementById(this.passwordInput.id).value;
+  const passwordCheckValue = document.getElementById(this.passwordCheckInput.id).value;
+  
+  if (this.loginInput.validate(loginValue)) isValidated = false;
+  if (this.emailInput.validate(emailValue)) isValidated = false;
+  if (this.passwordInput.validate(passwordValue)) isValidated = false;
+  if (this.passwordCheckInput.validate(passwordCheckValue)) isValidated = false;
 
-    if (isValidated) {
-      AuthService.register({
-        user_name: loginValue,
-        email: emailValue,
-        password: passwordValue,
-      })
-      .then(() => {
-        this.onSuccess();
-      })
-      .catch((err) => {
-        console.error("Ошибка регистрации:", err);
-        const errorMessage = err?.body?.error?.message || 'Произошла неизвестная ошибка';
-        this.loginInput.showError(errorMessage);
-      });
+  if (!isValidated) {
+    return;
+  }
+  try {
+    await AuthService.register({
+      user_name: loginValue,
+      email: emailValue,
+      password: passwordValue,
+    });
+    this.onSuccess();
+
+  } catch (error) {
+    console.error("Ошибка регистрации:", error);
+    if (error && error.status === 409) {
+      this.emailInput.showError('Пользователь с таким email уже существует.');
+    } else {
+      const generalErrorMessage = error.body || 'Произошла непредвиденная ошибка. Попробуйте позже.';
+      this.loginInput.showError(generalErrorMessage);
     }
   }
+}
 }
