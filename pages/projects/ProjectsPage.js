@@ -1,6 +1,6 @@
-import { listAds, deleteAd } from '../../public/api/ads.js';
 import { router } from '../../main.js';
 import ConfirmationModal from '../components/ConfirmationModal.js';
+import adsRepository from '../../public/repository/adsRepository.js';
 
 export default class ProjectsPage {
   constructor() {
@@ -8,24 +8,27 @@ export default class ProjectsPage {
   }
 
   async loadTemplate() {
-    const response = await fetch('/pages/projects/ProjectsPage.hbs');
-    if (!response.ok) throw new Error('Не удалось загрузить шаблон проектов');
-    const templateText = await response.text();
-    this.template = Handlebars.compile(templateText);
+    if (this.template) return;
+    try {
+      const response = await fetch('/pages/projects/ProjectsPage.hbs');
+      if (!response.ok) throw new Error('Не удалось загрузить шаблон проектов');
+      this.template = Handlebars.compile(await response.text());
+    } catch (error) {
+      console.error(error);
+      this.template = Handlebars.compile('<h1>Ошибка загрузки шаблона</h1>');
+    }
   }
 
   async render() {
-    if (!this.template) return 'Загрузка...';
+    await this.loadTemplate();
 
     try {
-      const ads = await listAds();
-      return this.template({ projects: ads });
+      const ads = await adsRepository.getAll();
+      const lastUpdated = ads.find(ad => ad.timestamp)?.timestamp;
+      
+      return this.template({ projects: ads, lastUpdated: lastUpdated });
     } catch (err) {
-      console.error('Ошибка при загрузке проектов:', err);
-      return `<div style="padding: 40px; text-align:center">
-        <h2>Не удалось загрузить проекты</h2>
-        <p>${err.body?.message || err.statusText || 'Ошибка сервера'}</p>
-      </div>`;
+      return this.template({ error: err.message });
     }
   }
 
@@ -49,31 +52,35 @@ export default class ProjectsPage {
     document.querySelectorAll('.btn-delete').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const adId = btn.dataset.id;
-
-        const modal = new ConfirmationModal({
-          message: 'Удалить это объявление?',
-          onConfirm: async () => {
-            try {
-              await deleteAd(adId);
-              await this.refreshList();
-            } catch (err) {
-              console.error('Ошибка при удалении:', err);
-            }
-          },
-          onCancel: () => {
-            console.log('Удаление отменено');
-          },
-        });
-
-        modal.show();
+        const adId = deleteBtn.dataset.id;
+        this.showDeleteModal(adId);
+        return;
       });
+      const projectCard = target.closest('.project-card');
+      if (projectCard) {
+        const projectId = projectCard.dataset.id;
+        if (projectId) {
+          router.navigate(`/projects/${projectId}`);
+        }
+      }
     });
   }
 
-  /**
-   * Обновляет список объявлений без перезагрузки страницы
-   */
+  showDeleteModal(adId) {
+    const modal = new ConfirmationModal({
+      message: 'Вы уверены, что хотите удалить это объявление?',
+      onConfirm: async () => {
+        try {
+          await adsRepository.delete(adId);
+          await this.refreshList();
+        } catch (err) {
+          console.error('Ошибка при удалении через репозиторий:', err);
+        }
+      },
+    });
+    modal.show();
+  }
+  
   async refreshList() {
     try {
       const ads = await listAds();
@@ -101,9 +108,6 @@ export default class ProjectsPage {
         `
         )
         .join('');
-
-      // заново навесить события на новые кнопки
-      this.attachEvents();
     } catch (err) {
       console.error('Ошибка при обновлении списка:', err);
     }

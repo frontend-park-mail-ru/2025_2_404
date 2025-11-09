@@ -3,45 +3,52 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = 8000;
-
-const ROOT = path.join(__dirname, '..');
-
-const routes = {
-  '/': path.join(ROOT, 'index.html'),
-};
-
+const ROOT = path.join(__dirname, '..'); 
 http
   .createServer((request, response) => {
-    let filePath = routes[request.url] || path.join(ROOT, request.url);
-
-    if (
-      !path.extname(filePath) &&
-      request.url !== '/' &&
-      !routes[request.url]
-    ) {
-      filePath += '.html';
-    }
-
-    const ext = path.extname(filePath);
-    let contentType = 'text/html; charset=utf-8';
-    if (ext === '.css') contentType = 'text/css; charset=utf-8';
-    if (ext === '.js') contentType = 'text/javascript; charset=utf-8';
-    if (ext === '.svg') contentType = 'image/svg+xml'; 
+    let filePath = path.join(ROOT, request.url);
+    const ext = String(path.extname(filePath)).toLowerCase();
+    const mimeTypes = {
+        '.html': 'text/html; charset=utf-8',
+        '.css': 'text/css; charset=utf-8',
+        '.js': 'text/javascript; charset=utf-8',
+        '.hbs': 'text/plain; charset=utf-8',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.gif': 'image/gif',
+        '.svg': 'image/svg+xml',
+        '.woff2': 'font/woff2',
+    };
+    const contentType = mimeTypes[ext] || 'application/octet-stream';
 
     fs.readFile(filePath, (error, content) => {
       if (error) {
-        fs.readFile(path.join(ROOT, 'notFound.html'), (err404, data404) => {
-          response.statusCode = 404;
-          response.setHeader('Content-Type', 'text/html; charset=utf-8');
-          if (err404) return response.end('404 Not Found');
-          response.end(data404);
-        });
+        if (error.code === 'ENOENT' || error.code === 'EISDIR') {
+          if (!ext) {
+            fs.readFile(path.join(ROOT, 'index.html'), (errIndex, indexContent) => {
+              if (errIndex) {
+                response.writeHead(500);
+                response.end('Ошибка сервера: не могу прочитать index.html');
+              } else {
+                response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+                response.end(indexContent);
+              }
+            });
+          } else {
+            response.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+            response.end('<h1>404 Not Found</h1>');
+          }
+        } else {
+          response.writeHead(500);
+          response.end(`Ошибка сервера: ${error.code}`);
+        }
       } else {
-        response.setHeader('Content-Type', contentType);
+        response.writeHead(200, { 'Content-Type': contentType });
         response.end(content);
       }
     });
   })
-  .listen(PORT, '0.0.0.0' ,() => {
-    console.log(`Сервер запущен: http://localhost:${PORT}`);
+  .listen(PORT, '0.0.0.0', () => {
+    console.log(`Сервер запущен: http://89.208.230.119:${PORT}`);
   });

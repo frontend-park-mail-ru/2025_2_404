@@ -3,8 +3,7 @@ import Button from '../components/Button.js';
 import Select from '../components/Select.js';
 import AuthService from '../../services/ServiceAuthentification.js';
 import ConfirmationModal from '../components/ConfirmationModal.js';
-import { router, header } from '../../main.js';
-import { http } from '../../public/api/http1.js';
+import { router } from '../../main.js';
 
 export default class ProfilePage {
   constructor() {
@@ -12,6 +11,7 @@ export default class ProfilePage {
     this.user = null;
     this.components = {};
     this.selectedFile = null; 
+    this.handleFileChange = this.handleFileChange.bind(this);
   }
 
   async loadTemplate() {
@@ -25,6 +25,7 @@ export default class ProfilePage {
       this.template = Handlebars.compile('<h1>Ошибка загрузки профиля</h1>');
     }
   }
+
   initComponents() {
     try {
       this.components.loginInput = new Input({
@@ -44,8 +45,8 @@ export default class ProfilePage {
 
       this.components.passwordInput = new Input({
         id: 'profile-password',
-        label: 'Пароль',
-        placeholder: '********',
+        label: 'Новый пароль',
+        placeholder: 'Оставьте пустым, если не меняете',
         type: 'password',
       });
 
@@ -86,11 +87,6 @@ export default class ProfilePage {
           { value: 'publisher', text: 'Рекламораспространитель' }
         ],
         value: this.user?.role || 'advertiser',
-        onChange: (e) => {
-          if (this.user) {
-            this.user.role = e.target.value;
-          }
-        }
       });
 
       this.components.saveButton = new Button({
@@ -120,12 +116,13 @@ export default class ProfilePage {
 
   async render() {
     await this.loadTemplate();
+    this.user = await AuthService.loadProfile();
 
-    this.user = AuthService.getUser();
     if (!this.user) {
       router.navigate('/');
       return '<div>Вы не авторизованы. Перенаправление...</div>';
     }
+
     this.initComponents();
     const context = {
       ...this.user,
@@ -143,6 +140,20 @@ export default class ProfilePage {
     };
     return this.template(context);
   }
+handleFileChange(event) {
+  if (event.target.files && event.target.files[0]) {
+    this.selectedFile = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const previewElement = document.getElementById('profile-avatar-preview');
+      if (previewElement) {
+        previewElement.src = e.target.result;
+      }
+    };
+    reader.readAsDataURL(this.selectedFile);
+  }
+}
+
   attachEvents() {
     const componentKeys = [
       'loginInput', 'emailInput', 'passwordInput', 'firstNameInput', 
@@ -151,32 +162,37 @@ export default class ProfilePage {
     ];
 
     componentKeys.forEach(key => {
-      const component = this.components[key];
-      if (component && component.attachEvents && typeof component.attachEvents === 'function') {
-        try {
-          component.attachEvents();
-        } catch (error) {
-          console.error(`Ошибка в attachEvents для ${key}:`, error);
+        const component = this.components[key];
+        if (component && component.attachEvents) {
+            component.attachEvents();
         }
-      } else {
-        console.warn(`Компонент ${key} не найден или не имеет attachEvents`);
-      }
     });
-    if (this.components.loginInput && this.components.loginInput.attachValidationEvent) {
-      this.components.loginInput.attachValidationEvent();
-    }
-    if (this.components.emailInput && this.components.emailInput.attachValidationEvent) {
-      this.components.emailInput.attachValidationEvent();
+
+    const fileInput = document.getElementById('profile-avatar-upload');
+    if (fileInput) {
+      fileInput.addEventListener('change', this.handleFileChange);
     }
   }
-
-  handleSave() {
-    if (this.user) {
-      this.user.firstName = document.getElementById('profile-firstname')?.value || '';
-      this.user.lastName = document.getElementById('profile-lastname')?.value || '';
-      this.user.company = document.getElementById('profile-company')?.value || '';
-      this.user.phone = document.getElementById('profile-phone')?.value || '';
-      this.user.role = document.getElementById('user-role')?.value || 'advertiser';
+  async handleSave() {
+    const formData = new FormData();
+    formData.append('user_name', document.getElementById('profile-login')?.value || '');
+    formData.append('email', document.getElementById('profile-email')?.value || '');
+    // formData.append('first_name', document.getElementById('profile-firstname')?.value || '');
+    // formData.append('last_name', document.getElementById('profile-lastname')?.value || '');
+    
+    const password = document.getElementById('profile-password')?.value;
+    if (password) {
+      formData.append('password', password);
+    }
+    if (this.selectedFile) {
+      formData.append('img', this.selectedFile);
+    }
+  
+    try {
+      await AuthService.updateProfile(formData);
+      router.loadRoute();
+    } catch (error) {
+      console.error('Ошибка при обновлении профиля:', error);
     }
   }
   
