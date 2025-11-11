@@ -1063,6 +1063,7 @@ body {
 
 
 
+// app
 
 #app {
   flex-grow: 1;
@@ -1070,6 +1071,7 @@ body {
 
 
 
+//error-message
 
 .error-message {
   color: #e63946;
@@ -1079,43 +1081,143 @@ body {
   display: block;
 }
 
-.balance-page {
+
+//balance
+
+.balance {
   max-width: 1200px;
   margin: 40px auto;
   padding: 20px;
+
+  &__summary {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-direction: column;
+    margin-bottom: 30px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--text-color);
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__amount {
+    font-size: 36px;
+    font-weight: 700;
+    color: #FF73AF;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 15px;
+  }
+
+  &__period-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  &__summary-card {
+    background-color: #f3f0ff;
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  &__summary-amount {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  &__summary-label {
+    margin: 5px 0 15px 0;
+  }
+
+
+  &__date-range {
+    display: block;
+    margin-top: 10px;
+    font-size: 14px;
+    color: var(--gray-text);
+    text-align: right;
+  }
+
+  &__progress {
+    background-color: #e0d7fe;
+    border-radius: 8px;
+    height: 8px;
+    width: 100%;
+    overflow: hidden;
+
+    &-bar {
+      background-color: var(--primary-purple);
+      height: 100%;
+      border-radius: 8px;
+    }
+  }
+
 }
 
-.balance-summary {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  flex-direction: column;
-  margin-bottom: 30px;
+
+
+// transactions
+
+.transactions {
+
+  &__title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 30px 0 15px0;
+  }
+
+  &__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #F8F5FF;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+
+  &__description {
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  &__time {
+    display: block;
+    font-size: 14px;
+    color: var(--gray-text);
+  }
+
+  &__amount {
+    font-size: 18px;
+    font-weight: 600;
+
+    &--positive {
+      color: #FF73AF;
+    }
+
+    &--negative {
+      color: var(--text-color);
+    }
+  }
+
 }
 
-.current-balance h1 {
-  margin: 0;
-  font-size: 28px;
-  font-weight: 500;
-  color: var(--text-color);
-  text-align: center;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-}
 
-.current-balance .amount {
-  font-size: 36px;
-  font-weight: 700;
-  color: #FF73AF;
-}
-
-.balance-actions {
-  display: flex;
-  gap: 15px;
-}
+//date-filter
 
 .date-filter {
   background-color: var(--primary-purple) !important;
@@ -1127,94 +1229,3 @@ body {
   gap: 8px;
   justify-content: center;
 }
-
-.period-summary {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-bottom: 40px;
-}
-
-.summary-card {
-  background-color: #f3f0ff;
-  padding: 20px;
-  border-radius: 16px;
-}
-
-.summary-card .amount {
-  font-size: 24px;
-  font-weight: 700;
-}
-
-.summary-card p {
-  margin: 5px 0 15px 0;
-}
-
-.progress-bar-container {
-  background-color: #e0d7fe;
-  border-radius: 8px;
-  height: 8px;
-  width: 100%;
-  overflow: hidden;
-}
-
-.progress-bar {
-  background-color: var(--primary-purple);
-  height: 100%;
-  border-radius: 8px;
-}
-
-.summary-card .date-range {
-  display: block;
-  margin-top: 10px;
-  font-size: 14px;
-  color: var(--gray-text);
-  text-align: right;
-}
-
-.history-group h3 {
-  font-size: 20px;
-  font-weight: 600;
-  margin: 30px 0 15px 0;
-}
-
-.transaction-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #F8F5FF;
-  padding: 15px;
-  border-radius: 12px;
-  margin-bottom: 10px;
-}
-
-.transaction-details .description {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.transaction-details .time {
-  display: block;
-  font-size: 14px;
-  color: var(--gray-text);
-}
-
-.transaction-amount {
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.transaction-amount.positive {
-  color: #FF73AF;
-}
-
-.transaction-amount.negative {
-  color: var(--text-color);
-}
-
-.history-end {
-  text-align: center;
-  color: var(--gray-text);
-  margin-top: 40px;
-}
-

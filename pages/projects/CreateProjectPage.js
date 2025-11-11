@@ -41,9 +41,6 @@ export default class CreateProjectPage {
     const previewImg = document.querySelector('.ads__preview-card img');
 
     // предпросмотр
-    // const previewTitle = document.querySelector('.preview-card h4');
-    // const previewDesc = document.querySelector('.preview-card p');
-    // const previewImg = document.querySelector('.preview-card img');
     titleInput?.addEventListener('input', () => {
       if (previewTitle) previewTitle.textContent = titleInput.value || 'Без названия';
     });
@@ -78,7 +75,6 @@ export default class CreateProjectPage {
       // валидация
       document.querySelectorAll('.error-message').forEach((el) => el.remove());
       document.querySelectorAll('.input--error').forEach((el) => el.classList.remove('input--error'));
-      // document.querySelectorAll('.error-msg').forEach((el) => el.remove());
       const errors = validateAdForm({ title, description: desc, domain: site, budget, file: imgFile });
       console.log(errors);
  const fieldMap = {
@@ -98,16 +94,6 @@ export default class CreateProjectPage {
             err.textContent = msg;
             err.classList.add('error-message');
             input.insertAdjacentElement('afterend', err);
-          // const inputId = fieldMap[key];
-          // if (inputId) {
-          //   const input = document.getElementById(inputId);
-          //   if (input) {
-          //     input.classList.add('input-error');
-          //     const errorElement = document.createElement('small');
-          //     errorElement.textContent = msg;
-          //     errorElement.classList.add('error-msg');
-          //     input.insertAdjacentElement('afterend', errorElement);
-          //   }
           }
         }
         return;
@@ -124,7 +110,7 @@ export default class CreateProjectPage {
       try {
         await adsRepository.create(formData);
         new ConfirmationModal({
-          message: 'Проект успешно создан (или будет синхронизирован при появлении сети)!',
+          message: 'Проект успешно создан',
           onConfirm: () => router.navigate('/projects'),
         }).show();
         

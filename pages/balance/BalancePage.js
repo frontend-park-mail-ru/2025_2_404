@@ -27,15 +27,15 @@ export default class BalancePage {
       
       const transactionTemplateString = `
         {{#each transactionGroups}}
-          <div class="history-group">
+          <div class="transactions">
             <h3>{{this.title}}</h3>
             {{#each this.items}}
-              <div class="transaction-item">
-                <div class="transaction-details">
-                  <span class="description">{{this.description}}</span>
-                  <span class="time">{{this.time}}</span>
+              <div class="transactions__item">
+                <div>
+                  <span class="transactions__description">{{this.description}}</span>
+                  <span class="transactions__time">{{this.time}}</span>
                 </div>
-                <span class="transaction-amount {{#if (eq this.type "positive")}}positive{{else}}negative{{/if}}">{{this.amount}} ₽</span>
+                <span class="transactions__amount {{#if (eq this.type "positive")}}transactions__amount--positive{{else}}transactions__amount--negative{{/if}}">{{this.amount}} ₽</span>
               </div>
             {{/each}}
           </div>
@@ -158,7 +158,7 @@ export default class BalancePage {
   }
 
   updateDisplay() {
-    const balanceAmountEl = document.querySelector('.current-balance .amount');
+    const balanceAmountEl = document.querySelector('.balance__amount');
     if (balanceAmountEl) {
         balanceAmountEl.textContent = `${this.balance.toLocaleString('ru-RU')} ₽`;
     }
