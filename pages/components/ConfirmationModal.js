@@ -13,10 +13,6 @@ export default class ConfirmationModal {
       variant: 'secondary',
       onClick: () => {
         if (this.onConfirm) this.onConfirm();
-      // text: 'Да, удалить',
-      // variant: 'secondary',
-      // onClick: () => {
-      //   this.onConfirm();
         this.hide();
       },
     });
@@ -39,9 +35,9 @@ export default class ConfirmationModal {
 
   render() {
     return `
-      <div class="modal-content" style="background: white; padding: 20px; border-radius: 8px; width: 400px; text-align: center;">
+      <div class="modal__content">
         <p>${this.message}</p>
-        <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
+        <div class="modal__actions">
           ${this.confirmButton.render()}
           ${this.cancelButton ? this.cancelButton.render() : ''}
         </div>
@@ -52,7 +48,7 @@ export default class ConfirmationModal {
   show() {
     if (!this.modalElement) {
       this.modalElement = document.createElement('div');
-      this.modalElement.className = 'modal-overlay';
+      this.modalElement.className = 'modal__overlay';
       this.modalElement.innerHTML = this.render();
       document.body.appendChild(this.modalElement);
       this.attachEvents();

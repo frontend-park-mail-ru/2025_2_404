@@ -101,7 +101,6 @@ export default class ProjectsPage {
                ${ad.title} 
             </div>
             <div class="projects__card-meta">
-              <span class="status ${ad.statusClass}">${ad.statusText}</span>
               <span class="meta-item">${ad.domain}</span>
             </div>
           </div>

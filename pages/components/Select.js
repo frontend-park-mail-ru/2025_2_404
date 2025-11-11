@@ -11,7 +11,7 @@ export default class Select {
     return `
       <div class="form-group">
         <label for="${this.id}">${this.label}</label>
-        <select id="${this.id}" name="${this.id}" class="form-select">
+        <select class="form-group__select" id="${this.id}" name="${this.id}" class="form-select">
           ${this.options.map(option => 
             `<option value="${option.value}" ${this.value === option.value ? 'selected' : ''}>
               ${option.text}

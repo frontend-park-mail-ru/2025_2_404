@@ -253,11 +253,11 @@ export default class BalancePage {
 
     let paginationHTML = '';
     for (let i = 1; i <= totalPages; i++) {
-      paginationHTML += `<button class="page-item ${i === this.currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
+      paginationHTML += `<button class="pagination__item ${i === this.currentPage ? 'pagination__item--active' : ''}" data-page="${i}">${i}</button>`;
     }
     container.innerHTML = paginationHTML;
 
-    container.querySelectorAll('.page-item').forEach(button => {
+    container.querySelectorAll('.pagination__item').forEach(button => {
       button.addEventListener('click', (e) => {
         this.currentPage = parseInt(e.target.dataset.page, 10);
         this.updateDisplay();

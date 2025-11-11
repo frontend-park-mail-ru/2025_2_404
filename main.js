@@ -95,48 +95,6 @@ function showRegisterModal() {
   registerModal.init().then(() => registerModal.show());
 }
 
-// async function startApp() {
-//   await Promise.all([
-//     header.loadTemplate(),
-//     footer.loadTemplate()
-//   ]);
-//   document.body.appendChild(footer.render());
-//   AuthService.onAuthChange((user) => {
-//     header.update(user);
-//   });
-//   document.addEventListener('click', (e) => {
-//     const target = e.target;
-
-//     if (target.closest('#login-btn-header')) {
-//       e.preventDefault();
-//       showLoginModal();
-//     } else if (target.closest('#register-btn-header')) {
-//       e.preventDefault();
-//       showRegisterModal();
-//     } else if (target.closest('#logout-btn')) {
-//       e.preventDefault();
-//       AuthService.logout();
-//       router.navigate('/');
-//     }
-
-//   });
-
-//   AuthService.onAuthChange(() => {
-//     header.render();
-//   });
-
-//   await Promise.all([
-//     header.loadTemplate(),
-//     footer.loadTemplate()
-//   ]);
-
-//   header.render();
-//   document.body.appendChild(footer.render());
-//   router.loadRoute();
-// }
-
-
-
 async function startApp() {
   await Promise.all([
     header.loadTemplate(),

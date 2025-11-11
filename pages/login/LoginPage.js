@@ -62,7 +62,7 @@ export default class LoginPage {
   show() {
     if (!this.modalElement) {
       this.modalElement = document.createElement('div');
-      this.modalElement.className = 'modal-overlay';
+      this.modalElement.className = 'modal__overlay';
       this.modalElement.innerHTML = this.render();
       document.body.appendChild(this.modalElement);
       this.attachEvents();
@@ -78,7 +78,7 @@ export default class LoginPage {
   }
 
   attachEvents() {
-    this.modalElement.querySelector('.auth__close-btn').addEventListener('click', this.onCancel);
+    this.modalElement.querySelector('.close-btn').addEventListener('click', this.onCancel);
     const form = this.modalElement.querySelector('#login-form');
     if (form) {
       form.addEventListener('submit', (event) => this.handleSubmit(event));

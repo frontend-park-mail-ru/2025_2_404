@@ -97,7 +97,7 @@ export default class RegisterPage {
   show() {
     if (!this.modalEl) {
       this.modalEl = document.createElement('div');
-      this.modalEl.className = 'modal-overlay';
+      this.modalEl.className = 'modal__overlay';
       this.modalEl.innerHTML = this.render();
       document.body.appendChild(this.modalEl);
       this.attachEvents();
@@ -113,7 +113,7 @@ export default class RegisterPage {
   }
 
   attachEvents() {
-    this.modalEl.querySelector('.auth__close-btn').addEventListener('click', this.onCancel);
+    this.modalEl.querySelector('.close-btn').addEventListener('click', this.onCancel);
     
     const form = this.modalEl.querySelector('#register-form');
     if (form) {
