@@ -19,22 +19,27 @@ class AuthService {
     return this.user;
   }
 
-  async loadProfile() {
+   async loadProfile() {
     if (!this.isAuthenticated()) {
-        this.user = null;
-        return null;
+      this.user = null;
+      if (this.onAuthChangeCallback) this.onAuthChangeCallback(null); 
+      return null;
     }
 
     try {
       const res = await http.get('/profile/');
       const clientData = res.data?.client;
       if (!clientData) throw new Error("Данные клиента не найдены");
-
       this.user = {
         id: clientData.id,
         username: clientData.user_name,
         email: clientData.email,
-        avatar: clientData.img_path || '/kit.jpg', 
+        firstName: clientData.first_name || '',
+        lastName: clientData.last_name || '',
+        company: clientData.company || '',
+        phone: clientData.phone || '',
+        role: clientData.role || 'advertiser',
+        avatar: res.data?.img ? `data:image/jpeg;base64,${res.data.img}` : '/kit.jpg',
       };
 
       if (this.onAuthChangeCallback) {
@@ -44,9 +49,17 @@ class AuthService {
       return this.user;
     } catch (err) {
       console.error('Ошибка при загрузке профиля:', err);
-      this.logout(); 
+      this.logout();
       return null;
     }
+  }
+
+  async updateProfile(formData) {
+    if (!this.isAuthenticated()) {
+      throw new Error("Пользователь не авторизован");
+    }
+    await http.putFormData('/profile/', formData);
+    return await this.loadProfile();
   }
 
   async login(credentials) {
@@ -65,20 +78,19 @@ class AuthService {
     this.user = null;
     
     if (token) {
-        apiLogout?.(token);
     }
-
     if (this.onAuthChangeCallback) this.onAuthChangeCallback(null);
   }
-
   onAuthChange(callback) {
     this.onAuthChangeCallback = callback;
   }
 
-  deleteAccount() {
-    console.log("Отправка запроса на удаление аккаунта...");
+  async deleteAccount() {
+    if (!this.isAuthenticated()) {
+      throw new Error("Пользователь не авторизован для удаления.");
+    }
+    await http.delete('/profile/');
     this.logout();
-    return Promise.resolve();
   }
 }
 

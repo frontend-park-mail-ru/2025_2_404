@@ -1,32 +1,24 @@
-import AuthService from '../../services/ServiceAuthentification.js';
-import { router } from '../../main.js';
-
 export default class MainPage {
   constructor() {
     this.template = null;
   }
-
   async loadTemplate() {
-    if (AuthService.isAuthenticated()) {
+    if (this.template) {
         return;
     }
-    const mainResponse = await fetch('/pages/main/MainPage.hbs');
-    if (!mainResponse.ok) {
-      throw new Error('Ошибка загрузки главной страницы');
+    try {
+      const response = await fetch('/pages/main/MainPage.hbs');
+      if (!response.ok) {
+        throw new Error('Ошибка загрузки шаблона главной страницы');
+      }
+      this.template = Handlebars.compile(await response.text());
+    } catch (error) {
+      console.error(error);
+      this.template = Handlebars.compile('<h1>Не удалось загрузить страницу</h1>');
     }
-    const mainText = await mainResponse.text();
-    this.template = Handlebars.compile(mainText);
   }
-
-  render() {
-    if (AuthService.isAuthenticated()) {
-      router.navigate('/projects');
-      return '<div>Перенаправление в ваши проекты...</div>';
-    }
-
-    if (!this.template) {
-      return '<div>Загрузка страницы...</div>';
-    }
+  async render() {
+    await this.loadTemplate();
     return this.template();
   }
 

@@ -9,7 +9,6 @@ export default class BalancePage {
     this.template = null;
     this.transactionTemplate = null;
     this.flatpickrInstance = null;
-
     this.balance = 0;
     this.allTransactions = [];
     this.currentTransactions = [];
@@ -17,78 +16,63 @@ export default class BalancePage {
     this.currentPage = 1;
     this.itemsPerPage = 5;
   }
+
   async loadTemplate() {
     if (this.template) return;
-
     Handlebars.registerHelper('eq', (a, b) => a === b);
-
     try {
       const response = await fetch('/pages/balance/BalancePage.hbs');
-      if (!response.ok) {
-        throw new Error('Не удалось загрузить шаблон BalancePage');
-      }
-      const templateText = await response.text();
-      this.template = Handlebars.compile(templateText);
+      if (!response.ok) throw new Error('Не удалось загрузить шаблон BalancePage');
+      this.template = Handlebars.compile(await response.text());
       
       const transactionTemplateString = `
         {{#each transactionGroups}}
-          <div class="history-group">
+          <div class="transactions">
             <h3>{{this.title}}</h3>
             {{#each this.items}}
-              <div class="transaction-item">
-                <div class="transaction-details">
-                  <span class="description">{{this.description}}</span>
-                  <span class="time">{{this.time}}</span>
+              <div class="transactions__item">
+                <div>
+                  <span class="transactions__description">{{this.description}}</span>
+                  <span class="transactions__time">{{this.time}}</span>
                 </div>
-                <span class="transaction-amount {{#if (eq this.type "positive")}}positive{{else}}negative{{/if}}">{{this.amount}} ₽</span>
+                <span class="transactions__amount {{#if (eq this.type "positive")}}transactions__amount--positive{{else}}transactions__amount--negative{{/if}}">{{this.amount}} ₽</span>
               </div>
             {{/each}}
           </div>
         {{else}}
-          <p style="text-align: center; color: var(--gray-text); margin: 40px 0;">
-            За выбранный период операций не найдено.
-          </p>
-        {{/each}}
-      `;
+          <p style="text-align: center; color: var(--gray-text); margin: 40px 0;">За выбранный период операций не найдено.</p>
+        {{/each}}`;
       this.transactionTemplate = Handlebars.compile(transactionTemplateString);
-
     } catch (error) {
       console.error(error);
       this.template = Handlebars.compile('<h1>Ошибка загрузки страницы баланса</h1>');
     }
   }
-  
   async fetchFromServer() {
-    const serverData = {
-      balance: '25000',
-      allTransactions: [
-        { id: 1, date: '2025-10-27T12:48:34Z', description: 'Пополнение Армен. Н.', amount: '+25000', type: 'positive' },
-        { id: 2, date: '2025-10-26T13:28:35Z', description: 'Оплата Рекламное объявление №1', amount: '-25000', type: 'negative' },
-        { id: 3, date: '2025-10-26T10:00:00Z', description: 'Покупка лицензии', amount: '-10000', type: 'negative' },
-        { id: 4, date: '2025-09-10T18:00:12Z', description: 'Пополнение баланса', amount: '+50000', type: 'positive' },
-        { id: 5, date: '2025-09-03T12:00:00Z', description: 'Зачисление от проекта "Омега"', amount: '+140000', type: 'positive' },
-      ].map(t => ({...t, time: new Date(t.date).toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}))
-    };
-    
-    await DBService.saveAllTransactions(serverData.allTransactions);
-    await DBService.saveBalance(parseInt(serverData.balance, 10));
-
-    return {
-        balance: parseInt(serverData.balance, 10),
-        allTransactions: serverData.allTransactions
-    };
+    return new Promise(resolve => {
+        setTimeout(() => {
+            const serverData = {
+              balance: Math.floor(20000 + Math.random() * 5000), 
+              allTransactions: [
+                { id: 1, date: '2025-10-27T12:48:34Z', description: 'Пополнение через СБП', amount: '+25000', type: 'positive' },
+                { id: 2, date: '2025-10-26T13:28:35Z', description: 'Оплата Рекламное объявление №1', amount: '-25000', type: 'negative' },
+                { id: 3, date: '2025-10-26T10:00:00Z', description: 'Покупка лицензии', amount: '-10000', type: 'negative' },
+                { id: 4, date: '2025-09-10T18:00:12Z', description: 'Пополнение баланса', amount: '+50000', type: 'positive' },
+              ].map(t => ({...t, time: new Date(t.date).toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}))
+            };
+            resolve(serverData);
+        }, 1000);
+    });
   }
 
   async render() {
     if (!AuthService.isAuthenticated()) {
       router.navigate('/');
-      return '<div>Доступ запрещен. Перенаправление...</div>';
+      return '<div>Доступ запрещен.</div>';
     }
-    
     await this.loadTemplate();
     const cachedBalance = await DBService.getBalance();
     this.balance = cachedBalance;
-    
     return this.template({ balance: this.balance.toLocaleString('ru-RU') });
   }
 
@@ -96,10 +80,27 @@ export default class BalancePage {
     this.initCalendar();
     document.getElementById('reset-filter-btn')?.addEventListener('click', () => this.resetFilter());
     this.attachActionButtons();
+    this.balance = await DBService.getBalance();
+    this.allTransactions = await DBService.getAllTransactions();
+    this.updateDisplay();
+    try {
+      const serverData = await this.fetchFromServer();
+      await DBService.saveBalance(parseInt(serverData.balance, 10));
+      await DBService.saveAllTransactions(serverData.allTransactions);
+      this.balance = parseInt(serverData.balance, 10);
+      this.allTransactions = serverData.allTransactions;
+      this.updateDisplay();
+    } catch (error) {
+      console.warn("Не удалось получить свежие данные с сервера. Работаем с кэшем.", error);
+    }
+  }
+  async attachEvents() {
+    this.initCalendar();
+    document.getElementById('reset-filter-btn')?.addEventListener('click', () => this.resetFilter());
+    this.attachActionButtons();
 
     try {
       const serverData = await this.fetchFromServer();
-      console.log("Данные успешно загружены с сервера.");
       this.balance = serverData.balance;
       this.allTransactions = serverData.allTransactions;
     } catch (error) {
@@ -157,7 +158,7 @@ export default class BalancePage {
   }
 
   updateDisplay() {
-    const balanceAmountEl = document.querySelector('.current-balance .amount');
+    const balanceAmountEl = document.querySelector('.balance__amount');
     if (balanceAmountEl) {
         balanceAmountEl.textContent = `${this.balance.toLocaleString('ru-RU')} ₽`;
     }
@@ -252,11 +253,11 @@ export default class BalancePage {
 
     let paginationHTML = '';
     for (let i = 1; i <= totalPages; i++) {
-      paginationHTML += `<button class="page-item ${i === this.currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
+      paginationHTML += `<button class="pagination__item ${i === this.currentPage ? 'pagination__item--active' : ''}" data-page="${i}">${i}</button>`;
     }
     container.innerHTML = paginationHTML;
 
-    container.querySelectorAll('.page-item').forEach(button => {
+    container.querySelectorAll('.pagination__item').forEach(button => {
       button.addEventListener('click', (e) => {
         this.currentPage = parseInt(e.target.dataset.page, 10);
         this.updateDisplay();

@@ -19,9 +19,9 @@ export default class Input {
     const initialIcon = '👁';
     return `
             <div class="form-group">
-                <label for="${this.id}">${this.label}</label>
+                <label class="form-group__label"for="${this.id}">${this.label}</label>
                 <div class="input-wrapper">
-                    <input type="${this.type}" id="${this.id}" placeholder="${this.placeholder}">
+                    <input class="form-group__input" "type="${this.type}" id="${this.id}" placeholder="${this.placeholder}">
                     ${this.showPasswordToggle ? `<span class="password-toggle" role="button" aria-controls="${this.id}">${initialIcon}</span>` : ''}
                 </div>
                 <div class="error-message" id="error-${this.id}"></div>

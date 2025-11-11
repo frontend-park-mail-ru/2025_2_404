@@ -35,14 +35,14 @@ export default class WithdrawModal {
   
   render() {
     return `
-      <div class="confirmation-modal" style="text-align: left; max-width: 400px;">
+      <div class="confirmation-modal">
         <button class="close-btn" id="cancel-withdraw">&times;</button>
-        <h2>Вывод средств</h2>
-        <p style="color: var(--gray-text); margin-bottom: 20px;">Введите сумму для вывода с вашего счета</p>
+        <h2 class="confirmation-modal__title">Вывод средств</h2>
+        <p confirmation-modal__title>Введите сумму для вывода с вашего счета</p>
         
         <form id="withdraw-form">
           ${this.amountInput.render()}
-          <div class="confirmation-modal-footer" style="margin-top: 20px;">
+          <div class="confirmation-modal__footer">
             ${this.confirmButton.render()}
           </div>
         </form>
@@ -53,7 +53,7 @@ export default class WithdrawModal {
   show() {
     if (!this.modalElement) {
       this.modalElement = document.createElement('div');
-      this.modalElement.className = 'modal-overlay';
+      this.modalElement.className = 'modal__overlay';
       this.modalElement.innerHTML = this.render();
       document.body.appendChild(this.modalElement);
       this.attachEvents();

@@ -1,15 +1,15 @@
-<div class="balance-page">
-  <div class="profile-header">
-    <a href="/">Главная</a> > <span>Мой баланс</span>
+<div class="balance">
+   <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="/">Главная</a> 
+    <span class="breadcrumbs__separator"> > </span>
+    <span class="breadcrumbs__current">Мой баланс</span>
   </div>
 
-  <div class="balance-summary">
-    <div class="current-balance">
-      <h1>
-        Ваш баланс: <span class="amount">{{balance}} ₽</span>
+  <div class="balance__summary">
+      <h1 class="balance__title">
+        Ваш баланс: <span class="balance__amount">{{balance}} ₽</span>
       </h1>
-    </div>
-    <div class="balance-actions">
+    <div class="balance__actions">
       <button id="add-funds-btn" class="btn btn--primary">Пополнить</button>
       <button id="withdraw-btn" class="btn btn--primary">Вывести</button>
     </div>
@@ -24,24 +24,24 @@
   
   <button class="btn" id="reset-filter-btn" style="display: none; background-color: #f3f4f6;">Сбросить фильтр</button>
 
-<div class="period-summary" id="period-summary-container">
-  <div class="summary-card">
-    <p>Траты</p>
-    <span class="amount" id="summary-spent">0 ₽</span>
-    <div class="progress-bar-container">
-      <div class="progress-bar" id="spent-progress" style="width: 0%;"></div>
+<div class="balance__period-summary" id="period-summary-container">
+  <div class="balance__summary-card">
+    <p class="balance__summary-label">Траты</p>
+    <span class="balance__summary-amount" id="summary-spent">0 ₽</span>
+    <div class="balance__progress">
+      <div class="balance__progress-bar" id="spent-progress"></div>
     </div>
     
-    <span class="date-range" id="summary-date-range"></span>
+    <span class="balance__date-range" id="summary-date-range"></span>
   </div>
-  <div class="summary-card">
-    <p>Зачисления</p>
-    <span class="amount" id="summary-earned">0 ₽</span>
-    <div class="progress-bar-container">
-      <div class="progress-bar" id="earned-progress" style="width: 0%;"></div>
+  <div class="balance__summary-card">
+    <p class="balance__summary-label">Зачисления</p>
+    <span class="balance__summary-amount" id="summary-earned">0 ₽</span>
+    <div class="balance__progress">
+      <div class="balance__progress-bar" id="earned-progress"></div>
     </div>
 
-    <span class="date-range" id="summary-date-range-earned"></span>
+    <span class="balance__date-range" id="summary-date-range-earned"></span>
   </div>
 </div>
 

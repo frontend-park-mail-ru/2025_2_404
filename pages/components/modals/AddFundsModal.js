@@ -29,14 +29,14 @@ export default class AddFundsModal {
   }
   render() {
     return `
-        <div class="confirmation-modal" style="text-align: left; max-width: 400px;">
+        <div class="confirmation-modal">
           <button class="close-btn" id="cancel-add-funds">&times;</button>
-          <h2>Пополнение баланса</h2>
-          <p style="color: var(--gray-text); margin-bottom: 20px;">Введите сумму для зачисления на ваш счет</p>
+          <h2 class="confirmation-modal__title">Пополнение баланса</h2>
+          <p class="confirmation-modal__subtitle">Введите сумму для зачисления на ваш счет</p>
           
           <form id="add-funds-form">
             ${this.amountInput.render()}
-            <div class="confirmation-modal-footer" style="margin-top: 20px;">
+            <div class="confirmation-modal__footer">
               ${this.confirmButton.render()}
             </div>
           </form>
@@ -47,7 +47,7 @@ export default class AddFundsModal {
   show() {
     if (!this.modalElement) {
       this.modalElement = document.createElement('div');
-      this.modalElement.className = 'modal-overlay';
+      this.modalElement.className = 'modal__overlay';
       this.modalElement.innerHTML = this.render();
       document.body.appendChild(this.modalElement);
       this.attachEvents();
