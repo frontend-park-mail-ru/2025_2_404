@@ -73,9 +73,55 @@ export default class Header {
     }
   }
 
+  // async update() {
+  //   await this.loadTemplate();
+  //   if (!this.template) return;
+
+  //   let isAuthenticated = AuthService.isAuthenticated();
+  //   let user = null;
+
+  //   if (isAuthenticated) {
+  //     try {
+  //       user = await AuthService.loadProfile();
+  //       if (user) {
+  //         user = {
+  //           username: user.username ?? user.user_name ?? '',
+  //           avatar: user.avatar || '/kit.jpg',
+  //         };
+  //       }
+  //     } catch (err) {
+  //       console.error('Ошибка загрузки данных для хедера (возможно, токен истёк)', err);
+  //       AuthService.logout();
+  //       isAuthenticated = false;
+  //     }
+  //   }
+
+  //   const sameAuth = this.lastAuthState === isAuthenticated;
+  //   const sameUser =
+  //     JSON.stringify(this.lastUser) === JSON.stringify(user);
+
+  //   // if (sameAuth && sameUser) {
+  //   //   return;
+  //   // }
+  //   if (sameAuth && sameUser && isAuthenticated) return;
+
+
+  //   // обновляем кеш состояния
+  //   this.lastAuthState = isAuthenticated;
+  //   this.lastUser = user;
+
+  //   this.header.innerHTML = this.template({ isAuthenticated, user });
+  // }
+
   async update() {
+    if (this._updating) return;
+    this._updating = true;
+
     await this.loadTemplate();
-    if (!this.template) return;
+    if (!this.template) {
+      this._updating = false;
+      return;
+    }
 
     let isAuthenticated = AuthService.isAuthenticated();
     let user = null;
@@ -85,37 +131,36 @@ export default class Header {
         user = await AuthService.loadProfile();
         if (user) {
           user = {
-            username: user.username ?? user.user_name ?? '',
-            avatar: user.avatar || '/kit.jpg',
+            username: user.username ?? user.user_name ?? "",
+            avatar: user.avatar || "/kit.jpg",
           };
         }
-      } catch (err) {
-        console.error('Ошибка загрузки данных для хедера (возможно, токен истёк)', err);
+      } catch {
         AuthService.logout();
         isAuthenticated = false;
       }
     }
 
     const sameAuth = this.lastAuthState === isAuthenticated;
-    const sameUser =
-      JSON.stringify(this.lastUser) === JSON.stringify(user);
+    const sameUser = JSON.stringify(this.lastUser) === JSON.stringify(user);
 
-    // if (sameAuth && sameUser) {
-    //   return;
-    // }
-    if (sameAuth && sameUser && isAuthenticated) return;
+    if (sameAuth && sameUser) {
+      this._updating = false;
+      return;
+    }
 
-
-    // обновляем кеш состояния
     this.lastAuthState = isAuthenticated;
     this.lastUser = user;
 
     this.header.innerHTML = this.template({ isAuthenticated, user });
+
+    this._updating = false;
   }
 
+
   resetCache() {
-  this.lastAuthState = null;
-  this.lastUser = null;
-}
+    this.lastAuthState = null;
+    this.lastUser = null;
+  }
 
 }

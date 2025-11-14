@@ -106,8 +106,9 @@ async function startApp() {
   document.body.appendChild(footer.render());
 
   // подписки на изменения авторизации
-  AuthService.onAuthChange((user) => {
-    header.update(user);
+  AuthService.onAuthChange(() => {
+    header.resetCache();
+    header.update();
   });
 
   // обработчики кликов (логин/регистрация/логаут)

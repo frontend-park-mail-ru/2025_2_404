@@ -134,7 +134,7 @@ async render() {
       try {
         await adsRepository.update(this.projectId, formData);
         new ConfirmationModal({
-          message: 'Изменения сохранены! Они будут отправлены на сервер, когда появится интернет.',
+          message: 'Изменения сохранены!',
           onConfirm: () => router.navigate('/projects'),
         }).show();
       } catch (err) {
