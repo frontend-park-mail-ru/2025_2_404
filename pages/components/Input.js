@@ -1,3 +1,8 @@
+const ICON_OPEN = './public/assets/eye-show.svg';
+
+const ICON_CLOSE = './public/assets/eye-close.svg'
+
+
 export default class Input {
   constructor({
     id,
@@ -16,13 +21,15 @@ export default class Input {
   }
 
   render() {
-    const initialIcon = '👁';
     return `
             <div class="form-group">
                 <label class="form-group__label"for="${this.id}">${this.label}</label>
                 <div class="input-wrapper">
-                    <input class="form-group__input" "type="${this.type}" id="${this.id}" placeholder="${this.placeholder}">
-                    ${this.showPasswordToggle ? `<span class="password-toggle" role="button" aria-controls="${this.id}">${initialIcon}</span>` : ''}
+                    <input class="form-group__input" type="${this.type}" id="${this.id}" placeholder="${this.placeholder}">
+                    ${this.showPasswordToggle ?
+                    `<span class="password-toggle" role="button" aria-controls="${this.id}">
+                      <img class="password-toggle__icon" src="${ICON_CLOSE}" alt="toggle password">
+                    </span>` : ''}
                 </div>
                 <div class="error-message" id="error-${this.id}"></div>
             </div>
@@ -72,6 +79,7 @@ export default class Input {
       inputEl.classList.remove('input--error');
     }
   }
+
   PasswordToggle() {
     const toggle = document.querySelector(`#${this.id} + .password-toggle`);
     if (toggle) {
@@ -79,14 +87,16 @@ export default class Input {
         const inputEl = document.getElementById(this.id);
         if (inputEl.type === 'password') {
           inputEl.type = 'text';
-          toggle.textContent = '👁';
+          toggle.innerHTML = `<img class="password-toggle__icon" src="${ICON_OPEN}" alt="">`;
         } else {
           inputEl.type = 'password';
-          toggle.textContent = '👁';
+          toggle.innerHTML = `<img class="password-toggle__icon" src="${ICON_CLOSE}" alt="">`;
+
         }
       });
     }
   }
+
   attachValidationEvent() {
     const inputEl = document.getElementById(this.id);
     if (inputEl) {

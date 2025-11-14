@@ -100,9 +100,11 @@ export default class Header {
     const sameUser =
       JSON.stringify(this.lastUser) === JSON.stringify(user);
 
-    if (sameAuth && sameUser) {
-      return;
-    }
+    // if (sameAuth && sameUser) {
+    //   return;
+    // }
+    if (sameAuth && sameUser && isAuthenticated) return;
+
 
     // обновляем кеш состояния
     this.lastAuthState = isAuthenticated;
@@ -110,4 +112,10 @@ export default class Header {
 
     this.header.innerHTML = this.template({ isAuthenticated, user });
   }
+
+  resetCache() {
+  this.lastAuthState = null;
+  this.lastUser = null;
+}
+
 }

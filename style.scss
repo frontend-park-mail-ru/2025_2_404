@@ -819,7 +819,15 @@ body {
   transform: translateY(-50%);
   cursor: pointer;
   color: var(--gray-text);
+
+  &__icon {
+
+    width: 25px;
+    height: auto;
+
+  }
 }
+
 
 // breadcrumbs
 
@@ -934,6 +942,11 @@ body {
       display: flex;
       gap: 15px;
     }
+  }
+
+  &__button-upload{
+    margin-bottom: 20px;
+    display: inline-block;
   }
 
 }

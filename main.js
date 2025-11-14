@@ -13,21 +13,21 @@ import BalancePage from './pages/balance/BalancePage.js';
 import LoginPage from './pages/login/LoginPage.js';
 import RegisterPage from './pages/register/Register.js';
 
-const offlineIndicator = document.getElementById('offline-indicator');
+// const offlineIndicator = document.getElementById('offline-indicator');
 
-function updateOnlineStatus() {
-  if (navigator.onLine) {
-    offlineIndicator.classList.add('hidden');
-  } else {
-    offlineIndicator.classList.remove('hidden');
-  }
-}
+// function updateOnlineStatus() {
+//   if (navigator.onLine) {
+//     offlineIndicator.classList.add('hidden');
+//   } else {
+//     offlineIndicator.classList.remove('hidden');
+//   }
+// }
 
-window.addEventListener('online', updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
+// window.addEventListener('online', updateOnlineStatus);
+// window.addEventListener('offline', updateOnlineStatus);
 
 // Вызываем функцию при первой загрузке, чтобы установить начальное состояние
-updateOnlineStatus();
+// updateOnlineStatus();
 Handlebars.registerHelper('formatDate', function (dateString) {
   if (!dateString) return '';
   return new Date(dateString).toLocaleString('ru-RU');
@@ -76,7 +76,7 @@ function showLoginModal() {
   loginModal.init().then(() => loginModal.show());
 }
 
-function showRegisterModal() {
+export function showRegisterModal() {
   if (loginModal) loginModal.hide();
   if (registerModal) return;
   registerModal = new RegisterPage({
@@ -120,10 +120,17 @@ async function startApp() {
     } else if (target.closest('#register-btn-header')) {
       e.preventDefault();
       showRegisterModal();
-    } else if (target.closest('#logout-btn')) {
+    } else if (
+      target.closest('#logout-btn') ||
+      target.closest('#profile-logout')
+    ) {
+
       e.preventDefault();
       AuthService.logout();
+      header.resetCache();
       router.navigate('/');
+      header.update();
+
     }
   });
 

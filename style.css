@@ -657,6 +657,10 @@ body {
   cursor: pointer;
   color: var(--gray-text);
 }
+.password-toggle__icon {
+  width: 25px;
+  height: auto;
+}
 
 .breadcrumbs {
   margin-bottom: 20px;
@@ -745,6 +749,10 @@ body {
 .profile__footer-left {
   display: flex;
   gap: 15px;
+}
+.profile__button-upload {
+  margin-bottom: 20px;
+  display: inline-block;
 }
 
 .pagination {

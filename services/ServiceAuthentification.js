@@ -14,15 +14,15 @@ class AuthService {
   isAuthenticated() {
     return !!this.getToken();
   }
-  
+
   getUser() {
     return this.user;
   }
 
-   async loadProfile() {
+  async loadProfile() {
     if (!this.isAuthenticated()) {
       this.user = null;
-      if (this.onAuthChangeCallback) this.onAuthChangeCallback(null); 
+      if (this.onAuthChangeCallback) this.onAuthChangeCallback(null);
       return null;
     }
 
@@ -45,7 +45,7 @@ class AuthService {
       if (this.onAuthChangeCallback) {
         this.onAuthChangeCallback(this.user);
       }
-      
+
       return this.user;
     } catch (err) {
       console.error('Ошибка при загрузке профиля:', err);
@@ -72,15 +72,25 @@ class AuthService {
     return await this.loadProfile();
   }
 
+  // logout() {
+  //   const token = this.getToken();
+  //   localStorage.removeItem('token');
+  //   this.user = null;
+
+  //   if (this.onAuthChangeCallback) this.onAuthChangeCallback(null);
+  // }
+
   logout() {
-    const token = this.getToken();
     localStorage.removeItem('token');
     this.user = null;
-    
-    if (token) {
-    }
+
     if (this.onAuthChangeCallback) this.onAuthChangeCallback(null);
+
+    if (window.header?.resetCache) {
+      window.header.resetCache();
+    }
   }
+
   onAuthChange(callback) {
     this.onAuthChangeCallback = callback;
   }

@@ -1,10 +1,12 @@
+import { showRegisterModal } from '../../main.js';
+
 export default class MainPage {
   constructor() {
     this.template = null;
   }
   async loadTemplate() {
     if (this.template) {
-        return;
+      return;
     }
     try {
       const response = await fetch('/pages/main/MainPage.hbs');
@@ -35,5 +37,13 @@ export default class MainPage {
         item.classList.toggle('active');
       });
     });
+
+    const tryBtn = document.getElementById('try-btn');
+    if (tryBtn) {
+      tryBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        showRegisterModal();
+      });
+    }
   }
 }
