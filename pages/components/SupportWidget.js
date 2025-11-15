@@ -509,42 +509,6 @@ export default class SupportWidget {
 
 async sendToServer(formData) {
     try {
-        // Создаем FormData объект
-        const formDataToSend = new FormData();
-        formDataToSend.append('status', 'open');
-        formDataToSend.append('category', formData.issue_category);
-        formDataToSend.append('description', formData.problem_description);
-        formDataToSend.append('contact_name', formData.contact_name);
-        formDataToSend.append('contact_email', formData.contact_email);
-        formDataToSend.append('login_email', formData.login_email);
-
-        const response = await fetch('/support/', {
-            method: 'POST',
-            body: formDataToSend
-        });
-        
-        if (response.ok) {
-            // Сначала проверяем, что ответ действительно JSON
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                const result = await response.json();
-                console.log('Форма успешно отправлена:', result);
-            } else {
-                // Если не JSON, читаем как текст
-                const text = await response.text();
-                console.log('Форма успешно отправлена. Ответ сервера:', text);
-            }
-        } else {
-            console.error('Ошибка при отправке формы:', response.status);
-            const errorText = await response.text();
-            console.error('Текст ошибки:', errorText);
-        }
-    } catch (error) {
-        console.error('Ошибка отправки формы:', error);
-    }
-}
-async sendToServer(formData) {
-    try {
         const formDataToSend = new FormData();
         formDataToSend.append('status', 'open');
         formDataToSend.append('category', formData.issue_category);
