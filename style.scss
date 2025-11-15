@@ -944,7 +944,7 @@ body {
     }
   }
 
-  &__button-upload{
+  &__button-upload {
     margin-bottom: 20px;
     display: inline-block;
   }
@@ -1242,3 +1242,225 @@ body {
   gap: 8px;
   justify-content: center;
 }
+
+/* ===========================
+   Страница списка обращений
+   =========================== */
+
+.appeals {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+
+  &__title {
+    margin: 0 0 24px;
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+/* ===========================
+   Карточка обращения
+   =========================== */
+
+.appeal-card {
+  padding: 16px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background-color: #ffffff;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+  cursor: pointer;
+  transition:
+    box-shadow 0.15s ease,
+    transform 0.15s ease,
+    border-color 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    border-color: rgba(79, 70, 229, 0.4);
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    gap: 8px;
+  }
+
+  &__id {
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  &__status {
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    line-height: 1.4;
+    background-color: #eef2ff;
+    color: #4338ca;
+    white-space: nowrap;
+  }
+
+  &__status--open {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  &__status--in-progress {
+    background-color: #fef9c3;
+    color: #854d0e;
+  }
+
+  &__status--closed {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+
+  &__category {
+    font-size: 13px;
+    margin-bottom: 2px;
+    color: #6b7280;
+  }
+
+  &__category--bug {
+    color: #b91c1c;
+  }
+
+  &__category--suggestion {
+    color: #0369a1;
+  }
+
+  &__category--complaint {
+    color: #7c2d12;
+  }
+
+  &__category--over {
+    color: #4b5563;
+    font-style: italic;
+  }
+
+  &__summary {
+    font-size: 14px;
+    color: #111827;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+}
+
+/* ===========================
+   Детальная страница
+   =========================== */
+
+.appeal-detail {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+
+  h1 {
+    margin: 0 0 16px;
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #111827;
+
+    b {
+      font-weight: 500;
+    }
+  }
+
+  h3 {
+    margin: 20px 0 8px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  &__status {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    line-height: 1.4;
+    background-color: #eef2ff;
+    color: #4338ca;
+  }
+
+  &__status--open {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  &__status--in-progress {
+    background-color: #fef9c3;
+    color: #854d0e;
+  }
+
+  &__status--closed {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+
+  &__category {
+    margin-left: 6px;
+    font-weight: 500;
+    color: #6b7280;
+  }
+
+  &__category--bug {
+    color: #b91c1c;
+  }
+
+  &__category--suggestion {
+    color: #0369a1;
+  }
+
+  &__category--complaint {
+    color: #7c2d12;
+  }
+
+  &__category--question {
+    color: #4b5563;
+  }
+
+  &__message {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background-color: #f9fafb;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+
+  &__image {
+    display: block;
+    max-width: 100%;
+    border-radius: 10px;
+    margin-top: 8px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+  }
+}
+
+
+.appeals__all-btn{
+  margin-bottom: 15px;
+}
+

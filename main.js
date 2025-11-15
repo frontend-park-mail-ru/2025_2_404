@@ -12,7 +12,9 @@ import CreateProjectPage from './pages/projects/CreateProjectPage.js';
 import BalancePage from './pages/balance/BalancePage.js';
 import LoginPage from './pages/login/LoginPage.js';
 import RegisterPage from './pages/register/Register.js';
-
+import AppealPage from './pages/appeal/AppealPage.js';
+import AppealDetailPage from './pages/appeal/AppealDetailPage.js';
+import AppealsPage from './pages/appeal/AppealsPage.js';
 // const offlineIndicator = document.getElementById('offline-indicator');
 
 // function updateOnlineStatus() {
@@ -32,6 +34,41 @@ Handlebars.registerHelper('formatDate', function (dateString) {
   if (!dateString) return '';
   return new Date(dateString).toLocaleString('ru-RU');
 });
+
+Handlebars.registerHelper('formatDate', function (dateString) {
+  if (!dateString) return '';
+  return new Date(dateString).toLocaleString('ru-RU');
+});
+
+Handlebars.registerHelper('statusModifier', function (status) {
+  if (!status) return '';
+
+  const value = String(status).toLowerCase().trim();
+
+  const map = {
+    'открыто': 'open',
+    'в работе': 'in-progress',
+    'закрыто': 'closed',
+  };
+
+  return map[value] || value.replace(/\s+/g, '-');
+});
+
+Handlebars.registerHelper('categoryModifier', function (category) {
+  if (!category) return '';
+
+  const value = String(category).toLowerCase().trim();
+
+  const map = {
+    'баг': 'bug',
+    'предложение': 'suggestion',
+    'жалоба': 'complaint',
+    'вопрос': 'question',
+  };
+
+  return map[value] || value.replace(/\s+/g, '-');
+});
+
 const appContainer = document.getElementById('app');
 const routes = {
   '/': MainPage,
@@ -40,6 +77,9 @@ const routes = {
   '/projects/create': CreateProjectPage,
   '/projects/:id': ProjectDetailPage,
   '/balance': BalancePage,
+  '/support': AppealPage,
+  '/support/:id': AppealDetailPage,
+  '/supports': AppealsPage,
 };
 
 export const router = new Router(routes, appContainer);

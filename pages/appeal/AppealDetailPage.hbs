@@ -1,0 +1,33 @@
+<div class="appeal-detail">
+  <h1>Обращение №{{appeal.id}}</h1>
+
+  <p>
+    <b>Статус:</b>
+    <span
+      class="appeal-detail__status appeal-detail__status--{{statusModifier appeal.status}}"
+    >
+      {{appeal.status}}
+    </span>
+  </p>
+
+  <p>
+    <b>Категория:</b>
+    <span
+      class="appeal-detail__category appeal-detail__category--{{categoryModifier appeal.category}}"
+    >
+      {{appeal.category}}
+    </span>
+  </p>
+
+  <p><b>Контактное лицо:</b> {{appeal.contactName}} ({{appeal.contactEmail}})</p>
+
+  <h3>Описание</h3>
+  <div class="appeal-detail__message">
+    {{appeal.description}}
+  </div>
+
+  {{#if appeal.imagePath}}
+    <h3>Приложенное изображение</h3>
+    <img class="appeal-detail__image" src="{{appeal.imagePath}}" alt="Приложение к обращению">
+  {{/if}}
+</div>

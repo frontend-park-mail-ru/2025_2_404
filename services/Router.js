@@ -51,7 +51,7 @@ export default class Router {
         }
       } catch (error) {
         console.error("Ошибка при рендеринге маршрута:", error);
-        this.rootElement.innerHTML = '<h1>Произошла ошибка при загрузке страницы</h1>';
+        this.rootElement.innerHTML = '<h1 class="error-page>Произошла ошибка при загрузке страницы</h1>';
       }
     } else {
       this.rootElement.innerHTML = '<div class="error-page"><h1>404: Страница не найдена</h1></div>';

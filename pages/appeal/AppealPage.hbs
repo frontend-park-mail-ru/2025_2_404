@@ -1,0 +1,37 @@
+
+
+
+<div class="appeals">
+  <div class="appeals__header">
+    <h1 class="appeals__title">Мои обращения</h1>
+
+    <button
+      class="appeals__all-btn btn btn--secondary"
+      id="appeals-all-btn"
+      type="button"
+    >
+      Посмотреть обращения всех пользователей
+    </button>
+  </div>
+
+  <div class="appeals__list">
+    {{#each appeals}}
+      <div class="appeal-card" data-id="{{this.id}}">
+        <div class="appeal-card__header">
+          <span class="appeal-card__id">№{{this.id}}</span>
+          <span class="appeal-card__status appeal-card__status--{{statusModifier this.status}}">
+            {{this.status}}
+          </span>
+        </div>
+
+        <div class="appeal-card__category appeal-card__category--{{categoryModifier this.category}}">
+          {{this.category}}
+        </div>
+
+        <div class="appeal-card__summary">
+          {{this.description}}
+        </div>
+      </div>
+    {{/each}}
+  </div>
+</div>
