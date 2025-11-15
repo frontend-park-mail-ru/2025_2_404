@@ -14,7 +14,7 @@ export default class SupportWidget {
         if (!this.isUserAuthenticated()) {
             console.log('Пользователь не авторизован - виджет поддержки не отображается');
             return;
-        }
+        }   
 
         const widgetHTML = `
         <!-- Кнопка для вызова поддержки -->
@@ -205,6 +205,7 @@ export default class SupportWidget {
                 });
 
                 // Обработка отправки формы
+// Обработка отправки формы
                 feedbackForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     
@@ -506,25 +507,85 @@ export default class SupportWidget {
         });
     }
 
-    async sendToServer(formData) {
-        try {
-            const response = await fetch('/support/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            });
-            
-            if (response.ok) {
-                console.log('Форма успешно отправлена');
+async sendToServer(formData) {
+    try {
+        // Создаем FormData объект
+        const formDataToSend = new FormData();
+        formDataToSend.append('status', 'open');
+        formDataToSend.append('category', formData.issue_category);
+        formDataToSend.append('description', formData.problem_description);
+        formDataToSend.append('contact_name', formData.contact_name);
+        formDataToSend.append('contact_email', formData.contact_email);
+        formDataToSend.append('login_email', formData.login_email);
+
+        const response = await fetch('/support/', {
+            method: 'POST',
+            body: formDataToSend
+        });
+        
+        if (response.ok) {
+            // Сначала проверяем, что ответ действительно JSON
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const result = await response.json();
+                console.log('Форма успешно отправлена:', result);
             } else {
-                console.error('Ошибка при отправке формы');
+                // Если не JSON, читаем как текст
+                const text = await response.text();
+                console.log('Форма успешно отправлена. Ответ сервера:', text);
             }
-        } catch (error) {
-            console.error('Ошибка отправки формы:', error);
+        } else {
+            console.error('Ошибка при отправке формы:', response.status);
+            const errorText = await response.text();
+            console.error('Текст ошибки:', errorText);
         }
+    } catch (error) {
+        console.error('Ошибка отправки формы:', error);
     }
+}
+async sendToServer(formData) {
+    try {
+        const formDataToSend = new FormData();
+        formDataToSend.append('status', 'open');
+        formDataToSend.append('category', formData.issue_category);
+        formDataToSend.append('description', formData.problem_description);
+        formDataToSend.append('contact_name', formData.contact_name);
+        formDataToSend.append('contact_email', formData.contact_email);
+        formDataToSend.append('login_email', formData.login_email);
+
+        console.log('📤 Отправка данных на localhost:8080/support/');
+
+        const response = await fetch('http://localhost:8080/support/', {
+            method: 'POST',
+            body: formDataToSend
+        });
+
+        const responseText = await response.text();
+        console.log('Статус ответа:', response.status);
+        console.log('Ответ сервера:', responseText);
+
+        if (response.ok) {
+            console.log('✅ Форма успешно отправлена на localhost:8080');
+            
+            // Пытаемся распарсить JSON
+            try {
+                const jsonResult = JSON.parse(responseText);
+                console.log('✅ JSON ответ:', jsonResult);
+            } catch (e) {
+                console.log('✅ Текстовый ответ:', responseText);
+            }
+            return true;
+        } else {
+            console.error('❌ Ошибка сервера:', response.status);
+            console.error('Текст ошибки:', responseText);
+            return false;
+        }
+        
+    } catch (error) {
+        console.error('❌ Ошибка сети при отправке на localhost:8080:', error);
+        return false;
+    }
+}
 
     init() {
         this.render();
