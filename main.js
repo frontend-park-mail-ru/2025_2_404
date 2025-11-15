@@ -1,9 +1,9 @@
 import Router from './services/Router.js';
 import Header from './pages/header/Header.js';
 import Footer from './pages/footer/Footer.js';
+import SupportWidget from './pages/components/SupportWidget.js';
 import AuthService from './services/ServiceAuthentification.js';
 
-// Импорт страниц
 import MainPage from './pages/main/MainPage.js';
 import ProfilePage from './pages/profile/ProfilePage.js';
 import ProjectsPage from './pages/projects/ProjectsPage.js';
@@ -34,41 +34,6 @@ Handlebars.registerHelper('formatDate', function (dateString) {
   if (!dateString) return '';
   return new Date(dateString).toLocaleString('ru-RU');
 });
-
-Handlebars.registerHelper('formatDate', function (dateString) {
-  if (!dateString) return '';
-  return new Date(dateString).toLocaleString('ru-RU');
-});
-
-Handlebars.registerHelper('statusModifier', function (status) {
-  if (!status) return '';
-
-  const value = String(status).toLowerCase().trim();
-
-  const map = {
-    'открыто': 'open',
-    'в работе': 'in-progress',
-    'закрыто': 'closed',
-  };
-
-  return map[value] || value.replace(/\s+/g, '-');
-});
-
-Handlebars.registerHelper('categoryModifier', function (category) {
-  if (!category) return '';
-
-  const value = String(category).toLowerCase().trim();
-
-  const map = {
-    'баг': 'bug',
-    'предложение': 'suggestion',
-    'жалоба': 'complaint',
-    'вопрос': 'question',
-  };
-
-  return map[value] || value.replace(/\s+/g, '-');
-});
-
 const appContainer = document.getElementById('app');
 const routes = {
   '/': MainPage,
@@ -87,15 +52,11 @@ export const header = new Header();
 const footer = new Footer();
 
 function onAuthSuccess() {
-  // header.update();
   router.navigate('/projects');
 }
 
 let loginModal = null;
 let registerModal = null;
-// function onAuthSuccess() {
-//   router.navigate('/projects');
-// }
 
 function showLoginModal() {
   if (registerModal) registerModal.hide();
@@ -134,61 +95,58 @@ export function showRegisterModal() {
   });
   registerModal.init().then(() => registerModal.show());
 }
-
 async function startApp() {
-  await Promise.all([
-    header.loadTemplate(),
-    footer.loadTemplate()
-  ]);
-
-  // сначала вставляем хедер и футер
-  await header.update();
-  document.body.appendChild(footer.render());
-
-  // подписки на изменения авторизации
-  AuthService.onAuthChange(() => {
-    header.resetCache();
-    header.update();
-  });
-
-  // обработчики кликов (логин/регистрация/логаут)
-  document.addEventListener('click', (e) => {
-    const target = e.target;
-
-    if (target.closest('#login-btn-header')) {
-      e.preventDefault();
-      showLoginModal();
-    } else if (target.closest('#register-btn-header')) {
-      e.preventDefault();
-      showRegisterModal();
-    } else if (
-      target.closest('#logout-btn') ||
-      target.closest('#profile-logout')
-    ) {
-
-      e.preventDefault();
-      AuthService.logout();
-      header.resetCache();
-      router.navigate('/');
-      header.update();
-
+  try {
+    await Promise.all([
+      header.loadTemplate(),
+      footer.loadTemplate()
+    ]);
+    await header.update();
+    document.body.appendChild(footer.render());
+    await AuthService.loadProfile();
+    if (AuthService.isAuthenticated()) {
+      const supportWidget = new SupportWidget();
+      supportWidget.init();
     }
-  });
+    AuthService.onAuthChange((user) => {
+      header.update(user);
+      if (user && !window.supportWidget) {
+        window.supportWidget = new SupportWidget();
+        window.supportWidget.init();
+      } else if (!user && window.supportWidget) {
+        const widgetElement = document.getElementById('support-widget');
+        const toggleButton = document.getElementById('support-toggle-button');
+        if (widgetElement) widgetElement.remove();
+        if (toggleButton) toggleButton.remove();
+        window.supportWidget = null;
+      }
+    });
+    if (AuthService.isAuthenticated() && window.location.pathname === '/') {
+      router.navigate('/projects');
+    } else {
+      router.loadRoute();
+    }
+    document.addEventListener('click', (e) => {
+      const target = e.target;
 
-  // наконец, рендерим первую страницу
-  router.loadRoute();
+      if (target.closest('#login-btn-header')) {
+        e.preventDefault();
+        showLoginModal();
+      } else if (target.closest('#register-btn-header')) {
+        e.preventDefault();
+        showRegisterModal();
+      } else if (
+        target.closest('#logout-btn') ||
+        target.closest('#profile-logout')
+      ) {
+        e.preventDefault();
+        AuthService.logout();
+        router.navigate('/');
+      }
+    });
+
+  } catch (error) {
+    console.error('Ошибка при запуске приложения:', error);
+  }
 }
-
 startApp();
-
-
-// startApp();
-
-// if ('serviceWorker' in navigator) {
-//   window.addEventListener('load', () => {
-//     navigator.serviceWorker.register('/service-worker.js')
-//       .catch(error => {
-//         console.error('Ошибка регистрации Service Worker:', error);
-//       });
-//   });
-// }

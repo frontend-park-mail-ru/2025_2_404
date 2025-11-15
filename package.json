@@ -1,7 +1,8 @@
 {
   "name": "2025_2_404",
   "dependencies": {
-    "dotenv": "^17.2.2"
+    "dotenv": "^17.2.2",
+    "sass": "^1.94.0"
   },
   "scripts": {
     "lint:js": "eslint .",
@@ -15,7 +16,6 @@
     "scss:build": "sass ./style.scss ./style.css --style=compressed",
     "dev": "concurrently -n \"SERVER,SASS\" -c \"yellow,cyan\" \"nodemon server/app.js\" \"npx sass style.scss style.css --watch --source-map --update\""
   },
-
   "devDependencies": {
     "@eslint/js": "^9.36.0",
     "concurrently": "^9.2.1",
