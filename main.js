@@ -1,6 +1,7 @@
 import Router from './services/Router.js';
 import Header from './pages/header/Header.js';
 import Footer from './pages/footer/Footer.js';
+import SupportWidget from './pages/components/SupportWidget.js';
 import AuthService from './services/ServiceAuthentification.js';
 
 // Импорт страниц
@@ -13,25 +14,11 @@ import BalancePage from './pages/balance/BalancePage.js';
 import LoginPage from './pages/login/LoginPage.js';
 import RegisterPage from './pages/register/Register.js';
 
-// const offlineIndicator = document.getElementById('offline-indicator');
-
-// function updateOnlineStatus() {
-//   if (navigator.onLine) {
-//     offlineIndicator.classList.add('hidden');
-//   } else {
-//     offlineIndicator.classList.remove('hidden');
-//   }
-// }
-
-// window.addEventListener('online', updateOnlineStatus);
-// window.addEventListener('offline', updateOnlineStatus);
-
-// Вызываем функцию при первой загрузке, чтобы установить начальное состояние
-// updateOnlineStatus();
 Handlebars.registerHelper('formatDate', function (dateString) {
   if (!dateString) return '';
   return new Date(dateString).toLocaleString('ru-RU');
 });
+
 const appContainer = document.getElementById('app');
 const routes = {
   '/': MainPage,
@@ -47,15 +34,11 @@ export const header = new Header();
 const footer = new Footer();
 
 function onAuthSuccess() {
-  // header.update();
   router.navigate('/projects');
 }
 
 let loginModal = null;
 let registerModal = null;
-// function onAuthSuccess() {
-//   router.navigate('/projects');
-// }
 
 function showLoginModal() {
   if (registerModal) registerModal.hide();
@@ -96,59 +79,60 @@ export function showRegisterModal() {
 }
 
 async function startApp() {
-  await Promise.all([
-    header.loadTemplate(),
-    footer.loadTemplate()
-  ]);
+  try {
+    // 1. Загружаем шаблоны для статических частей
+    await Promise.all([
+      header.loadTemplate(),
+      footer.loadTemplate()
+    ]);
 
-  // сначала вставляем хедер и футер
-  await header.update();
-  document.body.appendChild(footer.render());
+    // 2. Вставляем статические части в DOM
+    // Header уже создан в конструкторе, просто обновляем
+    await header.update();
+    // Footer создаем и добавляем через render()
+    document.body.appendChild(footer.render());
 
-  // подписки на изменения авторизации
-  AuthService.onAuthChange(() => {
-    header.resetCache();
-    header.update();
-  });
+    // Инициализируем виджет поддержки
+    const supportWidget = new SupportWidget();
+    supportWidget.init();
 
-  // обработчики кликов (логин/регистрация/логаут)
-  document.addEventListener('click', (e) => {
-    const target = e.target;
+    // 3. Подписки на изменения авторизации
+    AuthService.onAuthChange((user) => {
+      header.update(user);
+    });
 
-    if (target.closest('#login-btn-header')) {
-      e.preventDefault();
-      showLoginModal();
-    } else if (target.closest('#register-btn-header')) {
-      e.preventDefault();
-      showRegisterModal();
-    } else if (
-      target.closest('#logout-btn') ||
-      target.closest('#profile-logout')
-    ) {
+    // 4. Обработчики кликов (логин/регистрация/логаут)
+    document.addEventListener('click', (e) => {
+      const target = e.target;
 
-      e.preventDefault();
-      AuthService.logout();
-      header.resetCache();
-      router.navigate('/');
-      header.update();
+      if (target.closest('#login-btn-header')) {
+        e.preventDefault();
+        showLoginModal();
+      } else if (target.closest('#register-btn-header')) {
+        e.preventDefault();
+        showRegisterModal();
+      } else if (
+        target.closest('#logout-btn') ||
+        target.closest('#profile-logout')
+      ) {
+        e.preventDefault();
+        AuthService.logout();
+        router.navigate('/');
+      }
+    });
 
+    // 5. Проверяем, авторизован ли пользователь при первой загрузке
+    await AuthService.loadProfile();
+
+    // 6. Рендерим первую страницу
+    if (AuthService.isAuthenticated() && window.location.pathname === '/') {
+      router.navigate('/projects');
+    } else {
+      router.loadRoute();
     }
-  });
-
-  // наконец, рендерим первую страницу
-  router.loadRoute();
+  } catch (error) {
+    console.error('Ошибка при запуске приложения:', error);
+  }
 }
 
 startApp();
-
-
-// startApp();
-
-// if ('serviceWorker' in navigator) {
-//   window.addEventListener('load', () => {
-//     navigator.serviceWorker.register('/service-worker.js')
-//       .catch(error => {
-//         console.error('Ошибка регистрации Service Worker:', error);
-//       });
-//   });
-// }
