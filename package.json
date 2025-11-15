@@ -15,7 +15,6 @@
     "scss:build": "sass ./style.scss ./style.css --style=compressed",
     "dev": "concurrently -n \"SERVER,SASS\" -c \"yellow,cyan\" \"nodemon server/app.js\" \"npx sass style.scss style.css --watch --source-map --update\""
   },
-
   "devDependencies": {
     "@eslint/js": "^9.36.0",
     "concurrently": "^9.2.1",
@@ -26,6 +25,7 @@
     "livereload": "^0.10.3",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
+    "sass": "^1.94.0",
     "stylelint": "^16.24.0",
     "stylelint-config-standard": "^39.0.0"
   }

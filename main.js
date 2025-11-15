@@ -1,6 +1,7 @@
 import Router from './services/Router.js';
 import Header from './pages/header/Header.js';
 import Footer from './pages/footer/Footer.js';
+import SupportWidget from './pages/components/SupportWidget.js';
 import AuthService from './services/ServiceAuthentification.js';
 
 // Импорт страниц
@@ -96,22 +97,27 @@ export function showRegisterModal() {
 }
 
 async function startApp() {
+  // 1. Загружаем шаблоны для статических частей
   await Promise.all([
     header.loadTemplate(),
     footer.loadTemplate()
   ]);
 
-  // сначала вставляем хедер и футер
-  await header.update();
+  // 2. Вставляем статические части в DOM
+  document.body.prepend(header.render());
   document.body.appendChild(footer.render());
 
-  // подписки на изменения авторизации
-  AuthService.onAuthChange(() => {
-    header.resetCache();
-    header.update();
+  // Инициализируем виджет поддержки
+  const supportWidget = new SupportWidget();
+  supportWidget.init();
+
+  // 3. подписки на изменения авторизации
+  AuthService.onAuthChange((user) => {
+    // Эта функция будет вызвана при логине, логауте или загрузке профиля
+    header.update(user);
   });
 
-  // обработчики кликов (логин/регистрация/логаут)
+  // 4. обработчики кликов (логин/регистрация/логаут)
   document.addEventListener('click', (e) => {
     const target = e.target;
 
@@ -125,18 +131,22 @@ async function startApp() {
       target.closest('#logout-btn') ||
       target.closest('#profile-logout')
     ) {
-
       e.preventDefault();
       AuthService.logout();
-      header.resetCache();
       router.navigate('/');
-      header.update();
-
     }
   });
 
-  // наконец, рендерим первую страницу
-  router.loadRoute();
+  // 5. Проверяем, авторизован ли пользователь при первой загрузке
+  await AuthService.loadProfile();
+
+  // 6. наконец, рендерим первую страницу
+  // Если пользователь залогинен и находится на главной, перенаправляем его
+  if (AuthService.isAuthenticated() && window.location.pathname === '/') {
+    router.navigate('/projects');
+  } else {
+    router.loadRoute();
+  }
 }
 
 startApp();
