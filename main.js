@@ -4,7 +4,6 @@ import Footer from './pages/footer/Footer.js';
 import SupportWidget from './pages/components/SupportWidget.js';
 import AuthService from './services/ServiceAuthentification.js';
 
-// Импорт страниц
 import MainPage from './pages/main/MainPage.js';
 import ProfilePage from './pages/profile/ProfilePage.js';
 import ProjectsPage from './pages/projects/ProjectsPage.js';
@@ -77,31 +76,37 @@ export function showRegisterModal() {
   });
   registerModal.init().then(() => registerModal.show());
 }
-
 async function startApp() {
   try {
-    // 1. Загружаем шаблоны для статических частей
     await Promise.all([
       header.loadTemplate(),
       footer.loadTemplate()
     ]);
-
-    // 2. Вставляем статические части в DOM
-    // Header уже создан в конструкторе, просто обновляем
     await header.update();
-    // Footer создаем и добавляем через render()
     document.body.appendChild(footer.render());
-
-    // Инициализируем виджет поддержки
-    const supportWidget = new SupportWidget();
-    supportWidget.init();
-
-    // 3. Подписки на изменения авторизации
+    await AuthService.loadProfile();
+    if (AuthService.isAuthenticated()) {
+      const supportWidget = new SupportWidget();
+      supportWidget.init();
+    }
     AuthService.onAuthChange((user) => {
       header.update(user);
+      if (user && !window.supportWidget) {
+        window.supportWidget = new SupportWidget();
+        window.supportWidget.init();
+      } else if (!user && window.supportWidget) {
+        const widgetElement = document.getElementById('support-widget');
+        const toggleButton = document.getElementById('support-toggle-button');
+        if (widgetElement) widgetElement.remove();
+        if (toggleButton) toggleButton.remove();
+        window.supportWidget = null;
+      }
     });
-
-    // 4. Обработчики кликов (логин/регистрация/логаут)
+    if (AuthService.isAuthenticated() && window.location.pathname === '/') {
+      router.navigate('/projects');
+    } else {
+      router.loadRoute();
+    }
     document.addEventListener('click', (e) => {
       const target = e.target;
 
@@ -121,18 +126,8 @@ async function startApp() {
       }
     });
 
-    // 5. Проверяем, авторизован ли пользователь при первой загрузке
-    await AuthService.loadProfile();
-
-    // 6. Рендерим первую страницу
-    if (AuthService.isAuthenticated() && window.location.pathname === '/') {
-      router.navigate('/projects');
-    } else {
-      router.loadRoute();
-    }
   } catch (error) {
     console.error('Ошибка при запуске приложения:', error);
   }
 }
-
 startApp();
