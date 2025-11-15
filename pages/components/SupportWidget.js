@@ -519,7 +519,7 @@ async sendToServer(formData) {
 
         console.log('📤 Отправка данных на localhost:8080/support/');
 
-        const response = await fetch('http://89.208.230.119:8000/support/', {
+        const response = await fetch('http://89.208.230.119:8080`/support/', {
             method: 'POST',
             body: formDataToSend
         });
@@ -530,8 +530,6 @@ async sendToServer(formData) {
 
         if (response.ok) {
             console.log('✅ Форма успешно отправлена на localhost:8080');
-            
-            // Пытаемся распарсить JSON
             try {
                 const jsonResult = JSON.parse(responseText);
                 console.log('✅ JSON ответ:', jsonResult);
