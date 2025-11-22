@@ -39,13 +39,13 @@ async loadProfile() {
       id: clientData.id,
       username: clientData.user_name,
       email: clientData.email,
-      firstName: clientData.UserFirstName || '', 
-      lastName: clientData.UserLastName || '', 
-      company: clientData.Company || '', 
-      phone: clientData.Phone || '', 
+      // ИСПРАВЛЕННЫЕ НАЗВАНИЯ:
+      firstName: clientData.user_first_name || '', 
+      lastName: clientData.user_second_name || '', 
+      company: clientData.company || '', 
+      phone: clientData.phone_number || '', 
       role: clientData.role || 'advertiser',
       
-      // ИСПРАВЛЕННАЯ ОБРАБОТКА АВАТАРА:
       avatar: this.processAvatar(imgBase64),
     };
 
