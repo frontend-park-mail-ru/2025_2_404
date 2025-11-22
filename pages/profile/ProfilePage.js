@@ -32,7 +32,18 @@ initComponents() {
       id: 'profile-login',
       label: 'Логин',
       placeholder: 'Введите логин',
-      value: this.user?.username || '', 
+      value: this.user?.username || '',
+      validationFn: (value) => {
+        value = value.trim();
+        if (!value) return 'Логин обязателен для заполнения';
+        if (value.length < 4) return 'Логин должен содержать минимум 4 символа';
+        if (value.length > 20) return 'Логин должен содержать максимум 20 символов';
+        if (!/^[a-zA-Z0-9_]+$/.test(value)) return 'Логин может содержать только латиницу, цифры и _';
+        const UpperCase = /[A-Z]/.test(value);
+        const LowerCase = /[a-z]/.test(value);
+        if (!UpperCase && !LowerCase) return 'Логин должен содержать хотя бы одну букву';
+        return null;
+      },
     });
 
     // А вот тут проверь внимательно!
@@ -41,21 +52,45 @@ initComponents() {
       type: 'email',
       label: 'Почта',
       placeholder: 'Введите почту',
-      value: this.user?.email || '', // <--- Передаем email
+      value: this.user?.email || '',
+      validationFn: (value) => {
+        value = value.trim();
+        if (!value) return 'Email обязателен для заполнения';
+        if (value.length > 100) return 'Почта слишком длинная, введите другую';
+        const emailRegex = /^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(value)) return 'Введите корректный email';
+        return null;
+      },
     });
 
     this.components.firstNameInput = new Input({
       id: 'profile-firstname',
       label: 'Имя',
       placeholder: 'Введите ваше имя',
-      value: this.user?.firstName || '', // <--- Передаем firstName (из ServiceAuth)
+      value: this.user?.firstName || '',
+      validationFn: (value) => {
+        value = value.trim();
+        if (!value) return 'Имя обязательно для заполнения';
+        if (value.length < 2) return 'Имя должно содержать минимум 2 символа';
+        if (value.length > 50) return 'Имя слишком длинное';
+        if (!/^[a-zA-Zа-яА-ЯёЁ\s-]+$/.test(value)) return 'Имя может содержать только буквы и дефисы';
+        return null;
+      },
     });
       
     this.components.lastNameInput = new Input({
       id: 'profile-lastname',
       label: 'Фамилия',
       placeholder: 'Введите вашу фамилию',
-      value: this.user?.lastName || '', // <--- Передаем lastName
+      value: this.user?.lastName || '',
+      validationFn: (value) => {
+        value = value.trim();
+        if (!value) return 'Фамилия обязательна для заполнения';
+        if (value.length < 2) return 'Фамилия должна содержать минимум 2 символа';
+        if (value.length > 50) return 'Фамилия слишком длинная';
+        if (!/^[a-zA-Zа-яА-ЯёЁ\s-]+$/.test(value)) return 'Фамилия может содержать только буквы и дефисы';
+        return null;
+      },
     });
 
     this.components.companyInput = new Input({
@@ -63,6 +98,11 @@ initComponents() {
       label: 'Компания',
       placeholder: 'Введите название компании',
       value: this.user?.company || '',
+      validationFn: (value) => {
+        value = value.trim();
+        if (value && value.length > 100) return 'Название компании слишком длинное';
+        return null;
+      },
     });
 
     this.components.phoneInput = new Input({
@@ -71,6 +111,13 @@ initComponents() {
       placeholder: 'Введите ваш номер телефона',
       type: 'tel',
       value: this.user?.phone || '',
+      validationFn: (value) => {
+        value = value.trim();
+        if (value && !/^[\d\s\-\+\(\)]+$/.test(value)) return 'Номер телефона может содержать только цифры, пробелы и символы +-()';
+        if (value && value.replace(/\D/g, '').length < 10) return 'Номер телефона должен содержать минимум 10 цифр';
+        if (value && value.replace(/\D/g, '').length > 15) return 'Номер телефона слишком длинный';
+        return null;
+      },
     });
 
     this.components.roleSelect = new Select({
@@ -180,50 +227,51 @@ initComponents() {
     }
   }
 
-  async handleSave() {
-    const formData = new FormData();
-    
-    // Важно: input value нужно брать из DOM элемента в момент клика, а не из компонента
-    formData.append('user_name', document.getElementById('profile-login')?.value || '');
-    formData.append('email', document.getElementById('profile-email')?.value || '');
-    formData.append('user_first_name', document.getElementById('profile-firstname')?.value || ''); // ИСПРАВЛЕНО под бэкенд
-    formData.append('user_second_name', document.getElementById('profile-lastname')?.value || ''); // ИСПРАВЛЕНО под бэкенд
-    formData.append('company', document.getElementById('profile-company')?.value || '');
-    formData.append('phone_number', document.getElementById('profile-phone')?.value || ''); // ИСПРАВЛЕНО под бэкенд
-    
-    const password = document.getElementById('profile-password')?.value;
-    if (password) {
-      formData.append('password', password);
-    }
-if (this.selectedFile) {
-  // Верни 'img', так как это стандартное имя для этого бэкенда
-  formData.append('img', this.selectedFile); 
-}
+    async handleSave() {
+      let isValidated = true;
       
-        try {
-      // updateProfile УЖЕ возвращает обновленного пользователя (сделав 1-й GET запрос)
-      const updatedUser = await AuthService.updateProfile(formData);
+      // Проверяем все поля на валидность
+      const loginValue = document.getElementById('profile-login')?.value || '';
+      const emailValue = document.getElementById('profile-email')?.value || '';
+      const firstNameValue = document.getElementById('profile-firstname')?.value || '';
+      const lastNameValue = document.getElementById('profile-lastname')?.value || '';
+      const companyValue = document.getElementById('profile-company')?.value || '';
+      const phoneValue = document.getElementById('profile-phone')?.value || '';
       
-      // ВМЕСТО ТОГО ЧТОБЫ ДЕЛАТЬ router.loadRoute() (который вызовет 2-й GET),
-      // мы просто обновляем this.user и перерисовываем страницу вручную 
-      // или просто показываем уведомление, так как данные в инпутах и так уже новые (ты же их только что ввела).
-      
-      this.user = updatedUser; 
-      
-      // Вариант А: Просто показать уведомление (самый экономный)
-      // router.loadRoute() НЕ ВЫЗЫВАЕМ.
-      new ConfirmationModal({ message: "Данные сохранены!", onConfirm: () => {} }).show();
+      if (this.components.loginInput.validate(loginValue)) isValidated = false;
+      if (this.components.emailInput.validate(emailValue)) isValidated = false;
+      if (this.components.firstNameInput.validate(firstNameValue)) isValidated = false;
+      if (this.components.lastNameInput.validate(lastNameValue)) isValidated = false;
+      if (this.components.companyInput.validate(companyValue)) isValidated = false;
+      if (this.components.phoneInput.validate(phoneValue)) isValidated = false;
 
-      // Вариант Б: Если очень хочется обновить картинку/шапку:
-      // Можно обновить хедер вручную:
-      //if (window.header) window.header.update(this.user);
+      if (!isValidated) {
+        alert('Пожалуйста, исправьте ошибки в форме');
+        return;
+      }
+
+      const formData = new FormData();
       
+      formData.append('user_name', loginValue);
+      formData.append('email', emailValue);
+      formData.append('user_first_name', firstNameValue);
+      formData.append('user_second_name', lastNameValue);
+      formData.append('company', companyValue);
+      formData.append('phone_number', phoneValue);
       
-    } catch (error) {
-      console.error('Ошибка при обновлении профиля:', error);
-      alert('Не удалось сохранить изменения');
+      if (this.selectedFile) {
+        formData.append('img', this.selectedFile);
+      }
+        
+      try {
+        const updatedUser = await AuthService.updateProfile(formData);
+        this.user = updatedUser; 
+        new ConfirmationModal({ message: "Данные сохранены!", onConfirm: () => {} }).show();
+      } catch (error) {
+        console.error('Ошибка при обновлении профиля:', error);
+        alert('Не удалось сохранить изменения');
+      }
     }
-  }
   
   handleDelete() {
     const modal = new ConfirmationModal({
