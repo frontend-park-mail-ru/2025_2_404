@@ -227,51 +227,53 @@ initComponents() {
     }
   }
 
-    async handleSave() {
-      let isValidated = true;
-      
-      // Проверяем все поля на валидность
-      const loginValue = document.getElementById('profile-login')?.value || '';
-      const emailValue = document.getElementById('profile-email')?.value || '';
-      const firstNameValue = document.getElementById('profile-firstname')?.value || '';
-      const lastNameValue = document.getElementById('profile-lastname')?.value || '';
-      const companyValue = document.getElementById('profile-company')?.value || '';
-      const phoneValue = document.getElementById('profile-phone')?.value || '';
-      
-      if (this.components.loginInput.validate(loginValue)) isValidated = false;
-      if (this.components.emailInput.validate(emailValue)) isValidated = false;
-      if (this.components.firstNameInput.validate(firstNameValue)) isValidated = false;
-      if (this.components.lastNameInput.validate(lastNameValue)) isValidated = false;
-      if (this.components.companyInput.validate(companyValue)) isValidated = false;
-      if (this.components.phoneInput.validate(phoneValue)) isValidated = false;
+  async handleSave() {
+    let isValidated = true;
+    
+    // Проверяем все поля на валидность
+    const loginValue = document.getElementById('profile-login')?.value || '';
+    const emailValue = document.getElementById('profile-email')?.value || '';
+    const firstNameValue = document.getElementById('profile-firstname')?.value || '';
+    const lastNameValue = document.getElementById('profile-lastname')?.value || '';
+    const companyValue = document.getElementById('profile-company')?.value || '';
+    const phoneValue = document.getElementById('profile-phone')?.value || '';
+    
+    // Проверяем все поля и показываем ошибки если есть
+    if (this.components.loginInput.validate(loginValue)) isValidated = false;
+    if (this.components.emailInput.validate(emailValue)) isValidated = false;
+    if (this.components.firstNameInput.validate(firstNameValue)) isValidated = false;
+    if (this.components.lastNameInput.validate(lastNameValue)) isValidated = false;
+    if (this.components.companyInput.validate(companyValue)) isValidated = false;
+    if (this.components.phoneInput.validate(phoneValue)) isValidated = false;
 
-      if (!isValidated) {
-        alert('Пожалуйста, исправьте ошибки в форме');
-        return;
-      }
-
-      const formData = new FormData();
-      
-      formData.append('user_name', loginValue);
-      formData.append('email', emailValue);
-      formData.append('user_first_name', firstNameValue);
-      formData.append('user_second_name', lastNameValue);
-      formData.append('company', companyValue);
-      formData.append('phone_number', phoneValue);
-      
-      if (this.selectedFile) {
-        formData.append('img', this.selectedFile);
-      }
-        
-      try {
-        const updatedUser = await AuthService.updateProfile(formData);
-        this.user = updatedUser; 
-        new ConfirmationModal({ message: "Данные сохранены!", onConfirm: () => {} }).show();
-      } catch (error) {
-        console.error('Ошибка при обновлении профиля:', error);
-        alert('Не удалось сохранить изменения');
-      }
+    // Если есть ошибки - просто выходим, не показывая alert
+    if (!isValidated) {
+      return; // Просто выходим из функции, не показывая alert
     }
+
+    const formData = new FormData();
+    
+    formData.append('user_name', loginValue);
+    formData.append('email', emailValue);
+    formData.append('user_first_name', firstNameValue);
+    formData.append('user_second_name', lastNameValue);
+    formData.append('company', companyValue);
+    formData.append('phone_number', phoneValue);
+    
+    if (this.selectedFile) {
+      formData.append('img', this.selectedFile);
+    }
+      
+    try {
+      const updatedUser = await AuthService.updateProfile(formData);
+      this.user = updatedUser; 
+      new ConfirmationModal({ message: "Данные сохранены!", onConfirm: () => {} }).show();
+    } catch (error) {
+      console.error('Ошибка при обновлении профиля:', error);
+      // Вместо alert можно показать ошибку в форме
+      this.components.loginInput.showError('Не удалось сохранить изменения. Попробуйте позже.');
+    }
+  }
   
   handleDelete() {
     const modal = new ConfirmationModal({
