@@ -33,13 +33,10 @@ async loadProfile() {
     const imgBase64 = res.data?.img; 
 
     if (!clientData) throw new Error("Данные клиента не найдены");
-
-    // ИСПРАВЛЕННАЯ ЛОГИКА ОБРАБОТКИ АВАТАРА
     this.user = {
       id: clientData.id,
       username: clientData.user_name,
       email: clientData.email,
-      // ИСПРАВЛЕННЫЕ НАЗВАНИЯ:
       firstName: clientData.user_first_name || '', 
       lastName: clientData.user_second_name || '', 
       company: clientData.company || '', 
@@ -68,16 +65,10 @@ async loadProfile() {
       throw new Error("Пользователь не авторизован");
     }
 
-    // 1. Отправляем запрос
     const res = await http.putFormData('/profile/', formData);
-
-    // 2. ЛЕЧЕНИЕ ОШИБКИ 401:
-    // Если сервер вернул новый токен при обновлении, сохраняем его!
     if (res.data && res.data.token) {
       localStorage.setItem('token', res.data.token);
     }
-    
-    // 3. Перезагружаем профиль
     return await this.loadProfile();
   }
 

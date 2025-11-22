@@ -27,7 +27,6 @@ export default class ProfilePage {
   }
 
 initComponents() {
-    // Логин - обязательный
     this.components.loginInput = new Input({
       id: 'profile-login',
       label: 'Логин',
@@ -45,8 +44,6 @@ initComponents() {
         return null;
       },
     });
-
-    // Почта - обязательная
     this.components.emailInput = new Input({
       id: 'profile-email',
       type: 'email',
@@ -62,8 +59,6 @@ initComponents() {
         return null;
       },
     });
-
-    // Имя - необязательное
     this.components.firstNameInput = new Input({
       id: 'profile-firstname',
       label: 'Имя',
@@ -77,8 +72,6 @@ initComponents() {
         return null;
       },
     });
-      
-    // Фамилия - необязательная
     this.components.lastNameInput = new Input({
       id: 'profile-lastname',
       label: 'Фамилия',
@@ -92,8 +85,6 @@ initComponents() {
         return null;
       },
     });
-
-    // Компания - необязательная
     this.components.companyInput = new Input({
       id: 'profile-company',
       label: 'Компания',
@@ -105,8 +96,6 @@ initComponents() {
         return null;
       },
     });
-
-    // Телефон - необязательный
     this.components.phoneInput = new Input({
       id: 'profile-phone',
       label: 'Номер телефона',
@@ -121,8 +110,6 @@ initComponents() {
         return null;
       },
     });
-
-    // Остальные компоненты без изменений...
     this.components.roleSelect = new Select({
       id: 'user-role',
       label: 'Тип аккаунта',
@@ -157,13 +144,7 @@ initComponents() {
 
   async render() {
     await this.loadTemplate();
-    
-    // ИСПРАВЛЕНИЕ ДВОЙНОГО ЗАПРОСА:
-    // 1. Сначала пробуем взять данные из памяти (кэша сервиса)
     this.user = AuthService.getUser();
-
-    // 2. Если в памяти пусто (например, мы перешли по прямой ссылке и main.js еще не отработал),
-    // или если данных недостаточно - тогда загружаем с сервера.
     if (!this.user) {
         try {
             this.user = await AuthService.loadProfile();
@@ -181,9 +162,7 @@ initComponents() {
     
     const context = {
       ...this.user,
-      // Передаем аватарку явно, чтобы handlebars мог ее подхватить
       avatar: this.user.avatar, 
-      
       loginInputHtml: this.components.loginInput?.render() || '',
       emailInputHtml: this.components.emailInput?.render() || '',
       passwordInputHtml: this.components.passwordInput?.render() || '',
@@ -202,8 +181,6 @@ initComponents() {
   handleFileChange(event) {
     if (event.target.files && event.target.files[0]) {
       this.selectedFile = event.target.files[0];
-      
-      // Это нужно только для предпросмотра ДО сохранения
       const reader = new FileReader();
       reader.onload = (e) => {
         const previewElement = document.getElementById('profile-avatar-preview');
@@ -216,18 +193,14 @@ initComponents() {
   }
 
   attachEvents() {
-    // Прикрепление событий для инпутов
     Object.values(this.components).forEach(component => {
         if (component && component.attachEvents) {
             component.attachEvents();
         }
-        // Добавьте эту строку для компонентов с валидацией
         if (component && component.attachValidationEvent) {
             component.attachValidationEvent();
         }
     });
-
-    // Обработчик для загрузки файла
     const fileInput = document.getElementById('profile-avatar-upload');
     if (fileInput) {
       fileInput.addEventListener('change', this.handleFileChange);
@@ -236,16 +209,10 @@ initComponents() {
 
   async handleSave() {
     let isValidated = true;
-    
-    // Проверяем только обязательные поля
     const loginValue = document.getElementById('profile-login')?.value || '';
     const emailValue = document.getElementById('profile-email')?.value || '';
-    
-    // Проверяем только обязательные поля
     if (this.components.loginInput.validate(loginValue)) isValidated = false;
     if (this.components.emailInput.validate(emailValue)) isValidated = false;
-
-    // Необязательные поля проверяем, но не блокируем отправку из-за них
     const firstNameValue = document.getElementById('profile-firstname')?.value || '';
     const lastNameValue = document.getElementById('profile-lastname')?.value || '';
     const companyValue = document.getElementById('profile-company')?.value || '';
@@ -256,7 +223,6 @@ initComponents() {
     this.components.companyInput.validate(companyValue);
     this.components.phoneInput.validate(phoneValue);
 
-    // Если есть ошибки в обязательных полях - выходим
     if (!isValidated) {
       return;
     }

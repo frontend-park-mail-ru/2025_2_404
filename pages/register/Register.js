@@ -147,7 +147,6 @@ async Submit(event) {
   }
 
   try {
-    // ДОБАВЬТЕ ЛОГИРОВАНИЕ ДЛЯ ДЕБАГА
     console.log("Регистрируем пользователя:", {
       user_name: loginValue,
       email: emailValue,
@@ -157,10 +156,8 @@ async Submit(event) {
     await AuthService.register({
       user_name: loginValue,
       email: emailValue,
-      password: passwordValue, // Пароль передается как есть
+      password: passwordValue,
     });
-    
-    // ПОСЛЕ УСПЕШНОЙ РЕГИСТРАЦИИ НУЖНО АВТОМАТИЧЕСКИ ВОЙТИ
     await AuthService.login({
       email: emailValue,
       password: passwordValue

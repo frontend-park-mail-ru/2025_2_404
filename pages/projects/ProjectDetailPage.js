@@ -90,7 +90,6 @@ async render() {
       console.log('Отправка данных на сервер...');
       console.table({ title, desc, site, budget, imgFile });
 
-      // Очистка старых ошибок
       document.querySelectorAll('.error-message').forEach((el) => el.remove());
       document.querySelectorAll('.input--error').forEach((el) =>
         el.classList.remove('input--error')

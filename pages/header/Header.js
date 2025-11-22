@@ -4,7 +4,6 @@ export default class Header {
   constructor() {
     this.header = document.createElement('header');
     this.header.classList.add('header');
-    // УДАЛЕНО: document.body.prepend(this.header); — это делало хедер дублирующимся или вызывало конфликты
     this.template = null;
     this.lastUser = null;
     this.lastAuthState = null;
@@ -23,12 +22,11 @@ export default class Header {
     }
   }
 
-  // ДОБАВЛЕН МЕТОД RENDER
   render() {
     return this.header;
   }
 
-  async update(userData = null) { // Добавил возможность принимать user напрямую
+  async update(userData = null) {
     if (this._updating) return;
     this._updating = true;
 
@@ -40,10 +38,8 @@ export default class Header {
 
     let isAuthenticated = AuthService.isAuthenticated();
     let user = userData;
-
-    // Если пользователь не передан, но мы авторизованы, пробуем загрузить или берем из AuthService
     if (isAuthenticated && !user) {
-        user = AuthService.getUser(); // Сначала берем из памяти сервиса
+        user = AuthService.getUser(); 
         if (!user) {
             try {
                 user = await AuthService.loadProfile();
@@ -60,8 +56,6 @@ export default class Header {
             avatar: user.avatar || "/kit.jpg",
          };
     }
-
-    // Упрощенная проверка, чтобы избежать мерцания
     const sameAuth = this.lastAuthState === isAuthenticated;
     const sameUser = JSON.stringify(this.lastUser) === JSON.stringify(user);
 

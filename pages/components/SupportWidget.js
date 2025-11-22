@@ -3,8 +3,6 @@ export default class SupportWidget {
     this.widgetElement = null;
     this.isOpen = false;
   }
-
-  // Метод, который создает и добавляет HTML виджета на страницу
   render() {
     const widgetHTML = `
       <!-- Кнопка для вызова чата поддержки -->
@@ -46,19 +44,12 @@ export default class SupportWidget {
           </div>
       </div>
     `;
-    
-    // Создаем временный контейнер, чтобы не засорять DOM сразу
     const container = document.createElement('div');
     container.innerHTML = widgetHTML;
-    
-    // Добавляем все элементы виджета в body
-    // document.body.append(...container.children) не всегда работает, этот способ надежнее
     while (container.firstChild) {
       document.body.appendChild(container.firstChild);
     }
   }
-
-  // Метод, который "оживляет" HTML, добавляя обработчики событий
   attachEvents() {
     const toggleButton = document.getElementById('support-toggle-button');
     const supportWidget = document.getElementById('support-widget');
@@ -102,7 +93,6 @@ export default class SupportWidget {
         if (messageText) {
             addMessage(messageText, 'user');
             messageTextarea.value = '';
-            // TODO: Логика отправки на сервер (fetch)
             setTimeout(() => addMessage('Спасибо! Сообщение получено. Оператор скоро ответит.', 'agent'), 1000);
         }
     };
@@ -115,8 +105,6 @@ export default class SupportWidget {
         }
     });
   }
-
-  // Главный метод для инициализации компонента
   init() {
     this.render();
     this.attachEvents();

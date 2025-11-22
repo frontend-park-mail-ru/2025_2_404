@@ -11,7 +11,7 @@ export default class Input {
     placeholder,
     showPasswordToggle = false,
     validationFn,
-    value = '', // <--- 1. Мы принимаем значение здесь
+    value = '',
   }) {
     this.id = id;
     this.type = showPasswordToggle ? 'password' : type;
@@ -19,11 +19,10 @@ export default class Input {
     this.placeholder = placeholder;
     this.showPasswordToggle = showPasswordToggle;
     this.validationFn = validationFn;
-    this.value = value; // <--- 2. Мы сохраняем его в this.value
+    this.value = value; 
   }
 
   render() {
-    // 3. ВНИМАНИЕ НИЖЕ: мы вставляем value="${this.value}" прямо в HTML
     return `
             <div class="form-group">
                 <label class="form-group__label" for="${this.id}">${this.label}</label>
@@ -44,8 +43,6 @@ export default class Input {
             </div>
         `;
   }
-  
-  // ... (остальные методы оставь как есть: validate, attachEvents и т.д.)
   validate(value) {
     if (!this.validationFn) return null;
     const errorMessage = this.validationFn(value);
