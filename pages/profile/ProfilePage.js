@@ -197,7 +197,7 @@ initComponents() {
     }
 if (this.selectedFile) {
   // Верни 'img', так как это стандартное имя для этого бэкенда
-  formData.append('image', this.selectedFile); 
+  formData.append('img', this.selectedFile); 
 }
       
         try {
