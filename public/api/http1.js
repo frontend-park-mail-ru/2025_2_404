@@ -1,4 +1,4 @@
-export const BASE = "http://localhost:8080"; 
+export const BASE = "http://89.208.230.1198080"; 
 
 export async function request(path, init = {}) {
   const token = localStorage.getItem('token');

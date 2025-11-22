@@ -88,7 +88,7 @@ processAvatar(imgBase64) {
   
   // Если это путь к файлу
   if (imgString.startsWith('/') || imgString.includes('.')) {
-    const BACKEND_SERVER_BASE = 'http://localhost:8080';
+    const BACKEND_SERVER_BASE = 'http://89.208.230.119:8080';
     const cleanPath = imgString.replace(/^\/?/, '');
     return `${BACKEND_SERVER_BASE}/${cleanPath}`;
   }
