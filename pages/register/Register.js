@@ -145,18 +145,35 @@ async Submit(event) {
   if (!isValidated) {
     return;
   }
+
   try {
+    // ДОБАВЬТЕ ЛОГИРОВАНИЕ ДЛЯ ДЕБАГА
+    console.log("Регистрируем пользователя:", {
+      user_name: loginValue,
+      email: emailValue,
+      password_length: passwordValue.length
+    });
+
     await AuthService.register({
       user_name: loginValue,
       email: emailValue,
-      password: passwordValue,
+      password: passwordValue, // Пароль передается как есть
     });
+    
+    // ПОСЛЕ УСПЕШНОЙ РЕГИСТРАЦИИ НУЖНО АВТОМАТИЧЕСКИ ВОЙТИ
+    await AuthService.login({
+      email: emailValue,
+      password: passwordValue
+    });
+    
     this.onSuccess();
 
   } catch (error) {
     console.error("Ошибка регистрации:", error);
     if (error && error.status === 409) {
       this.emailInput.showError('Пользователь с таким email уже существует.');
+    } else if (error && error.status === 401) {
+      this.loginInput.showError('Неверные учетные данные после регистрации.');
     } else {
       const generalErrorMessage = error.body || 'Произошла непредвиденная ошибка. Попробуйте позже.';
       this.loginInput.showError(generalErrorMessage);

@@ -10,15 +10,23 @@
     <div class="profile__content">
 
       <div class="profile__sidebar">
+        <!-- Картинка-превью. У неё обязательно должен быть id="profile-avatar-preview" -->
         <img class="profile__avatar" id="profile-avatar-preview" src="{{avatar}}" alt="Аватар пользователя">
+        
+        <!-- Кнопка, связанная с инпутом ниже через for="..." -->
         <label for="profile-avatar-upload" class="btn btn--secondary profile__button-upload ">
           Сменить аватар
         </label>
+        
+        <!-- Скрытый инпут для файла. Обязательно id="profile-avatar-upload" -->
         <input class="profile__avatar-input" type="file" id="profile-avatar-upload" accept="image/png, image/jpeg, image/gif">
 
         {{{roleSelectHtml}}}
+        
+        <div class="profile__meta">
           <p><strong>Дата регистрации:</strong> {{registrationDate}}</p>
           <p><strong>Количество реклам:</strong> {{adCount}}</p>
+        </div>
       </div>
 
       <div class="profile__main">
