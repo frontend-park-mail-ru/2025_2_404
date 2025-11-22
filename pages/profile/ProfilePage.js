@@ -27,7 +27,7 @@ export default class ProfilePage {
   }
 
 initComponents() {
-    // Логин работает, тут все ок
+    // Логин - обязательный
     this.components.loginInput = new Input({
       id: 'profile-login',
       label: 'Логин',
@@ -46,7 +46,7 @@ initComponents() {
       },
     });
 
-    // А вот тут проверь внимательно!
+    // Почта - обязательная
     this.components.emailInput = new Input({
       id: 'profile-email',
       type: 'email',
@@ -63,6 +63,7 @@ initComponents() {
       },
     });
 
+    // Имя - необязательное
     this.components.firstNameInput = new Input({
       id: 'profile-firstname',
       label: 'Имя',
@@ -70,14 +71,14 @@ initComponents() {
       value: this.user?.firstName || '',
       validationFn: (value) => {
         value = value.trim();
-        if (!value) return 'Имя обязательно для заполнения';
-        if (value.length < 2) return 'Имя должно содержать минимум 2 символа';
-        if (value.length > 50) return 'Имя слишком длинное';
-        if (!/^[a-zA-Zа-яА-ЯёЁ\s-]+$/.test(value)) return 'Имя может содержать только буквы и дефисы';
+        if (value && value.length < 2) return 'Имя должно содержать минимум 2 символа';
+        if (value && value.length > 50) return 'Имя слишком длинное';
+        if (value && !/^[a-zA-Zа-яА-ЯёЁ\s-]+$/.test(value)) return 'Имя может содержать только буквы и дефисы';
         return null;
       },
     });
       
+    // Фамилия - необязательная
     this.components.lastNameInput = new Input({
       id: 'profile-lastname',
       label: 'Фамилия',
@@ -85,14 +86,14 @@ initComponents() {
       value: this.user?.lastName || '',
       validationFn: (value) => {
         value = value.trim();
-        if (!value) return 'Фамилия обязательна для заполнения';
-        if (value.length < 2) return 'Фамилия должна содержать минимум 2 символа';
-        if (value.length > 50) return 'Фамилия слишком длинная';
-        if (!/^[a-zA-Zа-яА-ЯёЁ\s-]+$/.test(value)) return 'Фамилия может содержать только буквы и дефисы';
+        if (value && value.length < 2) return 'Фамилия должна содержать минимум 2 символа';
+        if (value && value.length > 50) return 'Фамилия слишком длинная';
+        if (value && !/^[a-zA-Zа-яА-ЯёЁ\s-]+$/.test(value)) return 'Фамилия может содержать только буквы и дефисы';
         return null;
       },
     });
 
+    // Компания - необязательная
     this.components.companyInput = new Input({
       id: 'profile-company',
       label: 'Компания',
@@ -105,6 +106,7 @@ initComponents() {
       },
     });
 
+    // Телефон - необязательный
     this.components.phoneInput = new Input({
       id: 'profile-phone',
       label: 'Номер телефона',
@@ -120,6 +122,7 @@ initComponents() {
       },
     });
 
+    // Остальные компоненты без изменений...
     this.components.roleSelect = new Select({
       id: 'user-role',
       label: 'Тип аккаунта',
@@ -234,25 +237,28 @@ initComponents() {
   async handleSave() {
     let isValidated = true;
     
-    // Проверяем все поля на валидность
+    // Проверяем только обязательные поля
     const loginValue = document.getElementById('profile-login')?.value || '';
     const emailValue = document.getElementById('profile-email')?.value || '';
+    
+    // Проверяем только обязательные поля
+    if (this.components.loginInput.validate(loginValue)) isValidated = false;
+    if (this.components.emailInput.validate(emailValue)) isValidated = false;
+
+    // Необязательные поля проверяем, но не блокируем отправку из-за них
     const firstNameValue = document.getElementById('profile-firstname')?.value || '';
     const lastNameValue = document.getElementById('profile-lastname')?.value || '';
     const companyValue = document.getElementById('profile-company')?.value || '';
     const phoneValue = document.getElementById('profile-phone')?.value || '';
     
-    // Проверяем все поля и показываем ошибки если есть
-    if (this.components.loginInput.validate(loginValue)) isValidated = false;
-    if (this.components.emailInput.validate(emailValue)) isValidated = false;
-    if (this.components.firstNameInput.validate(firstNameValue)) isValidated = false;
-    if (this.components.lastNameInput.validate(lastNameValue)) isValidated = false;
-    if (this.components.companyInput.validate(companyValue)) isValidated = false;
-    if (this.components.phoneInput.validate(phoneValue)) isValidated = false;
+    this.components.firstNameInput.validate(firstNameValue);
+    this.components.lastNameInput.validate(lastNameValue);
+    this.components.companyInput.validate(companyValue);
+    this.components.phoneInput.validate(phoneValue);
 
-    // Если есть ошибки - просто выходим, не показывая alert
+    // Если есть ошибки в обязательных полях - выходим
     if (!isValidated) {
-      return; // Просто выходим из функции, не показывая alert
+      return;
     }
 
     const formData = new FormData();
@@ -274,11 +280,10 @@ initComponents() {
       new ConfirmationModal({ message: "Данные сохранены!", onConfirm: () => {} }).show();
     } catch (error) {
       console.error('Ошибка при обновлении профиля:', error);
-      // Вместо alert можно показать ошибку в форме
       this.components.loginInput.showError('Не удалось сохранить изменения. Попробуйте позже.');
     }
   }
-  
+    
   handleDelete() {
     const modal = new ConfirmationModal({
       message: `Вы уверены, что хотите удалить аккаунт ${this.user?.username || 'пользователя'}?`,
