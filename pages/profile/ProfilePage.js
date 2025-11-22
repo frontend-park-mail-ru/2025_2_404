@@ -218,6 +218,10 @@ initComponents() {
         if (component && component.attachEvents) {
             component.attachEvents();
         }
+        // Добавьте эту строку для компонентов с валидацией
+        if (component && component.attachValidationEvent) {
+            component.attachValidationEvent();
+        }
     });
 
     // Обработчик для загрузки файла
