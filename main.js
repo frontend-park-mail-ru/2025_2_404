@@ -14,21 +14,34 @@ import BalancePage from './pages/balance/BalancePage.js';
 import LoginPage from './pages/login/LoginPage.js';
 import RegisterPage from './pages/register/Register.js';
 
-// const offlineIndicator = document.getElementById('offline-indicator');
+const offlineIndicator = document.getElementById('offline-indicator');
 
-// function updateOnlineStatus() {
-//   if (navigator.onLine) {
-//     offlineIndicator.classList.add('hidden');
-//   } else {
-//     offlineIndicator.classList.remove('hidden');
-//   }
-// }
+function updateOnlineStatus() {
+  if (navigator.onLine) {
+    offlineIndicator.classList.add('hidden');
+  } else {
+    offlineIndicator.classList.remove('hidden');
+  }
+}
 
-// window.addEventListener('online', updateOnlineStatus);
-// window.addEventListener('offline', updateOnlineStatus);
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
 
-// Вызываем функцию при первой загрузке, чтобы установить начальное состояние
-// updateOnlineStatus();
+updateOnlineStatus();
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // Регистрируем только если мы не на localhost (продакшен)
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          console.log('ServiceWorker registration successful');
+        })
+        .catch(error => {
+          console.log('ServiceWorker registration failed: ', error);
+        });
+    }
+  });
+}
 Handlebars.registerHelper('formatDate', function (dateString) {
   if (!dateString) return '';
   return new Date(dateString).toLocaleString('ru-RU');
