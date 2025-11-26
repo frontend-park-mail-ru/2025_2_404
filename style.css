@@ -1186,3 +1186,812 @@ body {
 }
 
 /*# sourceMappingURL=style.css.map */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================
+   СТИЛИ ДЛЯ СТРАНИЦЫ СОЗДАНИЯ СЛОТА
+   (FINAL VERSION)
+   ========================================= */
+
+.slot-page-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: 'Manrope', sans-serif;
+    color: #2D3748;
+}
+
+/* --- БОЛЬШАЯ БЕЛАЯ КАРТОЧКА --- */
+.slot-card {
+    background: #F8F5FF;
+    border-radius: 24px;
+    /* Убираем padding тут, чтобы border-bottom у шапки шел от края до края */
+    padding: 0; 
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    margin-bottom: 40px;
+    overflow: hidden;
+}
+
+/* --- ШАПКА (С РАЗДЕЛИТЕЛЕМ) --- */
+.slot-card__header {
+    padding: 40px 50px 30px 50px; /* Внутренние отступы */
+    border-bottom: 1px solid #E2E8F0; /* ПОЛОСКА ВНИЗУ ШАПКИ */
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.slot-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Расстояние между текстом и ручкой */
+    width: fit-content; /* ВАЖНО: Контейнер сжимается по содержимому */
+    max-width: 100%;
+}
+
+.slot-title-input {
+    font-size: 32px;
+    font-family: "Manrope", sans-serif;
+    font-weight: 600;
+    color: #2D3748;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 4px 10px; /* Отступы внутри, чтобы рамка не прилипала к буквам */
+    background: transparent;
+    outline: none;
+    
+    /* ВАЖНО: */
+    width: auto; /* Ширина будет задаваться через JS */
+    min-width: 150px; /* Минимальная ширина, чтобы можно было кликнуть */
+    max-width: 100%; /* Чтобы не вылезал за экран */
+    
+    transition: border 0.2s, 0.2s;
+    margin-left: -10px;
+}
+
+.slot-title-input:focus {
+    color: #7C54E8;
+    border-color: #D6BCFA;
+    background-color: #F8F5FF;
+}
+
+.edit-icon {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+.edit-icon:hover {
+    background-color: #F3F0FF;
+}
+.edit-icon svg path { stroke: #A0AEC0; }
+.edit-icon:hover svg path { stroke: #7C54E8; }
+
+
+.slot-date {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #A0AEC0;
+}
+
+
+/* --- ТЕЛО КАРТОЧКИ: ДВЕ КОЛОНКИ С РАЗДЕЛИТЕЛЕМ --- */
+.slot-card__body {
+    display: flex;
+    /* gap убираем, так как используем border для разделения */
+}
+
+.slot-form-column {
+    flex: 1.4; /* Левая часть шире */
+    padding: 40px 50px;
+    border-right: 1px solid #E2E8F0; /* ВЕРТИКАЛЬНАЯ ПОЛОСКА */
+}
+
+.slot-preview-column {
+    flex: 1; /* Правая часть */
+    padding: 40px 50px;
+    /* Центрируем превью */
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+}
+
+
+/* --- ФОРМА --- */
+.slot-label {
+    display: block;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    color: #2D3748;
+}
+
+.slot-form-column .form-group {
+    margin-bottom: 32px; 
+}
+
+/* 
+   ЛОГИКА ЦВЕТОВ ИНПУТОВ 
+   По дефолту - Черный (#2D3748)
+   Класс .filled (добавляется JS) - Фиолетовый (#7C54E8)
+*/
+.slot-input, .slot-select {
+    width: 100%;
+    padding: 14px 16px;
+    background-color: #FFFFFF; 
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    font-size: 16px;
+    color: #2D3748; /* <-- ЧЕРНЫЙ ПО УМОЛЧАНИЮ */
+    box-sizing: border-box;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.slot-input::placeholder {
+    color: #A0AEC0;
+}
+
+/* Фокус - всегда фиолетовая рамка */
+.slot-input:focus, .slot-select:focus {
+    border-color: #7C54E8;
+    box-shadow: 0 0 0 3px rgba(124, 84, 232, 0.1);
+}
+
+/* ЗАПОЛНЕННОЕ СОСТОЯНИЕ (Добавляется JS) */
+.slot-input.filled, .slot-select.filled {
+    color: #7C54E8; /* Текст становится фиолетовым */
+    border-color: #7C54E8; /* Рамка тоже */
+    background-color: #FBFAFF; /* Легкий фон */
+    font-weight: 500;
+}
+
+.select-wrapper {
+    position: relative;
+}
+.select-arrow {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #7C54E8;
+    pointer-events: none;
+    font-size: 12px;
+}
+.slot-select {
+    appearance: none;
+    cursor: pointer;
+}
+
+
+/* --- ЦВЕТА --- */
+.form-row-colors {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 32px;
+}
+.half-width {
+    flex: 1;
+    margin-bottom: 0 !important;
+}
+.color-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    padding: 8px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    position: relative;
+    height: 50px;
+    box-sizing: border-box;
+}
+.color-preview-box {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.1);
+    flex-shrink: 0;
+}
+.color-hidden-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+.color-value {
+    font-family: monospace;
+    font-size: 14px;
+    color: #718096;
+}
+
+
+/* --- КНОПКА ГЕНЕРАЦИИ (Закругленная) --- */
+.full-width-btn {
+    width: 100%;
+    margin-bottom: 32px;
+    padding: 14px;
+    border-radius: 25px; /* Закругление как у полей */
+    font-size: 16px;
+}
+
+
+/* --- БЛОК С КОДОМ (Вернули стиль из 1-го варианта) --- */
+.code-block-container {
+    margin-top: 10px;
+}
+.code-area {
+    background-color: #F3F0FF; /* Светло-фиолетовый фон */
+    border: 1px solid #7C54E8; /* Фиолетовая рамка */
+    border-radius: 12px;
+    padding: 16px;
+    position: relative;
+    min-height: 100px;
+}
+.code-content {
+    margin: 0;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 13px;
+    color: #553C9A;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
+    padding-right: 40px;
+}
+/* Иконка копирования */
+.icon-copy {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.icon-copy:hover {
+    background: rgba(123, 97, 255, 0.1);
+}
+
+/* --- ПРЕДПРОСМОТР (Центр + Больше) --- */
+.preview-title {
+    font-size: 18px;
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-weight: 600;
+    color: #2D3748;
+    width: 100%;
+    text-align: left; /* Заголовок "Предпросмотр" слева */
+}
+
+/* ВЕРТИКАЛЬНАЯ КАРТОЧКА */
+.preview-card {
+    background: #fff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    border: 1px solid #EDF2F7;
+    width: 300px; /* Увеличили размер (было 240) */
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.preview-image-container {
+    position: relative;
+    width: 100%;
+    height: 260px; /* Увеличили высоту картинки */
+}
+.preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.preview-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: 700;
+    font-size: 18px;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+    white-space: nowrap;
+    text-align: center;
+}
+
+/* Крестик для вертикальной (внутри картинки) */
+.preview-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.3);
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.2s;
+}
+.preview-close:hover {
+    background: rgba(0,0,0,0.5);
+}
+
+.preview-content {
+    padding: 20px;
+    background-color: #fff;
+    transition: background-color 0.2s;
+}
+.preview-content h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: inherit;
+}
+.preview-content p {
+    font-size: 13px;
+    line-height: 1.5;
+    color: inherit;
+    opacity: 0.9;
+    margin-bottom: 15px;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.preview-link {
+    font-size: 12px;
+    color: #A0AEC0;
+}
+
+
+/* --- ГОРИЗОНТАЛЬНАЯ КАРТОЧКА (ИСПРАВЛЕНАЯ) --- */
+.preview-card--horizontal {
+    width: 100%;
+    max-width: 500px; /* Пошире */
+    height: 160px;
+    display: flex;
+    flex-direction: row;
+    position: relative; /* Важно для крестика */
+}
+
+.preview-card--horizontal .preview-image-container {
+    width: 160px; /* Квадратная картинка */
+    height: 100%;
+    flex-shrink: 0;
+}
+
+.preview-card--horizontal .preview-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20px;
+    padding-right: 30px; /* Место под крестик */
+}
+
+/* КРЕСТИК ДЛЯ ГОРИЗОНТАЛЬНОЙ (В ПРАВОМ ВЕРХНЕМ УГЛУ КАРТОЧКИ) */
+.preview-card--horizontal .preview-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none; /* Убираем фон */
+    color: #A0AEC0;   /* Серый цвет */
+    width: auto;
+    height: auto;
+    font-size: 22px;
+}
+.preview-card--horizontal .preview-close:hover {
+    color: #7C54E8; /* Фиолетовый при наведении */
+    background: none;
+}
+
+
+/* --- ФУТЕР КАРТОЧКИ --- */
+.slot-card__footer {
+    padding: 30px 50px 40px 50px;
+    border-top: 1px solid #E2E8F0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #F8F5FF;
+}
+
+.right-buttons {
+    display: flex;
+    gap: 16px;
+}
+
+/* Убедимся, что кнопки выглядят нормально */
+.btn-footer {
+    padding: 12px 30px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+/* --- СТИЛИ ДЛЯ ПОЛЗУНКА (TOGGLE) --- */
+
+.toggle-wrapper {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    width: fit-content;
+    user-select: none;
+}
+
+/* Скрываем стандартный чекбокс */
+.toggle-wrapper input {
+    display: none;
+}
+
+/* Фон ползунка (Серый по дефолту) */
+.toggle-slider {
+    position: relative;
+    width: 52px;
+    height: 28px;
+    background-color: #E2E8F0; /* Серый выключенный */
+    border-radius: 34px;
+    transition: 0.3s ease;
+    margin-right: 12px;
+}
+
+/* Кружочек внутри */
+.toggle-slider:before {
+    content: "";
+    position: absolute;
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Пружинистый эффект */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Состояние ВКЛЮЧЕНО (Checked) */
+.toggle-wrapper input:checked + .toggle-slider {
+    background-color: #7C54E8; /* Твой фиолетовый */
+}
+
+.toggle-wrapper input:checked + .toggle-slider:before {
+    transform: translateX(24px); /* Сдвигаем кружок вправо */
+}
+
+/* Текст рядом */
+.toggle-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: #A0AEC0; /* Серый по дефолту */
+    transition: color 0.3s;
+    min-width: 120px; /* Чтобы текст не прыгал */
+}
+
+
+
+/* --- СТИЛИ ДЛЯ СТРАНИЦЫ ПРОЕКТОВ (НОВЫЙ ДИЗАЙН) --- */
+
+.projects-page {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: 'Manrope', sans-serif;
+}
+
+/* Хлебные крошки */
+.breadcrumbs {
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #A0AEC0;
+}
+.breadcrumbs__link {
+    text-decoration: none;
+    color: #A0AEC0;
+    transition: color 0.2s;
+}
+.breadcrumbs__link:hover {
+    color: #7C54E8;
+}
+.breadcrumbs__current {
+    color: #A0AEC0;
+}
+
+/* ШАПКА С ВЫПАДАЮЩИМ СПИСКОМ */
+.projects__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.title-dropdown-wrapper {
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+}
+
+.projects__title {
+    font-size: 42px; /* Крупный заголовок как на макете */
+    font-weight: 700;
+    color: #000;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.dropdown-arrow {
+    font-size: 24px;
+    font-weight: 400;
+    transition: transform 0.2s ease;
+    margin-top: 5px;
+}
+.dropdown-arrow.rotate {
+    transform: rotate(180deg);
+}
+
+/* Выпадающее меню */
+.title-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    padding: 10px;
+    min-width: 220px;
+    z-index: 100;
+    margin-top: 10px;
+}
+.title-dropdown-menu.show {
+    display: block;
+    animation: fadeIn 0.2s ease;
+}
+
+.dropdown-option {
+    padding: 12px 20px;
+    font-size: 18px;
+    font-weight: 500;
+    color: #2D3748;
+    border-radius: 12px;
+    transition: background 0.2s;
+}
+.dropdown-option:hover {
+    background-color: #F3F0FF;
+    color: #7C54E8;
+}
+
+/* Кнопка Создать (Белая с тенью) */
+.btn--white-shadow {
+    background: white;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 30px;
+    font-weight: 600;
+    font-size: 16px;
+    color: #7C54E8;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+.btn--white-shadow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+
+/* СПИСОК КАРТОЧЕК */
+.projects__list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.project-card {
+    background: white;
+    border-radius: 24px;
+    padding: 30px 40px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04); /* Очень мягкая тень */
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid transparent;
+}
+
+.project-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    border-color: #F3F0FF;
+}
+
+.project-card__title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #A0AEC0; /* Светло-серый/голубой заголовок как на макете */
+    margin: 0 0 15px 0;
+}
+
+.project-card__info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Бейджи статусов */
+.status-badge {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.status-stopped {
+    background-color: #E2E8F0; /* Серый фон */
+    color: #4A5568; /* Темно-серый текст */
+}
+
+.status-active {
+    background-color: #D1FAE5; /* Светло-зеленый фон */
+    color: #065F46; /* Зеленый текст */
+}
+
+.project-card__date {
+    font-size: 16px;
+    color: #A0AEC0;
+    font-weight: 500;
+}
+
+.projects__empty {
+    text-align: center;
+    font-size: 20px;
+    color: #A0AEC0;
+    margin-top: 50px;
+}
+
+/* ПАГИНАЦИЯ */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 60px;
+}
+
+.page-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: #A0AEC0;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.page-btn.active {
+    background-color: #C084FC; /* Фиолетовый фон */
+    color: white;
+    box-shadow: 0 4px 10px rgba(192, 132, 252, 0.4);
+}
+
+.page-btn:hover:not(.active) {
+    background-color: #EDF2F7;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* МЕНЮ ОПЦИЙ (Троеточие) */
+.card-options-wrapper {
+    position: relative;
+}
+
+.options-btn {
+    background: #F3F0FF; /* Светлый фон кружка */
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.options-btn:hover {
+    background: #E0D7FE;
+}
+
+.dots {
+    color: #7C54E8;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 0;
+}
+
+/* Само выпадающее меню */
+.options-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 200px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    padding: 8px;
+    z-index: 50;
+    margin-top: 8px;
+}
+
+.options-menu.show {
+    display: block;
+    animation: fadeIn 0.2s;
+}
+
+.options-item {
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #2D3748;
+    cursor: pointer;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.options-item:hover {
+    background-color: #F8F5FF;
+    color: #7C54E8;
+}
+
+.options-item.text-danger {
+    color: #E53E3E;
+}
+.options-item.text-danger:hover {
+    background-color: #FFF5F5;
+}

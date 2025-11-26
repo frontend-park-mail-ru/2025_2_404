@@ -1,0 +1,145 @@
+<div class="slot-page-container">
+  <div class="breadcrumbs" style="margin-bottom: 20px;">
+     <a href="/projects" id="back-link-top" class="breadcrumbs__link">Мои слоты</a> 
+     <span class="breadcrumbs__separator">›</span>
+     <span class="breadcrumbs__current">{{slot.title}}</span>
+  </div>
+
+  <div class="slot-card">
+    <div class="slot-card__header">
+      <div class="header-left">
+        <div class="slot-title-wrapper">
+           <input type="text" id="slot-title-input" class="slot-title-input" value="{{slot.title}}" placeholder="Название слота">
+           <div class="edit-icon" id="edit-title-btn">
+             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="#A0AEC0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z" stroke="#A0AEC0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+             </svg>
+           </div>
+        </div>
+        <div class="slot-date">Создано {{formatDate slot.createdAt}}</div>
+      </div>
+      <div class="card-options-wrapper">
+          <button class="options-btn" id="options-trigger">
+             <span class="dots">•••</span>
+          </button>
+          <div class="options-menu" id="options-menu">
+              <div class="options-item text-danger" id="delete-slot-btn">
+                  <svg width="29" height="31" viewBox="0 0 29 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M23.833 11.96L21.6663 29.2933H6.49967L4.33301 11.96" stroke="#FF787A" stroke-width="2.16667" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M1.08301 7.62695H27.083" stroke="#FF787A" stroke-width="2.16667" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8.5791 6.9985V3.25016C8.5791 2.67553 8.80738 2.12443 9.2137 1.7181C9.62003 1.31177 10.1711 1.0835 10.7458 1.0835H17.2458C17.8204 1.0835 18.3715 1.31177 18.7778 1.7181C19.1842 2.12443 19.4124 2.67553 19.4124 3.25016V7.5835" stroke="#FF787A" stroke-width="2.16667" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>Удалить рекламу</div>
+              <div class="options-item" id="pause-slot-btn">
+                  <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <rect width="26" height="26" fill="url(#pattern0_466_6204)"/>
+                    <defs>
+                    <pattern id="pattern0_466_6204" patternContentUnits="objectBoundingBox" width="1" height="1">
+                    <use xlink:href="#image0_466_6204" transform="scale(0.01)"/>
+                    </pattern>
+                    <image id="image0_466_6204" width="100" height="100" preserveAspectRatio="none" xlink:href="data:image/png;base64,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"/>
+                    </defs>
+                    </svg>
+                    Приостановить показ
+              </div>
+          </div>
+      </div>
+    </div>
+    <div class="slot-card__body">
+      <div class="slot-form-column">
+        <div class="form-group">
+            <label class="slot-label">Минимальная стоимость показа объявления</label>
+            <input type="number" id="min-price" class="slot-input {{#if slot.minPrice}}filled{{/if}}" 
+                   placeholder="Введите число" value="{{slot.minPrice}}">
+        </div>
+        <div class="form-group">
+            <label class="slot-label">Выберите формат рекламного объявления</label>
+            <div class="select-wrapper">
+                <select id="ad-format" class="slot-select {{#if slot.format}}filled{{/if}}">
+                    <option value="" disabled>Выберите формат</option>
+                    <option value="horizontal" {{#if (eq slot.format 'horizontal')}}selected{{/if}}>Горизонтальный - 320x100</option>
+                    <option value="vertical" {{#if (eq slot.format 'vertical')}}selected{{/if}}>Вертикальный - 240x320</option>
+                </select>
+                <span class="select-arrow">∨</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="slot-label">Статус</label>
+            <label class="toggle-wrapper">
+                <input type="checkbox" id="slot-status-toggle" {{#if (eq slot.status 'active')}}checked{{/if}}>
+                <div class="toggle-slider"></div>
+                <span class="toggle-text" id="status-text">
+                    {{#if (eq slot.status 'active')}}Активно{{else}}Приостановлено{{/if}}
+                </span>
+            </label>
+        </div>
+        <div class="form-group">
+            <label class="slot-label">Цвета объявления</label>
+            <div class="form-row-colors">
+                <div class="color-input-wrapper half-width">
+                    <div class="color-preview-box" id="bg-color-preview" style="background-color: {{slot.bgColor}};"></div>
+                    <span class="color-value" id="bg-color-text">{{slot.bgColor}}</span>
+                    <input type="color" id="bg-color" class="color-hidden-input" value="{{slot.bgColor}}">
+                </div>
+
+                <div class="color-input-wrapper half-width">
+                    <div class="color-preview-box" id="text-color-preview" style="background-color: {{slot.textColor}};"></div>
+                    <span class="color-value" id="text-color-text">{{slot.textColor}}</span>
+                    <input type="color" id="text-color" class="color-hidden-input" value="{{slot.textColor}}">
+                </div>
+            </div>
+        </div>
+        <button class="btn btn--primary full-width-btn" id="generate-code-btn">
+            Сгенерировать код для вставки
+        </button>
+        <div class="form-group">
+            <label class="slot-label">Скопируйте этот код и вставьте к себе на страницу</label>
+            <div class="code-area">
+                <button class="icon-copy" id="copy-code-btn" title="Скопировать">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="9" y="9" width="13" height="13" rx="2" stroke="#7B61FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5 15H4C2.89543 15 2 14.1046 2 13V4C2 2.89543 2.89543 2 4 2H13C14.1046 2 15 2.89543 15 4V5" stroke="#7B61FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <pre class="code-content" id="embed-code">
+                    &lt;div id="ad-slot-{{slot.id}}"&gt;&lt;/div&gt;
+                    &lt;script&gt;
+                    AdNet.init({ 
+                        id: "{{slot.id}}", 
+                        bg: "{{slot.bgColor}}", 
+                        text: "{{slot.textColor}}" 
+                    });
+                    &lt;/script&gt;
+                </pre>
+            </div>
+        </div>
+
+      </div>
+      <div class="slot-preview-column">
+          <h3 class="preview-title">Предпросмотр</h3>
+          <div id="preview-card" class="preview-card {{#if (eq slot.format 'horizontal')}}preview-card--horizontal{{/if}}">
+              <div class="preview-image-container">
+                  <img src="/public/assets/cat_meme.png" alt="Preview" class="preview-img">
+                  <button class="preview-close">✕</button>
+              </div>
+              <div class="preview-content" style="background-color: {{slot.bgColor}};">
+                  <h4 id="preview-title" style="color: {{slot.textColor}};">Лучшая реклама</h4>
+                  <p id="preview-desc" style="color: {{slot.textColor}};">
+                      Описание, много текста. Описание, много текста. 
+                      Описание, много текста. Описание, много текста...
+                  </p>
+                  <span class="preview-link">luchshayareklama.ru</span>
+              </div>
+          </div>
+      </div>
+
+    </div>
+    <div class="slot-card__footer">
+        <button class="btn btn--secondary btn-footer" id="back-btn-bottom">Назад</button>
+        <div class="right-buttons">
+            <button class="btn btn--secondary btn-footer" id="save-draft-btn">Сохранить черновик</button>
+            <button class="btn btn--primary btn-footer" id="save-btn">Отредактировать</button>
+        </div>
+    </div>
+  </div>
+</div>

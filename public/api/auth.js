@@ -1,23 +1,22 @@
 import { http } from './http1.js';
 
-
 export async function signup(data) {
-
-  const res = await http.post('/auth/signup', data);
-  const token = res.data?.token;
+  const res = await http.post('/auth/register', data);
+  // ИСПРАВЛЕНИЕ: Ищем токен везде
+  const token = res.token || res.data?.token || res.body?.token;
   if (token) {
     localStorage.setItem('token', token);
   }
-
   return res; 
 }
+
 export async function signin(data) {
-  const res = await http.post('/auth/signin', data);
-  const token = res.data?.token;
+  const res = await http.post('/auth/login', data);
+  // ИСПРАВЛЕНИЕ: Ищем токен везде
+  const token = res.token || res.data?.token || res.body?.token;
   if (token) {
     localStorage.setItem('token', token);
   }
-  
   return res; 
 }
 

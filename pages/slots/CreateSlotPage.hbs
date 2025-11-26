@@ -1,0 +1,109 @@
+<div class="slot-page-container">
+    <div class="slot-card">
+        <div class="slot-card__header">
+            <div class="slot-title-wrapper">
+                <input type="text" id="slot-title-input" class="slot-title-input" value="{{#if isNew}}Слот №1{{else}}Слот №{{slot.id}}{{/if}}" placeholder="Введите название">
+                <span class="edit-icon" id="edit-title-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="#2D3748" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z" stroke="#2D3748" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+            </div>
+        </div>
+        <div class="slot-card__body">
+            <div class="slot-form-column">
+                <form id="slot-form">
+                    
+                    <div class="form-group">
+                        <label class="slot-label">Минимальная стоимость показа объявления</label>
+                        <input type="number" id="min-price" class="slot-input" placeholder="Введите число" value="{{slot.minPrice}}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="slot-label">Выберите формат рекламного объявления</label>
+                        <div class="select-wrapper">
+                            <select id="ad-format" class="slot-select">
+                                <option value="vertical" {{#if (eq slot.format 'vertical')}}selected{{/if}}>Вертикальный - 240x320</option>
+                                <option value="horizontal" {{#if (eq slot.format 'horizontal')}}selected{{/if}}>Горизонтальный - 320x100</option>
+                            </select>
+                            <span class="select-arrow">⌄</span>
+                        </div>
+                    </div>
+                    <div class="form-row-colors">
+                        <div class="form-group half-width">
+                            <label class="slot-label">Цвет фона рекламы</label>
+                            <div class="color-input-wrapper">
+                                <div class="color-preview-box" id="bg-color-preview" style="background-color: #ffffff;"></div>
+                                <input type="color" id="bg-color" value="#ffffff" class="color-hidden-input">
+                                <span class="color-value" id="bg-color-text">#ffffff</span>
+                            </div>
+                        </div>
+                        <div class="form-group half-width">
+                            <label class="slot-label">Цвет текста рекламы</label>
+                            <div class="color-input-wrapper">
+                                <div class="color-preview-box" id="text-color-preview" style="background-color: #000000;"></div>
+                                <input type="color" id="text-color" value="#000000" class="color-hidden-input">
+                                <span class="color-value" id="text-color-text">#000000</span>
+                            </div>
+                        </div>
+                    </div>
+                                        <div class="form-group">
+                        <label class="slot-label">Статус</label>
+                        <label class="toggle-wrapper">
+                            <input type="checkbox" id="slot-status-toggle" {{#if (eq slot.status 'active')}}checked{{/if}}>
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-text" id="status-text">
+                                {{#if (eq slot.status 'active')}}Активно{{else}}Приостановлено{{/if}}
+                            </span>
+                        </label>
+                    </div>
+                    <button type="button" id="generate-code-btn" class="btn btn--primary full-width-btn">
+                        Сгенерировать код для вставки
+                    </button>
+                    <div class="code-block-container">
+                        <label class="slot-label">Скопируйте этот код и вставьте к себе на страницу</label>
+                        <div class="code-area">
+                            <pre class="code-content" id="embed-code">&lt;div id="ad-slot-..."&gt;&lt;/div&gt;
+&lt;script src="..."&gt;&lt;/script&gt;</pre>
+                            <button type="button" id="copy-code-btn" class="icon-copy">
+                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="9" y="9" width="13" height="13" rx="2" stroke="#7B61FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M5 15H4C2.89543 15 2 14.1046 2 13V4C2 2.89543 2.89543 2 4 2H13C14.1046 2 15 2.89543 15 4V5" stroke="#7B61FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="slot-preview-column">
+                <h3 class="preview-title">Предпросмотр</h3>
+                <div class="preview-card" id="preview-card">
+                    <div class="preview-image-container">
+                        <img src="/public/assets/cat_meme.png" alt="Реклама" class="preview-img">
+                        <button class="preview-close">×</button>
+                    </div>
+                    <div class="preview-content">
+                        <h4 id="preview-title">Лучшая реклама</h4>
+                        <p id="preview-desc">
+                            Описание, много текста Описание, много текста. Описание, много текста...
+                        </p>
+                        <span class="preview-link">luchshayareklama.ru</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="slot-card__footer">
+            <button id="back-btn" class="btn btn--secondary">Назад</button>
+            <div class="right-buttons">
+                <button type="button" id="save-draft-btn" class="btn btn--secondary">Сохранить черновик</button>
+                <button type="button" id="create-slot-btn" class="btn btn--primary">
+                    {{#if isNew}}Создать{{else}}Сохранить{{/if}}
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>

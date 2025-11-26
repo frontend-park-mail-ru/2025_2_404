@@ -3,13 +3,14 @@ import Header from './pages/header/Header.js';
 import Footer from './pages/footer/Footer.js';
 import SupportWidget from './pages/components/SupportWidget.js';
 import AuthService from './services/ServiceAuthentification.js';
-
 // Импорт страниц
 import MainPage from './pages/main/MainPage.js';
 import ProfilePage from './pages/profile/ProfilePage.js';
 import ProjectsPage from './pages/projects/ProjectsPage.js';
 import ProjectDetailPage from './pages/projects/ProjectDetailPage.js';
 import CreateProjectPage from './pages/projects/CreateProjectPage.js';
+import SlotDetailPage from './pages/slots/SlotDetailPage.js';
+import CreateSlotPage from './pages/slots/CreateSlotPage.js';
 import BalancePage from './pages/balance/BalancePage.js';
 import LoginPage from './pages/login/LoginPage.js';
 import RegisterPage from './pages/register/Register.js';
@@ -42,6 +43,8 @@ const routes = {
   '/projects/create': CreateProjectPage,
   '/projects/:id': ProjectDetailPage,
   '/balance': BalancePage,
+  '/slots/create': CreateSlotPage,
+  '/slots/:id': SlotDetailPage, 
 };
 
 export const router = new Router(routes, appContainer);
@@ -98,27 +101,17 @@ export function showRegisterModal() {
 }
 
 async function startApp() {
-  // 1. Загружаем шаблоны для статических частей
   await Promise.all([
     header.loadTemplate(),
     footer.loadTemplate()
   ]);
-
-  // 2. Вставляем статические части в DOM
   document.body.prepend(header.render());
   document.body.appendChild(footer.render());
-
-  // Инициализируем виджет поддержки
   const supportWidget = new SupportWidget();
   supportWidget.init();
-
-  // 3. подписки на изменения авторизации
   AuthService.onAuthChange((user) => {
-    // Эта функция будет вызвана при логине, логауте или загрузке профиля
     header.update(user);
   });
-
-  // 4. обработчики кликов (логин/регистрация/логаут)
   document.addEventListener('click', (e) => {
     const target = e.target;
 
@@ -137,12 +130,7 @@ async function startApp() {
       router.navigate('/');
     }
   });
-
-  // 5. Проверяем, авторизован ли пользователь при первой загрузке
   await AuthService.loadProfile();
-
-  // 6. наконец, рендерим первую страницу
-  // Если пользователь залогинен и находится на главной, перенаправляем его
   if (AuthService.isAuthenticated() && window.location.pathname === '/') {
     router.navigate('/projects');
   } else {

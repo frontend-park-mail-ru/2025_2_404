@@ -19,6 +19,10 @@ class AuthService {
     return this.user;
   }
 
+// ... импорты и начало класса ...
+
+// Внутри ServiceAuthentification.js
+
 async loadProfile() {
   if (!this.isAuthenticated()) {
     this.user = null;
@@ -27,22 +31,39 @@ async loadProfile() {
   }
 
   try {
-    const res = await http.get('/profile/');
+    const res = await http.get('/profile');
     
-    const clientData = res.data?.client;
-    const imgBase64 = res.data?.img; 
+    // Ищем данные клиента
+    let clientData = res.client || res.data?.client || res.body?.client;
+    if (!clientData && res && res.user_name) {
+        clientData = res; 
+    }
 
-    if (!clientData) throw new Error("Данные клиента не найдены");
+    const imgBase64 = res.img || res.data?.img || clientData?.img || clientData?.avatar;
+
+    if (!clientData) {
+         throw new Error("Данные клиента не найдены");
+    }
+
+    // --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
+    // Мы ищем данные и по новым ключам (first_name), и по старым (user_first_name), на всякий случай
     this.user = {
       id: clientData.id,
       username: clientData.user_name,
       email: clientData.email,
-      firstName: clientData.user_first_name || '', 
-      lastName: clientData.user_second_name || '', 
-      company: clientData.company || '', 
-      phone: clientData.phone_number || '', 
-      role: clientData.role || 'advertiser',
       
+      // Имя: ищем first_name ИЛИ user_first_name
+      firstName: clientData.first_name || clientData.user_first_name || '', 
+      
+      // Фамилия: ищем last_name ИЛИ user_second_name
+      lastName: clientData.last_name || clientData.user_second_name || '', 
+      
+      company: clientData.company || '', 
+      
+      // Телефон: ищем phone ИЛИ phone_number
+      phone: clientData.phone || clientData.phone_number || '', 
+      
+      role: clientData.role || clientData.profile_type || 'advertiser',
       avatar: imgBase64 ? `data:image/jpeg;base64,${imgBase64}` : '/kit.jpg',
     };
 
@@ -60,14 +81,22 @@ async loadProfile() {
   }
 }
 
-  async updateProfile(formData) {
+// ... остальные методы (updateProfile, deleteAccount) ТОЖЕ БЕЗ СЛЕШЕЙ ...
+async updateProfile(formData) {
     if (!this.isAuthenticated()) {
       throw new Error("Пользователь не авторизован");
     }
 
-    const res = await http.putFormData('/profile/', formData);
-    if (res.data && res.data.token) {
-      localStorage.setItem('token', res.data.token);
+    // ИСПРАВЛЕНИЕ:
+    // 1. Используем http.post вместо http.putFormData (или put)
+    // 2. Добавляем /update к пути
+    const res = await http.post('/profile/update', formData);
+    
+    // Также поправим чтение токена, так как структура может быть "плоской"
+    const token = res.token || res.data?.token;
+
+    if (token) {
+      localStorage.setItem('token', token);
     }
     return await this.loadProfile();
   }
@@ -97,7 +126,7 @@ async loadProfile() {
     if (!this.isAuthenticated()) {
       throw new Error("Пользователь не авторизован для удаления.");
     }
-    await http.delete('/profile/');
+    await http.delete('/profile');
     this.logout();
   }
 }

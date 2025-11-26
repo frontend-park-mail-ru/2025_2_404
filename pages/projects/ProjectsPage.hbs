@@ -1,25 +1,103 @@
-<div class="projects">
-  <div class="projects__header">
-    <h1 class="projects__header-title">Мои проекты</h1>
-    <button class="btn btn--secondary " id="new-campaign-btn">
-      <span>+</span> Создать
+<div class="projects-page">
+  
+  <!-- Хлебные крошки -->
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="/">Слоты</a> 
+    <span class="breadcrumbs__separator">›</span>
+    <span class="breadcrumbs__current">
+      {{#if (eq activeTab 'ads')}}Мои объявления{{else}}Мои слоты{{/if}}
+    </span>
   </div>
 
-  <div class="project__lists">
-    {{#if projects.length}}
-    {{#each projects}}
-      <div class="projects__card" data-id="{{this.id}}">
-        <div class="projects__card-title">
-          Рекламное объявление №{{this.id}}
-        </div>
-        <div class="projects__card-meta">
-          <span class="meta-item">{{this.domain}}</span>
-        </div>
+  <!-- Шапка с выпадающим заголовком и кнопкой -->
+  <div class="projects__header">
+    
+    <div class="title-dropdown-wrapper" id="title-dropdown-trigger">
+      <h1 class="projects__title">
+        {{#if (eq activeTab 'ads')}}Мои объявления{{else}}Мои слоты{{/if}} 
+        <span class="dropdown-arrow">∨</span>
+      </h1>
+      
+      <!-- Скрытое меню -->
+      <div class="title-dropdown-menu" id="title-dropdown-menu">
+        <div class="dropdown-option" data-type="slots">Мои слоты</div>
+        <div class="dropdown-option" data-type="ads">Мои объявления</div>
       </div>
-    {{/each}}
+    </div>
+
+    <button class="btn btn--secondary" id="create-btn">
+      <span>+</span> Создать
+    </button>
+  </div>
+
+  <!-- Список карточек -->
+  <div class="projects__list-container">
+    {{#if items.length}}
+      {{#each items}}
+        <!-- ВАЖНО: data-id оставляем настоящим для навигации -->
+        <div class="project-card" data-id="{{this.id}}" data-type="{{../activeTab}}">
+          
+          <div class="project-card__header">
+            <h3 class="project-card__title">
+              {{#if (eq ../activeTab 'ads')}}
+                <!-- Используем порядковый номер вместо ID -->
+                Рекламное объявление №{{this.displayNumber}}
+              {{else}}
+                <!-- Для слотов: если есть имя - показываем имя, иначе номер -->
+                {{#if this.title}}
+                    {{this.title}}
+                {{else}}
+                    Слот №{{this.displayNumber}}
+                {{/if}}
+              {{/if}}
+            </h3>
+          </div>
+
+          <div class="project-card__info">
+            <!-- Статус -->
+            <span class="status-badge {{#if (eq this.status 'active')}}status-active{{else}}status-stopped{{/if}}">
+              {{#if (eq this.status 'active')}}Активно{{else}}Приостановлено{{/if}}
+            </span>
+
+            <!-- Дата создания -->
+            <span class="project-card__date">Создано {{#if this.createdAt}}{{formatDate this.createdAt}}{{else}}—{{/if}}</span>
+          </div>
+
+        </div>
+      {{/each}}
     {{else}}
-      <div class="projects__no-project-info">У вас пока нет проектов</div>
+      <div class="projects__empty">
+        {{#if (eq activeTab 'ads')}}
+          У вас пока нет объявлений
+        {{else}}
+          У вас пока нет слотов
+        {{/if}}
+      </div>
     {{/if}}
   </div>
+
+  <!-- Пагинация -->
+  {{#if (gt pagination.totalPages 1)}}
+  <div class="pagination-container">
+      <button class="page-btn prev-btn" 
+              data-page="{{sub pagination.currentPage 1}}" 
+              {{#if (eq pagination.currentPage 1)}}disabled{{/if}}>
+          &lt;
+      </button>
+
+      {{#each pagination.pages}}
+          <button class="page-btn {{#if (eq this ../pagination.currentPage)}}active{{/if}}" 
+                  data-page="{{this}}">
+              {{this}}
+          </button>
+      {{/each}}
+
+      <button class="page-btn next-btn" 
+              data-page="{{add pagination.currentPage 1}}" 
+              {{#if (eq pagination.currentPage pagination.totalPages)}}disabled{{/if}}>
+          &gt;
+      </button>
+  </div>
+  {{/if}}
 
 </div>
