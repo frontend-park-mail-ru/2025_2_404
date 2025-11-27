@@ -1,9 +1,12 @@
+import AuthService from './ServiceAuthentification.js'; // <--- 1. ИМПОРТ
+
 export default class Router {
   constructor(routes, rootElement) {
     this.routes = routes;
     this.rootElement = rootElement;
     this.initEventListeners();
   }
+
   initEventListeners() {
     window.addEventListener('click', e => {
       const link = e.target.closest('a');
@@ -26,6 +29,19 @@ export default class Router {
 
   async loadRoute() {
     const currentPath = window.location.pathname;
+
+    // --- 2. ЗАЩИТА РОУТОВ (GUARD) ---
+    // Список страниц, доступных без входа
+    const publicRoutes = ['/']; 
+
+    // Если путь НЕ публичный И пользователь НЕ авторизован
+    if (!publicRoutes.includes(currentPath) && !AuthService.isAuthenticated()) {
+        console.warn("Попытка доступа без авторизации. Перенаправление на главную.");
+        this.navigate('/'); 
+        return;
+    }
+    // ---------------------------------
+
     let routeFound = null;
     for (const routePath in this.routes) {
       const routeRegex = new RegExp(`^${routePath.replace(/:\w+/g, '([^/]+)')}$`);
@@ -40,30 +56,29 @@ export default class Router {
       }
     }
 
-     if (routeFound) {
-      // ИСПРАВЛЕНИЕ: Передаем router (this) первым аргументом, 
-      // так как SlotDetailPage(router, id) ждет его.
+    if (routeFound) {
+      // Передаем this (роутер) первым аргументом, параметры URL - следующими
       const page = new routeFound.component(this, ...routeFound.params);
       
       try {
         const html = await page.render();
-        // Защита от пустого рендера
+        
         if (!html) {
              this.rootElement.innerHTML = '<div class="error-page">Ошибка: Страница пуста</div>';
              return;
         }
+
         this.rootElement.innerHTML = html;
+        
         if (typeof page.attachEvents === 'function') {
           page.attachEvents();
         }
       } catch (error) {
-        console.error("Ошибка при рендеринге:", error);
-        // Выводим ошибку на экран, чтобы вы ее видели
-        this.rootElement.innerHTML = `<div class="error-page"><h1>Ошибка JS: ${error.message}</h1></div>`;
+        console.error("Ошибка при рендеринге маршрута:", error);
+        this.rootElement.innerHTML = `<div class="error-page"><h1>Произошла ошибка</h1><p>${error.message}</p></div>`;
       }
     } else {
-      this.rootElement.innerHTML = '<div class="error-page"><h1>404: Страница не найдена</h1><a href="/projects">Перейти к проектам</a></div>';
+      this.rootElement.innerHTML = '<div class="error-page"><h1>404: Страница не найдена</h1><a href="/projects">Вернуться</a></div>';
     }
   }
 }
-      

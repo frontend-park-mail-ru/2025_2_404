@@ -1,4 +1,4 @@
-const CACHE_NAME = 'adnet-app-cache-v1';
+/* const CACHE_NAME = 'adnet-app-cache-v1';
 const FONT_CACHE_NAME = 'adnet-font-cache-v1'; 
 const DATA_CACHE_NAME = 'adnet-data-cache-v1'
 const APP_SHELL_FILES = [
@@ -106,4 +106,4 @@ self.addEventListener('fetch', (event) => {
       return cachedResponse || fetch(event.request);
     })
   );
-});
+}); */
