@@ -3,6 +3,7 @@ import { router } from '../../main.js';
 import AddFundsModal from '../components/modals/AddFundsModal.js';
 import WithdrawModal from '../components/modals/WithdrawModal.js';
 import { DBService } from '../../services/DataBaseService.js';
+import balanceRepository from '../../public/repository/balanceRepository.js'; // <--- ИМПОРТ
 
 export default class BalancePage {
   constructor() {
@@ -48,22 +49,6 @@ export default class BalancePage {
       this.template = Handlebars.compile('<h1>Ошибка загрузки страницы баланса</h1>');
     }
   }
-  async fetchFromServer() {
-    return new Promise(resolve => {
-        setTimeout(() => {
-            const serverData = {
-              balance: Math.floor(20000 + Math.random() * 5000), 
-              allTransactions: [
-                { id: 1, date: '2025-10-27T12:48:34Z', description: 'Пополнение через СБП', amount: '+25000', type: 'positive' },
-                { id: 2, date: '2025-10-26T13:28:35Z', description: 'Оплата Рекламное объявление №1', amount: '-25000', type: 'negative' },
-                { id: 3, date: '2025-10-26T10:00:00Z', description: 'Покупка лицензии', amount: '-10000', type: 'negative' },
-                { id: 4, date: '2025-09-10T18:00:12Z', description: 'Пополнение баланса', amount: '+50000', type: 'positive' },
-              ].map(t => ({...t, time: new Date(t.date).toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}))
-            };
-            resolve(serverData);
-        }, 1000);
-    });
-  }
 
   async render() {
     if (!AuthService.isAuthenticated()) {
@@ -71,8 +56,11 @@ export default class BalancePage {
       return '<div>Доступ запрещен.</div>';
     }
     await this.loadTemplate();
+    
+    // Сначала показываем кэш, чтобы было быстро
     const cachedBalance = await DBService.getBalance();
-    this.balance = cachedBalance;
+    this.balance = cachedBalance || 0;
+    
     return this.template({ balance: this.balance.toLocaleString('ru-RU') });
   }
 
@@ -80,77 +68,90 @@ export default class BalancePage {
     this.initCalendar();
     document.getElementById('reset-filter-btn')?.addEventListener('click', () => this.resetFilter());
     this.attachActionButtons();
-    this.balance = await DBService.getBalance();
-    this.allTransactions = await DBService.getAllTransactions();
-    this.updateDisplay();
+
+    // 1. Сначала грузим из кэша (IndexedDB)
     try {
-      const serverData = await this.fetchFromServer();
-      await DBService.saveBalance(parseInt(serverData.balance, 10));
-      await DBService.saveAllTransactions(serverData.allTransactions);
-      this.balance = parseInt(serverData.balance, 10);
-      this.allTransactions = serverData.allTransactions;
+        this.balance = await DBService.getBalance() || 0;
+        this.allTransactions = await DBService.getAllTransactions() || [];
+        this.updateDisplay();
+    } catch (e) { console.error("Ошибка чтения кэша", e); }
+
+    // 2. Потом идем на сервер за свежими данными
+    try {
+      const serverData = await balanceRepository.getBalanceAndTransactions();
+      
+      this.balance = serverData.balance;
+      
+      // Если сервер вернул транзакции, обновляем их
+      if (serverData.transactions && serverData.transactions.length > 0) {
+          this.allTransactions = serverData.transactions;
+      }
+
+      // Сохраняем свежие данные в кэш
+      await DBService.saveBalance(this.balance);
+      if (this.allTransactions.length > 0) {
+          await DBService.saveAllTransactions(this.allTransactions);
+      }
+      
       this.updateDisplay();
     } catch (error) {
-      console.warn("Не удалось получить свежие данные с сервера. Работаем с кэшем.", error);
+      console.warn("Сервер недоступен, остаемся на данных из кэша.", error);
     }
   }
-  async attachEvents() {
-    this.initCalendar();
-    document.getElementById('reset-filter-btn')?.addEventListener('click', () => this.resetFilter());
-    this.attachActionButtons();
 
-    try {
-      const serverData = await this.fetchFromServer();
-      this.balance = serverData.balance;
-      this.allTransactions = serverData.allTransactions;
-    } catch (error) {
-      console.warn(error.message, "Загружаем данные из локального кэша (IndexedDB).");
-      this.balance = await DBService.getBalance();
-      this.allTransactions = await DBService.getAllTransactions();
-    } finally {
-      this.updateDisplay();
-    }
+  // Метод для обновления данных после пополнения/снятия
+  async refreshData() {
+      try {
+          const serverData = await balanceRepository.getBalanceAndTransactions();
+          this.balance = serverData.balance;
+          if (serverData.transactions) {
+             this.allTransactions = serverData.transactions;
+          }
+          await DBService.saveBalance(this.balance);
+          await DBService.saveAllTransactions(this.allTransactions);
+          this.updateDisplay();
+      } catch (e) {
+          console.error("Не удалось обновить данные после операции", e);
+      }
   }
 
   attachActionButtons() {
+    // --- ПОПОЛНЕНИЕ ---
     document.getElementById('add-funds-btn')?.addEventListener('click', () => {
       const modal = new AddFundsModal({
         onConfirm: async (amount) => {
-          this.balance += amount;
-          const newTransaction = {
-            date: new Date().toISOString(),
-            description: `Пополнение баланса`,
-            time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
-            amount: `+${amount.toLocaleString('ru-RU')}`,
-            type: 'positive'
-          };
-          
-          await DBService.addTransaction(newTransaction);
-          await DBService.saveBalance(this.balance);
-          this.allTransactions.unshift(newTransaction);
-          this.updateDisplay();
+          try {
+              // Запрос на сервер
+              await balanceRepository.addBalance(amount);
+              
+              // Обновляем данные с сервера (чтобы получить точный баланс и новую запись в истории)
+              await this.refreshData();
+              
+          } catch (error) {
+              alert("Ошибка при пополнении баланса");
+              console.error(error);
+          }
         },
       });
       modal.show();
     });
 
+    // --- ВЫВОД ---
     document.getElementById('withdraw-btn')?.addEventListener('click', () => {
         const modal = new WithdrawModal({
             balance: this.balance,
             onConfirm: async (amount) => {
-                this.balance -= amount;
-                const newTransaction = {
-                    date: new Date().toISOString(),
-                    description: `Вывод средств`,
-                    time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
-                    amount: `-${amount.toLocaleString('ru-RU')}`,
-                    type: 'negative'
-                };
+                try {
+                    // Запрос на сервер
+                    await balanceRepository.subtractBalance(amount);
+                    
+                    // Обновляем данные
+                    await this.refreshData();
 
-                await DBService.addTransaction(newTransaction);
-                await DBService.saveBalance(this.balance);
-                this.allTransactions.unshift(newTransaction);
-                this.updateDisplay();
+                } catch (error) {
+                    alert("Ошибка при выводе средств");
+                    console.error(error);
+                }
             },
         });
         modal.show();
@@ -163,6 +164,7 @@ export default class BalancePage {
         balanceAmountEl.textContent = `${this.balance.toLocaleString('ru-RU')} ₽`;
     }
     
+    // ... Фильтрация по датам (оставляем без изменений) ...
     this.currentTransactions = this.selectedDates
       ? this.allTransactions.filter(transaction => {
           const transactionDate = new Date(transaction.date);
@@ -187,22 +189,21 @@ export default class BalancePage {
     this.renderPagination();
   }
 
+  // ... Остальные методы (calculateAndRenderSummary, renderTransactionList, initCalendar и т.д.)
+  // оставляем без изменений, они работают с this.allTransactions корректно ...
+  
   calculateAndRenderSummary() {
     let totalSpent = 0;
     let totalEarned = 0;
 
     this.currentTransactions.forEach(t => {
-      if (typeof t.amount !== 'string') {
-        console.error("Транзакция без 'amount' или 'amount' не является строкой:", t);
-        return; 
+      // Превращаем amount в число, если это строка
+      let amount = t.amount;
+      if (typeof amount === 'string') {
+          amount = parseInt(amount.replace(/[+\s]/g, ''), 10);
       }
-      const amountString = t.amount.replace(/[+\s]/g, '');
-      const amount = parseInt(amountString, 10);
       
-      if (isNaN(amount)) {
-          console.error("Не удалось спарсить 'amount' в число:", t);
-          return;
-      }
+      if (isNaN(amount)) return;
 
       if (t.type === 'negative') {
         totalSpent += Math.abs(amount);
