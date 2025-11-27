@@ -26,13 +26,25 @@ export default class SlotDetailPage {
     }
   }
 
-  async render() {
+async render() {
     await this.loadTemplate();
     this.slotData = await slotsRepository.getById(this.slotId);
+    
     if (!this.slotData) {
         return `<div class="error-page">Слот с ID ${this.slotId} не найден</div>`;
     }
-    return this.template({ slot: this.slotData });
+
+    // --- ИСПРАВЛЕНИЕ: Генерируем код при загрузке страницы ---
+    const generatedCode = await slotsRepository.getIntegrationCode(
+        this.slotData.id, 
+        this.slotData.format || 'vertical' // формат обязателен
+    );
+
+    // Передаем код в шаблон
+    return this.template({ 
+        slot: this.slotData,
+        integrationCode: generatedCode // <--- Новая переменная
+    });
   }
 
   attachEvents() {
