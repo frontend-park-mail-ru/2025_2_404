@@ -128,6 +128,7 @@ export default class CreateSlotPage {
     }
 
     // --- ОСНОВНАЯ ЛОГИКА: ГЕНЕРАЦИЯ КОДА (СОЗДАНИЕ) ---
+// --- ОСНОВНАЯ ЛОГИКА: ГЕНЕРАЦИЯ КОДА (СОЗДАНИЕ) ---
     const generateBtn = document.querySelector('#generate-code-btn');
     const codeDiv = document.getElementById('embed-code');
 
@@ -136,29 +137,30 @@ export default class CreateSlotPage {
             e.preventDefault();
             const slotData = getFormData();
 
-            // Валидация
             if (!slotData.minPrice || !slotData.format) {
                 alert('Пожалуйста, укажите цену и формат объявления.');
                 return;
             }
 
             try {
-                // UI: Блокируем кнопку
                 generateBtn.textContent = 'Генерация...';
                 generateBtn.disabled = true;
 
-                // 1. Создаем слот через репозиторий
+                // 1. Создаем слот
                 const response = await slotsRepository.create(slotData);
 
-                // 2. Вставляем полученный iframe в поле кода
+                // 2. Вставляем код
                 if (codeDiv) {
                     codeDiv.textContent = response.integrationCode;
                 }
 
-                // 3. Предлагаем перейти к созданному слоту
+                // ИСПРАВЛЕНИЕ: Убираем router.navigate из onConfirm.
+                // Теперь мы просто показываем сообщение и остаемся на странице.
                 new ConfirmationModal({
-                    message: 'Слот успешно создан! Код сгенерирован.',
-                    onConfirm: () => router.navigate(`/slots/${response.slot.id}`),
+                    message: 'Слот создан! Код готов к копированию.',
+                    onConfirm: () => { 
+                        // Здесь пусто, мы никуда не переходим 
+                    } 
                 }).show();
 
             } catch (err) {

@@ -40,21 +40,29 @@ export default class Router {
       }
     }
 
-    if (routeFound) {
+     if (routeFound) {
+      // ИСПРАВЛЕНИЕ: Передаем router (this) первым аргументом, 
+      // так как SlotDetailPage(router, id) ждет его.
       const page = new routeFound.component(this, ...routeFound.params);
       
       try {
         const html = await page.render();
+        // Защита от пустого рендера
+        if (!html) {
+             this.rootElement.innerHTML = '<div class="error-page">Ошибка: Страница пуста</div>';
+             return;
+        }
         this.rootElement.innerHTML = html;
         if (typeof page.attachEvents === 'function') {
           page.attachEvents();
         }
       } catch (error) {
-        console.error("Ошибка при рендеринге маршрута:", error);
-        this.rootElement.innerHTML = '<h1>Произошла ошибка при загрузке страницы</h1>';
+        console.error("Ошибка при рендеринге:", error);
+        // Выводим ошибку на экран, чтобы вы ее видели
+        this.rootElement.innerHTML = `<div class="error-page"><h1>Ошибка JS: ${error.message}</h1></div>`;
       }
     } else {
-      this.rootElement.innerHTML = '<div class="error-page"><h1>404: Страница не найдена</h1></div>';
+      this.rootElement.innerHTML = '<div class="error-page"><h1>404: Страница не найдена</h1><a href="/projects">Перейти к проектам</a></div>';
     }
   }
 }

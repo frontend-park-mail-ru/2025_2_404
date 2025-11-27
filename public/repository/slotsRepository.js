@@ -1,54 +1,52 @@
-import { http, BASE } from '../api/http1.js';
+import { http } from '../api/http1.js'; // Убедитесь, что путь до http1.js верный
+
+// ВАЖНО: Это адрес вашего БЭКЕНДА, откуда будут грузиться баннеры
+const BASE = "http://localhost:8080"; 
 
 class SlotsRepository {
 
-  /**
-   * 1. Получить список слотов
-   * Бэк: GET /slots/ (или просто GET /)
-   */
-async getAll() {
+  async getAll() {
     try {
-      // ИСПРАВЛЕНИЕ 1: Убрали слеш (на всякий случай, если еще не убрали)
+      // Запрос без слеша в конце
       const res = await http.get('/slots'); 
       
-      // ИСПРАВЛЕНИЕ 2: Проверяем, что ответ вообще пришел
-      if (!res) {
-          console.warn("Сервер вернул пустой ответ для слотов");
-          return [];
-      }
+      if (!res) return [];
 
-      // ИСПРАВЛЕНИЕ 3: Безопасное чтение
-      // Сначала проверяем, есть ли body/data, иначе берем сам res
+      // Безопасное чтение массива
       const slotsData = res.slots || res.data?.slots || res.body?.slots || res; 
-      
-      // Проверка, что это массив
       const list = Array.isArray(slotsData) ? slotsData : [];
 
       return list.map(slot => ({
-        id: slot.link,                    
+        id: slot.link || slot.id, // Сервер может возвращать id или link
         title: slot.slot_name,
-        status: slot.status === 'active' ? 'active' : 'paused', 
-        createdAt: slot.created_at || new Date().toISOString(), 
+        status: slot.status === 'active' ? 'active' : 'paused',
+        createdAt: slot.created_at || new Date().toISOString(),
         displayNumber: 0 
       }));
     } catch (err) {
       console.error('Ошибка загрузки слотов:', err);
-      // Если сервер лежит (504), возвращаем пустой список, чтобы сайт не падал
       return [];
     }
   }
 
-  /**
-   * 2. Получить один слот
-   * Бэк: GET /{uuid}
-   */
-  async getById(id) {
+async getById(id) {
     try {
       const res = await http.get(`/slots/${id}`);
-      const slot = res.body || res.data || res;
+      
+      // ИСПРАВЛЕНИЕ: Если сервер не ответил или вернул null -> выходим
+      if (!res) {
+          console.error(`Слот с id=${id} не найден (пустой ответ)`);
+          return null;
+      }
+
+      // Универсальное чтение
+      const slot = res.slot || res.data?.slot || res.body?.slot || res;
+
+      // Если после всех попыток slot пустой
+      if (!slot) return null;
 
       return {
-        id: slot.link,
+        id: slot.link || slot.id,
         title: slot.slot_name,
         minPrice: slot.min_cost_adv,
         format: slot.format_of_banner,
@@ -63,33 +61,35 @@ async getAll() {
     }
   }
 
-  /**
-   * 3. Создать слот
-   * Бэк: POST / (c полями slot_name, back_color и т.д.)
-   */
   async create(slotData) {
     const payload = {
       slot_name: slotData.title,
       min_cost_adv: Number(slotData.minPrice),
       format_of_banner: slotData.format,
-      status: slotData.status,     // "active" или "paused"
+      status: slotData.status,
       back_color: slotData.bgColor,
       text_color: slotData.textColor
     };
 
     try {
+      // 1. Отправляем запрос
       const res = await http.post('/slots', payload);
       
-      // Бэкенд должен вернуть созданный объект. Берем оттуда link (UUID).
-      // Если структура ответа сложная (например { body: {...} }), поправь здесь.
-      const createdSlot = res.body || res.data || res; 
+      // 2. Достаем ID (ищем везде)
+      const newId = res.id || res.data?.id || res.body?.id;
+
+      if (!newId) {
+          // Если ID нет, но запрос прошел - пробуем fallback, но лучше выкинуть ошибку
+          throw new Error("Сервер не вернул ID слота");
+      }
       
-      // Генерируем код iframe сразу
-      const { code, link } = this._generateArtifacts(createdSlot.link, payload.format_of_banner);
+      // 3. Генерируем код, используя полученный ID
+      const { code, link } = this._generateArtifacts(newId, payload.format_of_banner);
 
       return {
         success: true,
-        slot: { id: createdSlot.link, ...slotData },
+        // Собираем объект, который ждет страница
+        slot: { id: newId, ...slotData },
         integrationCode: code,
         feedLink: link
       };
@@ -99,10 +99,6 @@ async getAll() {
     }
   }
 
-  /**
-   * 4. Обновить слот
-   * Бэк: PUT /{uuid}
-   */
   async update(id, slotData) {
     const payload = {
       slot_name: slotData.title,
@@ -122,10 +118,6 @@ async getAll() {
     }
   }
 
-  /**
-   * 5. Удалить слот
-   * Бэк: DELETE /{uuid}
-   */
   async delete(id) {
     try {
       await http.delete(`/slots/${id}`);
@@ -136,20 +128,16 @@ async getAll() {
     }
   }
 
-  /**
-   * 6. Получить код (Локальная генерация)
-   */
   async getIntegrationCode(id, format) {
       const { code } = this._generateArtifacts(id, format);
       return Promise.resolve(code);
   }
 
-  /**
-   * Вспомогательный метод для генерации строки Iframe
-   */
+  // Генератор HTML кода iframe
   _generateArtifacts(uuid, format) {
-      // ИСПРАВЛЕНО: Путь теперь /serving/ (без /ads)
-      const iframeSrc = `${BASE}/serving/${uuid}`;
+      // Ссылка ведет на бэкенд (8080) /slots/serving/{uuid}
+      // ВАЖНО: Путь должен совпадать с тем, что в slot_handler.go (ServeSlot)
+      const iframeSrc = `${BASE}/slots/serving/${uuid}`;
       
       let w = '300';
       let h = '250';
@@ -157,7 +145,7 @@ async getAll() {
       if (format === 'vertical')   { w = '240'; h = '400'; }
 
       const code = `<iframe src="${iframeSrc}" width="${w}" height="${h}" frameborder="0" scrolling="no" style="border:none; overflow:hidden;"></iframe>`;
-      const link = `${BASE}/serving/${uuid}`; // Если прямая ссылка ведет туда же
+      const link = iframeSrc; 
       
       return { code, link };
   }

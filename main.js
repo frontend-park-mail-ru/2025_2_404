@@ -42,9 +42,10 @@ const routes = {
   '/projects': ProjectsPage,
   '/projects/create': CreateProjectPage,
   '/projects/:id': ProjectDetailPage,
-  '/balance': BalancePage,
+  '/balance': BalancePage,      // Список слотов и реклам здесь
+  '/slots': ProjectsPage,          // <--- ДОБАВЬТЕ ЭТО, если хотите открывать список по /slots
   '/slots/create': CreateSlotPage,
-  '/slots/:id': SlotDetailPage, 
+  '/slots/:id': SlotDetailPage,
 };
 
 export const router = new Router(routes, appContainer);
