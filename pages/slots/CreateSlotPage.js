@@ -5,6 +5,7 @@ import { slotsRepository } from '../../public/repository/slotsRepository.js';
 export default class CreateSlotPage {
   constructor() {
     this.template = null;
+    this.createdSlotId = null; // <--- ДОБАВЛЕНО: Храним ID созданного слота
   }
 
   async loadTemplate() {
@@ -24,13 +25,12 @@ export default class CreateSlotPage {
     await this.loadTemplate();
     const context = {
         isNew: true,
-        slot: { minPrice: '', format: '', status: 'active', code: '' } // status по умолчанию active
+        slot: { minPrice: '', format: '', status: 'active', code: '' } 
     };
     return this.template(context);
   }
 
   attachEvents() {
-    // 1. Сбор данных с формы
     const getFormData = () => ({
         title: document.getElementById('slot-title-input')?.value || 'Новый слот',
         minPrice: document.getElementById('min-price')?.value,
@@ -40,7 +40,7 @@ export default class CreateSlotPage {
         textColor: document.getElementById('text-color')?.value
     });
 
-    // --- ЛОГИКА UI (Ресайз, Цвета, Статус) ---
+    // ... (Код UI логики: ресайз, цвета, статус - оставляем без изменений) ...
     const titleInput = document.getElementById('slot-title-input');
     const editBtn = document.getElementById('edit-title-btn');
     const autoResizeInput = (input) => {
@@ -74,10 +74,9 @@ export default class CreateSlotPage {
             }
         };
         statusToggle.addEventListener('change', updateStatusView);
-        updateStatusView(); // init
+        updateStatusView(); 
     }
 
-    // Подсветка заполненных полей
     const handleInputColor = (element) => {
         if (!element) return;
         if (element.value && element.value !== "") element.classList.add('filled');
@@ -89,7 +88,6 @@ export default class CreateSlotPage {
         input.addEventListener('change', () => handleInputColor(input));
     });
 
-    // Превью цветов
     const bgColorInput = document.getElementById('bg-color');
     const textColorInput = document.getElementById('text-color');
     const previewContent = document.querySelector('.preview-content'); 
@@ -114,7 +112,6 @@ export default class CreateSlotPage {
     bgColorInput?.addEventListener('input', updatePreview);
     textColorInput?.addEventListener('input', updatePreview);
 
-    // Превью формата
     const formatSelect = document.getElementById('ad-format');
     const previewCard = document.getElementById('preview-card');
     if (formatSelect && previewCard) {
@@ -126,17 +123,25 @@ export default class CreateSlotPage {
             }
         });
     }
+    // ... (Конец UI логики) ...
 
-    // --- ОСНОВНАЯ ЛОГИКА: ГЕНЕРАЦИЯ КОДА (СОЗДАНИЕ) ---
-// --- ОСНОВНАЯ ЛОГИКА: ГЕНЕРАЦИЯ КОДА (СОЗДАНИЕ) ---
+
+    // --- 1. ГЕНЕРАЦИЯ КОДА ---
     const generateBtn = document.querySelector('#generate-code-btn');
     const codeDiv = document.getElementById('embed-code');
+    const createBtn = document.querySelector('#create-slot-btn'); // Ссылка на нижнюю кнопку
 
     if (generateBtn) {
         generateBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            const slotData = getFormData();
+            
+            // Если уже создали через эту кнопку, просто показываем сообщение (или ничего не делаем)
+            if (this.createdSlotId) {
+                 alert("Слот уже создан. Код ниже.");
+                 return;
+            }
 
+            const slotData = getFormData();
             if (!slotData.minPrice || !slotData.format) {
                 alert('Пожалуйста, укажите цену и формат объявления.');
                 return;
@@ -146,29 +151,32 @@ export default class CreateSlotPage {
                 generateBtn.textContent = 'Генерация...';
                 generateBtn.disabled = true;
 
-                // 1. Создаем слот
+                // Создаем слот
                 const response = await slotsRepository.create(slotData);
+                
+                // ЗАПОМИНАЕМ ID, чтобы не создавать дубль
+                this.createdSlotId = response.slot.id;
 
-                // 2. Вставляем код
+                // Вставляем код
                 if (codeDiv) {
                     codeDiv.textContent = response.integrationCode;
                 }
+                
+                // Меняем текст нижней кнопки, так как слот уже есть
+                if (createBtn) {
+                    createBtn.textContent = "Сохранить и выйти";
+                }
 
-                // ИСПРАВЛЕНИЕ: Убираем router.navigate из onConfirm.
-                // Теперь мы просто показываем сообщение и остаемся на странице.
                 new ConfirmationModal({
                     message: 'Слот создан! Код готов к копированию.',
-                    onConfirm: () => { 
-                        // Здесь пусто, мы никуда не переходим 
-                    } 
+                    onConfirm: () => {} 
                 }).show();
 
             } catch (err) {
                 console.error(err);
                 alert('Ошибка при создании слота');
-            } finally {
+                generateBtn.disabled = false; // Разблокируем, если ошибка
                 generateBtn.textContent = 'Сгенерировать код для вставки';
-                generateBtn.disabled = false;
             }
         });
     }
@@ -191,33 +199,44 @@ export default class CreateSlotPage {
       router.navigate('/projects');
     });
 
-    // --- КНОПКА СОЗДАТЬ (ВНИЗУ) ---
-    document.querySelector('#create-slot-btn')?.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const btn = e.target;
-        if (btn.disabled) return; // Защита
-
-        const slotData = getFormData();
-        
-        if (!slotData.minPrice || !slotData.format) {
-             alert('Заполните обязательные поля');
-             return;
-        }
-
-        try {
-            btn.disabled = true;
-            btn.textContent = "Создание...";
-            await slotsRepository.create(slotData);
-            new ConfirmationModal({
-                message: 'Слот успешно создан',
-                onConfirm: () => router.navigate('/projects'),
-            }).show();
-        } catch (err) {
-            console.error(err);
-            btn.disabled = false; 
-            btn.textContent = "Создать";
+    // --- 2. КНОПКА СОЗДАТЬ (ВНИЗУ) ---
+    if (createBtn) {
+        createBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
             
-        }
-    });
+            // ПРОВЕРКА: Если слот уже создан (через генерацию), просто уходим
+            if (this.createdSlotId) {
+                router.navigate('/projects');
+                return;
+            }
+
+            const btn = e.target;
+            if (btn.disabled) return;
+
+            const slotData = getFormData();
+            
+            if (!slotData.minPrice || !slotData.format) {
+                 alert('Заполните обязательные поля');
+                 return;
+            }
+
+            try {
+                btn.disabled = true;
+                btn.textContent = "Создание...";
+                
+                // Создаем только если еще не создан
+                await slotsRepository.create(slotData);
+                
+                new ConfirmationModal({
+                    message: 'Слот успешно создан',
+                    onConfirm: () => router.navigate('/projects'),
+                }).show();
+            } catch (err) {
+                console.error(err);
+                btn.disabled = false; 
+                btn.textContent = "Создать";
+            }
+        });
+    }
   }
 }
