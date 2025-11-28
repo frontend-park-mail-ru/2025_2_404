@@ -1,23 +1,18 @@
-import { http } from '../api/http1.js'; // Убедитесь, что путь до http1.js верный
-
-// ВАЖНО: Это адрес вашего БЭКЕНДА, откуда будут грузиться баннеры
+import { http } from '../api/http1.js'; 
 const BASE = "http://localhost:8080"; 
 
 class SlotsRepository {
 
   async getAll() {
     try {
-      // Запрос без слеша в конце
       const res = await http.get('/slots'); 
       
       if (!res) return [];
-
-      // Безопасное чтение массива
       const slotsData = res.slots || res.data?.slots || res.body?.slots || res; 
       const list = Array.isArray(slotsData) ? slotsData : [];
 
       return list.map(slot => ({
-        id: slot.link || slot.id, // Сервер может возвращать id или link
+        id: slot.link || slot.id,
         title: slot.slot_name,
         status: slot.status === 'active' ? 'active' : 'paused',
         createdAt: slot.created_at || new Date().toISOString(),
@@ -32,17 +27,11 @@ class SlotsRepository {
 async getById(id) {
     try {
       const res = await http.get(`/slots/${id}`);
-      
-      // ИСПРАВЛЕНИЕ: Если сервер не ответил или вернул null -> выходим
       if (!res) {
           console.error(`Слот с id=${id} не найден (пустой ответ)`);
           return null;
       }
-
-      // Универсальное чтение
       const slot = res.slot || res.data?.slot || res.body?.slot || res;
-
-      // Если после всех попыток slot пустой
       if (!slot) return null;
 
       return {
@@ -72,23 +61,16 @@ async getById(id) {
     };
 
     try {
-      // 1. Отправляем запрос
       const res = await http.post('/slots', payload);
-      
-      // 2. Достаем ID (ищем везде)
       const newId = res.id || res.data?.id || res.body?.id;
 
       if (!newId) {
-          // Если ID нет, но запрос прошел - пробуем fallback, но лучше выкинуть ошибку
           throw new Error("Сервер не вернул ID слота");
       }
-      
-      // 3. Генерируем код, используя полученный ID
       const { code, link } = this._generateArtifacts(newId, payload.format_of_banner);
 
       return {
         success: true,
-        // Собираем объект, который ждет страница
         slot: { id: newId, ...slotData },
         integrationCode: code,
         feedLink: link
@@ -132,11 +114,7 @@ async getById(id) {
       const { code } = this._generateArtifacts(id, format);
       return Promise.resolve(code);
   }
-
-  // Генератор HTML кода iframe
   _generateArtifacts(uuid, format) {
-      // Ссылка ведет на бэкенд (8080) /slots/serving/{uuid}
-      // ВАЖНО: Путь должен совпадать с тем, что в slot_handler.go (ServeSlot)
       const iframeSrc = `${BASE}/slots/serving/${uuid}`;
       
       let w = '300';

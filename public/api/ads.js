@@ -21,20 +21,12 @@ function normalizeImageUrl(ad, image) {
 
 export async function listAds() {
   const res = await http.get('/ads');
-
-  // 1. Получаем массив. 
-  // Судя по скриншоту, сервер присылает массив сразу, без обертки "data" или "ads".
-  // Но оставим проверки на всякий случай.
   let ads = Array.isArray(res) ? res : (res.ads || res.data?.ads || []);
-
   return ads.map((ad) => ({
-    // ИСПРАВЛЕНИЕ 1: Сервер шлет "id", а не "add_id"
     id: ad.id || ad.add_id, 
     
     title: ad.title,
     description: ad.content,
-    
-    // ИСПРАВЛЕНИЕ 2: Сервер шлет "targeturl", а не "target_url"
     domain: ad.targeturl || ad.target_url || '', 
     
     image_url: normalizeImageUrl(ad, ad.image), 
@@ -43,13 +35,10 @@ export async function listAds() {
 
 export async function getAdById(ad_id) {
   const res = await http.get(`/ads/${ad_id}`);
-  
-  // Сервер может вернуть объект напрямую или в обертке
   const ad = res.ad || res.data?.ad || res || {};
   const image = res.image || res.data?.image || ad.image || null; 
 
   return {
-    // И здесь тоже исправляем поля под ответ сервера
     id: ad.id || ad.add_id,
     title: ad.title,
     description: ad.content,

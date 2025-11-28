@@ -1,6 +1,4 @@
 <div class="projects-page">
-  
-  <!-- Хлебные крошки -->
   <div class="breadcrumbs">
     <a class="breadcrumbs__link" href="/">Слоты</a> 
     <span class="breadcrumbs__separator">›</span>
@@ -8,8 +6,6 @@
       {{#if (eq activeTab 'ads')}}Мои объявления{{else}}Мои слоты{{/if}}
     </span>
   </div>
-
-  <!-- Шапка с выпадающим заголовком и кнопкой -->
   <div class="projects__header">
     
     <div class="title-dropdown-wrapper" id="title-dropdown-trigger">
@@ -17,8 +13,6 @@
         {{#if (eq activeTab 'ads')}}Мои объявления{{else}}Мои слоты{{/if}} 
         <span class="dropdown-arrow">∨</span>
       </h1>
-      
-      <!-- Скрытое меню -->
       <div class="title-dropdown-menu" id="title-dropdown-menu">
         <div class="dropdown-option" data-type="slots">Мои слоты</div>
         <div class="dropdown-option" data-type="ads">Мои объявления</div>
@@ -29,21 +23,16 @@
       <span>+</span> Создать
     </button>
   </div>
-
-  <!-- Список карточек -->
   <div class="projects__list-container">
     {{#if items.length}}
       {{#each items}}
-        <!-- ВАЖНО: data-id оставляем настоящим для навигации -->
         <div class="project-card" data-id="{{this.id}}" data-type="{{../activeTab}}">
           
           <div class="project-card__header">
             <h3 class="project-card__title">
               {{#if (eq ../activeTab 'ads')}}
-                <!-- Используем порядковый номер вместо ID -->
                 Рекламное объявление №{{this.displayNumber}}
               {{else}}
-                <!-- Для слотов: если есть имя - показываем имя, иначе номер -->
                 {{#if this.title}}
                     {{this.title}}
                 {{else}}
@@ -54,12 +43,8 @@
           </div>
 
           <div class="project-card__info">
-            <!-- Статус -->
             <span class="status-badge {{#if (eq this.status 'active')}}status-active{{else}}status-stopped{{/if}}">
               {{#if (eq this.status 'active')}}Активно{{else}}Приостановлено{{/if}}
-            </span>
-
-            <!-- Дата создания -->
             <span class="project-card__date">Создано {{#if this.createdAt}}{{formatDate this.createdAt}}{{else}}—{{/if}}</span>
           </div>
 
@@ -75,8 +60,6 @@
       </div>
     {{/if}}
   </div>
-
-  <!-- Пагинация -->
   {{#if (gt pagination.totalPages 1)}}
   <div class="pagination-container">
       <button class="page-btn prev-btn" 

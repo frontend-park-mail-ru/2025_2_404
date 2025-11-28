@@ -1,4 +1,4 @@
-import AuthService from './ServiceAuthentification.js'; // <--- 1. ИМПОРТ
+import AuthService from './ServiceAuthentification.js';
 
 export default class Router {
   constructor(routes, rootElement) {
@@ -29,18 +29,12 @@ export default class Router {
 
   async loadRoute() {
     const currentPath = window.location.pathname;
-
-    // --- 2. ЗАЩИТА РОУТОВ (GUARD) ---
-    // Список страниц, доступных без входа
     const publicRoutes = ['/']; 
-
-    // Если путь НЕ публичный И пользователь НЕ авторизован
     if (!publicRoutes.includes(currentPath) && !AuthService.isAuthenticated()) {
         console.warn("Попытка доступа без авторизации. Перенаправление на главную.");
         this.navigate('/'); 
         return;
     }
-    // ---------------------------------
 
     let routeFound = null;
     for (const routePath in this.routes) {
@@ -57,7 +51,6 @@ export default class Router {
     }
 
     if (routeFound) {
-      // Передаем this (роутер) первым аргументом, параметры URL - следующими
       const page = new routeFound.component(this, ...routeFound.params);
       
       try {

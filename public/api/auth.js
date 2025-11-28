@@ -2,7 +2,6 @@ import { http } from './http1.js';
 
 export async function signup(data) {
   const res = await http.post('/auth/register', data);
-  // ИСПРАВЛЕНИЕ: Ищем токен везде
   const token = res.token || res.data?.token || res.body?.token;
   if (token) {
     localStorage.setItem('token', token);
@@ -12,7 +11,6 @@ export async function signup(data) {
 
 export async function signin(data) {
   const res = await http.post('/auth/login', data);
-  // ИСПРАВЛЕНИЕ: Ищем токен везде
   const token = res.token || res.data?.token || res.body?.token;
   if (token) {
     localStorage.setItem('token', token);

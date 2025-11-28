@@ -22,8 +22,6 @@ export default class CreateSlotPage {
 
   async render() {
     await this.loadTemplate();
-    
-    // --- ИСПРАВЛЕНИЕ НУМЕРАЦИИ ---
     let nextNum = 1;
     try {
         const existingSlots = await slotsRepository.getAll();
@@ -33,8 +31,6 @@ export default class CreateSlotPage {
     }
 
     const context = {
-        isNew: true,
-        // Передаем готовое название с правильным номером
         defaultTitle: `Слот №${nextNum}`, 
         slot: { minPrice: '', format: '', status: 'active', code: '' }
     };
@@ -50,8 +46,6 @@ export default class CreateSlotPage {
         bgColor: document.getElementById('bg-color')?.value,
         textColor: document.getElementById('text-color')?.value
     });
-
-    // ... (Код UI логики: ресайз, цвета, статус - оставляем без изменений) ...
     const titleInput = document.getElementById('slot-title-input');
     const editBtn = document.getElementById('edit-title-btn');
     const autoResizeInput = (input) => {
@@ -134,10 +128,6 @@ export default class CreateSlotPage {
             }
         });
     }
-    // ... (Конец UI логики) ...
-
-
-    // --- 1. ГЕНЕРАЦИЯ КОДА (ИСПРАВЛЕНО) ---
     const generateBtn = document.querySelector('#generate-code-btn');
     const codeDiv = document.getElementById('embed-code');
     const createBtn = document.querySelector('#create-slot-btn');
@@ -182,8 +172,6 @@ export default class CreateSlotPage {
             }
         });
     }
-
-    // --- Копирование ---
     const copyBtn = document.querySelector('#copy-code-btn');
     if (copyBtn) {
         copyBtn.addEventListener('click', () => {
@@ -193,8 +181,6 @@ export default class CreateSlotPage {
                 .catch(err => console.error(err));
         });
     }
-
-    // --- Навигация и Создание (оставляем как было) ---
     document.querySelector('#back-btn')?.addEventListener('click', (e) => {
       e.preventDefault();
       router.navigate('/projects');
@@ -207,8 +193,6 @@ export default class CreateSlotPage {
                 router.navigate('/projects');
                 return;
             }
-            // ... остальной код создания ...
-            // (он у вас уже есть, просто вставьте его сюда)
              const slotData = getFormData();
              if (!slotData.minPrice || !slotData.format) { return; }
              try {

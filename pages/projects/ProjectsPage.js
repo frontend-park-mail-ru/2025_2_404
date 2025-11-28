@@ -6,7 +6,7 @@ export default class ProjectsPage {
   constructor() {
     this.template = null;
     this.activeTab = localStorage.getItem('projects_tab') || 'slots';
-    this.items = []; // В вашем коде было this.items или this.allItems, проверьте соответствие
+    this.items = [];
     this.allItems = [];
     this.currentPage = 1;
     this.itemsPerPage = 5;
@@ -36,18 +36,17 @@ export default class ProjectsPage {
     try {
       if (this.activeTab === 'ads') {
         let ads = await adsRepository.getAll();
-        // Мапим объявления, добавляем статус и ПОРЯДКОВЫЙ НОМЕР
         this.allItems = ads.map((item, index) => ({
             ...item, 
             status: 'active',
-            displayNumber: index + 1 // 1, 2, 3...
+            displayNumber: index + 1
         })); 
       } else {
         let slots = await slotsRepository.getAll();
-        // Мапим слоты, добавляем ПОРЯДКОВЫЙ НОМЕР
+
         this.allItems = slots.map((item, index) => ({
             ...item,
-            displayNumber: index + 1 // 1, 2, 3...
+            displayNumber: index + 1
         }));
       }
     } catch (err) {

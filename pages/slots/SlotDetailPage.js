@@ -33,22 +33,17 @@ async render() {
     if (!this.slotData) {
         return `<div class="error-page">Слот с ID ${this.slotId} не найден</div>`;
     }
-
-    // --- ИСПРАВЛЕНИЕ: Генерируем код при загрузке страницы ---
     const generatedCode = await slotsRepository.getIntegrationCode(
         this.slotData.id, 
-        this.slotData.format || 'vertical' // формат обязателен
+        this.slotData.format || 'vertical'
     );
-
-    // Передаем код в шаблон
     return this.template({ 
         slot: this.slotData,
-        integrationCode: generatedCode // <--- Новая переменная
+        integrationCode: generatedCode
     });
   }
 
   attachEvents() {
-    // Вспомогательная функция сбора данных
     const getFormData = () => ({
         title: document.getElementById('slot-title-input')?.value,
         minPrice: document.getElementById('min-price')?.value,
@@ -57,8 +52,6 @@ async render() {
         bgColor: document.getElementById('bg-color')?.value,
         textColor: document.getElementById('text-color')?.value
     });
-
-    // --- ЛОГИКА UI (Ресайз, Цвета, Статус) ---
     const titleInput = document.getElementById('slot-title-input');
     const editTitleBtn = document.getElementById('edit-title-btn');
     const autoResizeInput = (input) => {
@@ -79,8 +72,6 @@ async render() {
         titleInput.addEventListener('input', () => autoResizeInput(titleInput));
         editTitleBtn?.addEventListener('click', () => { titleInput.focus(); });
     }
-
-    // Статус
     const statusToggle = document.getElementById('slot-status-toggle');
     const statusText = document.getElementById('status-text');
     if (statusToggle && statusText) {
@@ -94,10 +85,8 @@ async render() {
              }
         };
         statusToggle.addEventListener('change', updateStatus);
-        updateStatus(); // init
+        updateStatus(); 
     }
-
-    // Цвета и превью
     const bgColorInput = document.getElementById('bg-color');
     const textColorInput = document.getElementById('text-color');
     const previewContent = document.querySelector('.preview-content'); 
@@ -121,8 +110,6 @@ async render() {
     };
     bgColorInput?.addEventListener('input', updatePreview);
     textColorInput?.addEventListener('input', updatePreview);
-
-    // Формат
     const formatSelect = document.getElementById('ad-format');
     const previewCard = document.getElementById('preview-card');
     if (formatSelect && previewCard) {
@@ -135,7 +122,6 @@ async render() {
         });
     }
 
-    // --- СОХРАНЕНИЕ ---
     const handleSave = async () => {
         const updatedData = getFormData();
         if (!updatedData.minPrice) {
@@ -156,20 +142,13 @@ async render() {
     };
     document.getElementById('save-btn')?.addEventListener('click', handleSave);
     document.getElementById('save-draft-btn')?.addEventListener('click', handleSave);
-
-    // --- ГЕНЕРАЦИЯ КОДА (ОБНОВЛЕННАЯ) ---
     document.getElementById('generate-code-btn')?.addEventListener('click', async () => {
         const data = getFormData();
         const codeEl = document.getElementById('embed-code');
-        
-        // Получаем правильный код (iframe) из репозитория
         const code = await slotsRepository.getIntegrationCode(this.slotId, data.format);
         
         if (codeEl) codeEl.textContent = code;
     });
-
-    // --- УДАЛЕНИЕ ---
-    // Меню опций
     const optionsBtn = document.getElementById('options-trigger');
     const optionsMenu = document.getElementById('options-menu');
     if (optionsBtn && optionsMenu) {
@@ -202,8 +181,6 @@ async render() {
              optionsMenu.classList.remove('show');
         });
     }
-
-    // Навигация
     const goBack = (e) => { e.preventDefault(); router.navigate('/projects'); };
     document.getElementById('back-link-top')?.addEventListener('click', goBack);
     document.getElementById('back-btn-bottom')?.addEventListener('click', goBack);

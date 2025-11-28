@@ -3,7 +3,7 @@ import { router } from '../../main.js';
 import AddFundsModal from '../components/modals/AddFundsModal.js';
 import WithdrawModal from '../components/modals/WithdrawModal.js';
 import { DBService } from '../../services/DataBaseService.js';
-import balanceRepository from '../../public/repository/balanceRepository.js'; // <--- ИМПОРТ
+import balanceRepository from '../../public/repository/balanceRepository.js'; 
 
 export default class BalancePage {
   constructor() {
@@ -56,8 +56,6 @@ export default class BalancePage {
       return '<div>Доступ запрещен.</div>';
     }
     await this.loadTemplate();
-    
-    // Сначала показываем кэш, чтобы было быстро
     const cachedBalance = await DBService.getBalance();
     this.balance = cachedBalance || 0;
     
@@ -68,26 +66,18 @@ export default class BalancePage {
     this.initCalendar();
     document.getElementById('reset-filter-btn')?.addEventListener('click', () => this.resetFilter());
     this.attachActionButtons();
-
-    // 1. Сначала грузим из кэша (IndexedDB)
     try {
         this.balance = await DBService.getBalance() || 0;
         this.allTransactions = await DBService.getAllTransactions() || [];
         this.updateDisplay();
     } catch (e) { console.error("Ошибка чтения кэша", e); }
-
-    // 2. Потом идем на сервер за свежими данными
     try {
       const serverData = await balanceRepository.getBalanceAndTransactions();
       
       this.balance = serverData.balance;
-      
-      // Если сервер вернул транзакции, обновляем их
       if (serverData.transactions && serverData.transactions.length > 0) {
           this.allTransactions = serverData.transactions;
       }
-
-      // Сохраняем свежие данные в кэш
       await DBService.saveBalance(this.balance);
       if (this.allTransactions.length > 0) {
           await DBService.saveAllTransactions(this.allTransactions);
@@ -98,8 +88,6 @@ export default class BalancePage {
       console.warn("Сервер недоступен, остаемся на данных из кэша.", error);
     }
   }
-
-  // Метод для обновления данных после пополнения/снятия
   async refreshData() {
       try {
           const serverData = await balanceRepository.getBalanceAndTransactions();
@@ -116,15 +104,11 @@ export default class BalancePage {
   }
 
   attachActionButtons() {
-    // --- ПОПОЛНЕНИЕ ---
     document.getElementById('add-funds-btn')?.addEventListener('click', () => {
       const modal = new AddFundsModal({
         onConfirm: async (amount) => {
           try {
-              // Запрос на сервер
               await balanceRepository.addBalance(amount);
-              
-              // Обновляем данные с сервера (чтобы получить точный баланс и новую запись в истории)
               await this.refreshData();
               
           } catch (error) {
@@ -135,17 +119,12 @@ export default class BalancePage {
       });
       modal.show();
     });
-
-    // --- ВЫВОД ---
     document.getElementById('withdraw-btn')?.addEventListener('click', () => {
         const modal = new WithdrawModal({
             balance: this.balance,
             onConfirm: async (amount) => {
                 try {
-                    // Запрос на сервер
                     await balanceRepository.subtractBalance(amount);
-                    
-                    // Обновляем данные
                     await this.refreshData();
 
                 } catch (error) {
@@ -163,8 +142,6 @@ export default class BalancePage {
     if (balanceAmountEl) {
         balanceAmountEl.textContent = `${this.balance.toLocaleString('ru-RU')} ₽`;
     }
-    
-    // ... Фильтрация по датам (оставляем без изменений) ...
     this.currentTransactions = this.selectedDates
       ? this.allTransactions.filter(transaction => {
           const transactionDate = new Date(transaction.date);
@@ -188,16 +165,11 @@ export default class BalancePage {
     this.renderTransactionList(groupedData);
     this.renderPagination();
   }
-
-  // ... Остальные методы (calculateAndRenderSummary, renderTransactionList, initCalendar и т.д.)
-  // оставляем без изменений, они работают с this.allTransactions корректно ...
   
   calculateAndRenderSummary() {
     let totalSpent = 0;
     let totalEarned = 0;
-
     this.currentTransactions.forEach(t => {
-      // Превращаем amount в число, если это строка
       let amount = t.amount;
       if (typeof amount === 'string') {
           amount = parseInt(amount.replace(/[+\s]/g, ''), 10);

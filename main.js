@@ -3,7 +3,6 @@ import Header from './pages/header/Header.js';
 import Footer from './pages/footer/Footer.js';
 import SupportWidget from './pages/components/SupportWidget.js';
 import AuthService from './services/ServiceAuthentification.js';
-// Импорт страниц
 import MainPage from './pages/main/MainPage.js';
 import ProfilePage from './pages/profile/ProfilePage.js';
 import ProjectsPage from './pages/projects/ProjectsPage.js';
@@ -42,8 +41,8 @@ const routes = {
   '/projects': ProjectsPage,
   '/projects/create': CreateProjectPage,
   '/projects/:id': ProjectDetailPage,
-  '/balance': BalancePage,      // Список слотов и реклам здесь
-  '/slots': ProjectsPage,          // <--- ДОБАВЬТЕ ЭТО, если хотите открывать список по /slots
+  '/balance': BalancePage,   
+  '/slots': ProjectsPage,
   '/slots/create': CreateSlotPage,
   '/slots/:id': SlotDetailPage,
 };
