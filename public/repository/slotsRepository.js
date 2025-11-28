@@ -1,5 +1,5 @@
 import { http } from '../api/http1.js'; 
-const BASE = "http://localhost:8080"; 
+const BASE = "http://89.208.230.119:8080"; 
 
 class SlotsRepository {
 
