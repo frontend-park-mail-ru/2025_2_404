@@ -1,57 +1,8 @@
-// import AuthService from '../../services/ServiceAuthentification.js';
-
-// export default class Header {
-//   constructor() {
-//     this.header = document.createElement('header');
-//     this.header.classList.add('header');
-//     document.body.prepend(this.header);
-//     this.template = null;
-//   }
-
-//   async loadTemplate() {
-//     if (this.template) return;
-//     try {
-//       const response = await fetch('/pages/header/header.hbs');
-//       if (!response.ok) throw new Error('Failed to load header');
-//       this.template = Handlebars.compile(await response.text());
-//     } catch (error) {
-//       console.error(error);
-//       this.header.innerHTML = '<p>Ошибка загрузки хедера</p>';
-//     }
-//   }
-
-//   // единая версия update
-//   async update() {
-//     await this.loadTemplate();
-//     if (!this.template) return;
-
-//     let isAuthenticated = AuthService.isAuthenticated();
-//     let user = null;
-
-//     if (isAuthenticated) {
-//       try {
-//         // централизованно берём профиль (как в ProfilePage)
-//         user = await AuthService.loadProfile();
-//         if (user) {
-//           user = {
-//             username: user.username ?? user.user_name ?? '',
-//             avatar: user.avatar || '/kit.jpg',
-//           };
-//         }
-//       } catch (err) {
-//         console.error('Ошибка загрузки данных для хедера (возможно, токен истёк)', err);
-//         AuthService.logout();
-//         isAuthenticated = false;
-//       }
-//     }
-
-//     this.header.innerHTML = this.template({ isAuthenticated, user });
-//   }
-// }
-
 import AuthService from '../../services/ServiceAuthentification.js';
 
 export default class Header {
+
+  #updating = false;
   constructor() {
     this.header = document.createElement('header');
     this.header.classList.add('header');
@@ -73,88 +24,84 @@ export default class Header {
     }
   }
 
-  // async update() {
-  //   await this.loadTemplate();
-  //   if (!this.template) return;
-
-  //   let isAuthenticated = AuthService.isAuthenticated();
-  //   let user = null;
-
-  //   if (isAuthenticated) {
-  //     try {
-  //       user = await AuthService.loadProfile();
-  //       if (user) {
-  //         user = {
-  //           username: user.username ?? user.user_name ?? '',
-  //           avatar: user.avatar || '/kit.jpg',
-  //         };
-  //       }
-  //     } catch (err) {
-  //       console.error('Ошибка загрузки данных для хедера (возможно, токен истёк)', err);
-  //       AuthService.logout();
-  //       isAuthenticated = false;
-  //     }
-  //   }
-
-  //   const sameAuth = this.lastAuthState === isAuthenticated;
-  //   const sameUser =
-  //     JSON.stringify(this.lastUser) === JSON.stringify(user);
-
-  //   // if (sameAuth && sameUser) {
-  //   //   return;
-  //   // }
-  //   if (sameAuth && sameUser && isAuthenticated) return;
+  buildNavItems(isAuthenticated) {
+    return [
+      {
+        title: 'Агенства',
+        items: [
+          { href: '#', text: 'Список агенств' }
+        ]
+      },
+      {
+        title: 'Специалисты',
+        items: [
+          { href: '#', text: 'Список специалистов' }
+        ]
+      },
+      {
+        title: 'Проекты',
+        items: [
+          {
+            href: isAuthenticated ? '/projects' : '#',
+            text: 'Мои проекты',
+            id: isAuthenticated ? null : 'login-for-projects-btn'
+          }
+        ]
+      }
+    ];
+  }
 
 
-  //   // обновляем кеш состояния
-  //   this.lastAuthState = isAuthenticated;
-  //   this.lastUser = user;
-
-  //   this.header.innerHTML = this.template({ isAuthenticated, user });
-  // }
 
   async update() {
-    if (this._updating) return;
-    this._updating = true;
+    if (this.#updating) return;
+    this.#updating = true;
 
-    await this.loadTemplate();
-    if (!this.template) {
-      this._updating = false;
-      return;
-    }
 
-    let isAuthenticated = AuthService.isAuthenticated();
-    let user = null;
-
-    if (isAuthenticated) {
-      try {
-        user = await AuthService.loadProfile();
-        if (user) {
-          user = {
-            username: user.username ?? user.user_name ?? "",
-            avatar: user.avatar || "/kit.jpg",
-          };
-        }
-      } catch {
-        AuthService.logout();
-        isAuthenticated = false;
+    try {
+      await this.loadTemplate();
+      if (!this.template) {
+        return;
       }
+  
+      let isAuthenticated = AuthService.isAuthenticated();
+      let user = null;
+  
+      if (isAuthenticated) {
+        try {
+          user = await AuthService.loadProfile();
+          if (user) {
+            user = {
+              username: user.username ?? user.user_name ?? "",
+              avatar: user.avatar || "/kit.jpg",
+            };
+          }
+        } catch {
+          AuthService.logout();
+          isAuthenticated = false;
+        }
+      }
+  
+      const sameAuth = this.lastAuthState === isAuthenticated;
+      const sameUser = JSON.stringify(this.lastUser) === JSON.stringify(user);
+  
+      if (sameAuth && sameUser) {
+        return;
+      }
+  
+      this.lastAuthState = isAuthenticated;
+      this.lastUser = user;
+  
+      // this.header.innerHTML = this.template({ isAuthenticated, user });
+      const navItems = this.buildNavItems(isAuthenticated);
+      this.header.innerHTML = this.template({ isAuthenticated, user, navItems });
+
+    } catch(error){
+      console.log(error);
+    } finally{
+      this.#updating = false;
     }
-
-    const sameAuth = this.lastAuthState === isAuthenticated;
-    const sameUser = JSON.stringify(this.lastUser) === JSON.stringify(user);
-
-    if (sameAuth && sameUser) {
-      this._updating = false;
-      return;
-    }
-
-    this.lastAuthState = isAuthenticated;
-    this.lastUser = user;
-
-    this.header.innerHTML = this.template({ isAuthenticated, user });
-
-    this._updating = false;
+  
   }
 
 

@@ -72,14 +72,6 @@ class AuthService {
     return await this.loadProfile();
   }
 
-  // logout() {
-  //   const token = this.getToken();
-  //   localStorage.removeItem('token');
-  //   this.user = null;
-
-  //   if (this.onAuthChangeCallback) this.onAuthChangeCallback(null);
-  // }
-
   logout() {
     localStorage.removeItem('token');
     this.user = null;

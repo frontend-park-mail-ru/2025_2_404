@@ -1,9 +1,18 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const livereload = require('livereload');
 
 const PORT = 8000;
-const ROOT = path.join(__dirname, '..'); 
+const ROOT = path.join(__dirname, '..');
+
+// LiveReload сервер для автоматической перезагрузки браузера
+const lrServer = livereload.createServer({
+  exts: ['html', 'css', 'js', 'hbs', 'scss'],
+  delay: 100,
+});
+lrServer.watch(ROOT);
+console.log('LiveReload сервер запущен на порту 35729'); 
 http
   .createServer((request, response) => {
     let filePath = path.join(ROOT, request.url);

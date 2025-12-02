@@ -5,30 +5,24 @@
             <span class="logo__text">Ad.net</span>
         </div>
     </a>
-    <nav class="header__nav">
-        <div class="header__nav-dropdown">
-            <a href="#" class="header__nav-link">Агенства</a>
-            <div class="header__dropdown">
-                <a href="#" class="header__dropdown-item">Список агенств</a>
-            </div>
+
+    {{!-- <nav class="header__nav">
+    {{#each navItems}}
+    <div class="header__nav-dropdown">
+        <a href="#" class="header__nav-link">{{this.title}}</a>
+        <div class="header__dropdown">
+            {{#each this.items}}
+            <a href="{{this.href}}" 
+                class="header__dropdown-item" 
+                {{#if this.id}}id="{{this.id}}"{{/if}}>
+                {{this.text}}
+            </a>
+            {{/each}}
         </div>
-        <div class="header__nav-dropdown">
-            <a href="#" class="header__nav-link">Специалисты</a>
-            <div class="header__dropdown">
-                <a href="#" class="header__dropdown-item">Список специалистов</a>
-            </div>
-        </div>
-        <div class="header__nav-dropdown">
-            <a href="#" class="header__nav-link">Проекты</a>
-            <div class="header__dropdown">
-                {{#if isAuthenticated}}
-                <a href="/projects" class="header__dropdown-item">Мои проекты</a>
-                {{else}}
-                <a href="#" id="login-for-projects-btn" class="header__dropdown-item">Мои проекты</a>
-                {{/if}}
-            </div>
-        </div>
-    </nav>
+    </div>
+    {{/each}}
+    </nav> --}}
+    
     {{#if isAuthenticated}}
     <div class="profile-dropdown">
         <div class="profile-dropdown__user">
