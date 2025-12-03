@@ -12,6 +12,7 @@ export default class ProfilePage {
     this.components = {};
     this.selectedFile = null; 
     this.handleFileChange = this.handleFileChange.bind(this);
+    this.toggleEditMode = this.toggleEditMode.bind(this);
   }
 
   async loadTemplate() {
@@ -124,8 +125,10 @@ export default class ProfilePage {
     }
 
     this.initComponents();
+    const roleText = this.user?.role === 'advertiser' ? 'Рекламодатель' : 'Рекламораспространитель';
     const context = {
       ...this.user,
+      roleText,
       loginInputHtml: this.components.loginInput?.render() || '',
       emailInputHtml: this.components.emailInput?.render() || '',
       passwordInputHtml: this.components.passwordInput?.render() || '',
@@ -154,6 +157,21 @@ handleFileChange(event) {
   }
 }
 
+toggleEditMode(show) {
+  const viewMode = document.getElementById('profile-view-mode');
+  const editMode = document.getElementById('profile-edit-mode');
+  
+  if (viewMode && editMode) {
+    if (show) {
+      viewMode.classList.add('is-hidden');
+      editMode.classList.add('is-active');
+    } else {
+      viewMode.classList.remove('is-hidden');
+      editMode.classList.remove('is-active');
+    }
+  }
+}
+
   attachEvents() {
     const componentKeys = [
       'loginInput', 'emailInput', 'passwordInput', 'firstNameInput', 
@@ -168,9 +186,22 @@ handleFileChange(event) {
         }
     });
 
+    // Файловый инпут для аватара
     const fileInput = document.getElementById('profile-avatar-upload');
     if (fileInput) {
       fileInput.addEventListener('change', this.handleFileChange);
+    }
+
+    // Кнопка редактирования (мобильная)
+    const editBtn = document.getElementById('profile-edit-btn');
+    if (editBtn) {
+      editBtn.addEventListener('click', () => this.toggleEditMode(true));
+    }
+
+    // Кнопка назад (мобильная)
+    const backBtn = document.getElementById('profile-back-btn');
+    if (backBtn) {
+      backBtn.addEventListener('click', () => this.toggleEditMode(false));
     }
   }
   async handleSave() {

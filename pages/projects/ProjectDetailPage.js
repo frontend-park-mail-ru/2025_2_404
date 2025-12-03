@@ -9,8 +9,41 @@ export default class ProjectDetailPage {
     this.projectId = projectId;
     this.template = null;
     this.project = null;
-    this.selectedFile = null; 
+    this.selectedFile = null;
+    this.toggleEditMode = this.toggleEditMode.bind(this);
+    this.togglePreview = this.togglePreview.bind(this);
   }
+
+  togglePreview(show) {
+    const formCard = document.getElementById('ads-edit-mode');
+    const previewCard = document.getElementById('ads-preview-card');
+    
+    if (formCard && previewCard) {
+      if (show) {
+        formCard.classList.add('is-preview-hidden');
+        previewCard.classList.add('is-active');
+      } else {
+        formCard.classList.remove('is-preview-hidden');
+        previewCard.classList.remove('is-active');
+      }
+    }
+  }
+
+  toggleEditMode(show) {
+    const viewMode = document.getElementById('ads-view-mode');
+    const editMode = document.getElementById('ads-edit-mode');
+    
+    if (viewMode && editMode) {
+      if (show) {
+        viewMode.classList.add('is-hidden');
+        editMode.classList.add('is-active');
+      } else {
+        viewMode.classList.remove('is-hidden');
+        editMode.classList.remove('is-active');
+      }
+    }
+  }
+
   async loadTemplate() {
     if (this.template) return;
     try {
@@ -23,125 +56,150 @@ export default class ProjectDetailPage {
     }
   }
 
-async render() {
-  await this.loadTemplate();
-  try {
-    const projectData = await adsRepository.getById(this.projectId);
-    if (!projectData) throw new Error('Нет данных об объявлении');
+  async render() {
+    await this.loadTemplate();
+    try {
+      const projectData = await adsRepository.getById(this.projectId);
+      if (!projectData) throw new Error('Нет данных об объявлении');
 
-    const DEFAULT_IMG = '/public/assets/default.jpg'; 
-    let imageUrl = projectData.image_url || projectData.image || '';
-    
-    if (!imageUrl) {
-      imageUrl = DEFAULT_IMG;
-    } else if (
-      !imageUrl.startsWith('data:image') &&
-      !imageUrl.startsWith('http') &&
-      !imageUrl.startsWith('/')
-    ) {
-      imageUrl = `data:image/jpeg;base64,${imageUrl}`;
+      const DEFAULT_IMG = '/public/assets/default.jpg'; 
+      let imageUrl = projectData.image_url || projectData.image || '';
+      
+      if (!imageUrl) {
+        imageUrl = DEFAULT_IMG;
+      } else if (
+        !imageUrl.startsWith('data:image') &&
+        !imageUrl.startsWith('http') &&
+        !imageUrl.startsWith('/')
+      ) {
+        imageUrl = `data:image/jpeg;base64,${imageUrl}`;
+      }
+      
+      this.project = { ...projectData, image_url: imageUrl };
+
+      return this.template({
+        project: this.project,
+        isNew: false,
+        lastUpdated: !navigator.onLine && this.project.timestamp ? this.project.timestamp : null,
+      });
+    } catch (err) {
+      console.error(`Ошибка при рендеринге проекта ID ${this.projectId}:`, err);
+      return this.template({ error: err.message || 'Не удалось загрузить проект' });
     }
-    
-    this.project = { ...projectData, image_url: imageUrl };
-
-    return this.template({
-      project: this.project,
-      isNew: false,
-      lastUpdated: !navigator.onLine && this.project.timestamp ? this.project.timestamp : null,
-    });
-  } catch (err) {
-    console.error(`Ошибка при рендеринге проекта ID ${this.projectId}:`, err);
-    return this.template({ error: err.message || 'Не удалось загрузить проект' });
   }
-}
 
   attachEvents() {
+    // Обычная кнопка "Назад"
     document.querySelector('#back-btn')?.addEventListener('click', (e) => {
       e.preventDefault();
       router.navigate('/projects');
     });
+
+    // Мобильная кнопка "Редактировать" (в режиме просмотра)
+    document.querySelector('#ads-edit-btn')?.addEventListener('click', () => {
+      this.toggleEditMode(true);
+    });
+
+    // Мобильная кнопка "Назад" (в режиме редактирования)
+    document.querySelector('#ads-back-btn')?.addEventListener('click', () => {
+      this.toggleEditMode(false);
+    });
+
+    // Мобильная кнопка "Назад к списку" (в режиме просмотра)
+    document.querySelector('#view-back-btn')?.addEventListener('click', () => {
+      router.navigate('/projects');
+    });
+
+    // Мобильная кнопка "Удалить" (в режиме просмотра)
+    document.querySelector('#view-delete-btn')?.addEventListener('click', () => {
+      this.handleDelete();
+    });
+
+    // Обычная кнопка "Удалить"
     document.querySelector('#delete-btn')?.addEventListener('click', () => {
-      if (!this.project) return;
-      const modal = new ConfirmationModal({
-        message: `Вы уверены, что хотите удалить "${this.project.title}"?`,
-        onConfirm: async () => {
-          try {
-            await adsRepository.delete(this.projectId);
-            router.navigate('/projects');
-          } catch (err) {
-            console.error('Ошибка при удалении:', err);
-          }
-        },
-      });
-      modal.show();
+      this.handleDelete();
     });
-    const editBtn = document.querySelector('#edit-btn');
-    if (!editBtn) return;
 
-    editBtn.addEventListener('click', async (e) => {
+    // Кнопка "Предпросмотр" (мобильная)
+    document.querySelector('#preview-toggle-btn')?.addEventListener('click', (e) => {
       e.preventDefault();
-
-      const title = document.getElementById('title-input').value.trim();
-      const desc = document.getElementById('desc-input').value.trim();
-      const site = document.getElementById('site-input').value.trim();
-      const budget = document.getElementById('budget-input').value.trim();
-      const imgFile = this.selectedFile; 
-
-      console.log('Отправка данных на сервер...');
-      console.table({ title, desc, site, budget, imgFile });
-
-      // Очистка старых ошибок
-      document.querySelectorAll('.error-message').forEach((el) => el.remove());
-      document.querySelectorAll('.input--error').forEach((el) =>
-        el.classList.remove('input--error')
-      );
-      // document.querySelectorAll('.error-msg').forEach((el) => el.remove());
-      // document.querySelectorAll('.input-error').forEach((el) => el.classList.remove('input-error'));
-
-      const errors = validateAdForm({ title, description: desc, domain: site, budget, file: imgFile });
-
-      const fieldMap = {
-        title: 'title-input',
-        description: 'desc-input',
-        domain: 'site-input',
-        budget: 'budget-input',
-        image: 'img-file',
-      };
-
-      if (Object.keys(errors).length > 0) {
-        for (const [key, msg] of Object.entries(errors)) {
-          const input = document.getElementById(fieldMap[key]);
-          if (input) {
-            input.classList.add('input--error');
-            const err = document.createElement('small');
-            err.textContent = msg;
-            err.classList.add('error-message');
-            input.insertAdjacentElement('afterend', err);
-          }
-        }
-        console.warn('Ошибки валидации:', errors);
-        return;
-      }
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('content', desc);
-      formData.append('target_url', site);
-      formData.append('budget', budget);
-      if (imgFile) {
-        formData.append('image', imgFile);
-      }
-
-      try {
-        await adsRepository.update(this.projectId, formData);
-        new ConfirmationModal({
-          message: 'Изменения сохранены!',
-          onConfirm: () => router.navigate('/projects'),
-        }).show();
-      } catch (err) {
-        console.error('Ошибка при обновлении:', err);
-      }  
+      this.togglePreview(true);
     });
 
+    // Кнопка "Назад к форме" в preview (мобильная)
+    document.querySelector('#preview-back-btn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.togglePreview(false);
+    });
+
+    // Кнопка "Сохранить изменения"
+    const editBtn = document.querySelector('#edit-btn');
+    if (editBtn) {
+      editBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        const title = document.getElementById('title-input').value.trim();
+        const desc = document.getElementById('desc-input').value.trim();
+        const site = document.getElementById('site-input').value.trim();
+        const budget = document.getElementById('budget-input').value.trim();
+        const imgFile = this.selectedFile; 
+
+        console.log('Отправка данных на сервер...');
+        console.table({ title, desc, site, budget, imgFile });
+
+        // Очистка старых ошибок
+        document.querySelectorAll('.error-message').forEach((el) => el.remove());
+        document.querySelectorAll('.input--error').forEach((el) =>
+          el.classList.remove('input--error')
+        );
+
+        const errors = validateAdForm({ title, description: desc, domain: site, budget, file: imgFile });
+
+        const fieldMap = {
+          title: 'title-input',
+          description: 'desc-input',
+          domain: 'site-input',
+          budget: 'budget-input',
+          image: 'img-file',
+        };
+
+        if (Object.keys(errors).length > 0) {
+          for (const [key, msg] of Object.entries(errors)) {
+            const input = document.getElementById(fieldMap[key]);
+            if (input) {
+              input.classList.add('input--error');
+              const err = document.createElement('small');
+              err.textContent = msg;
+              err.classList.add('error-message');
+              input.insertAdjacentElement('afterend', err);
+            }
+          }
+          console.warn('Ошибки валидации:', errors);
+          return;
+        }
+        
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('content', desc);
+        formData.append('target_url', site);
+        formData.append('budget', budget);
+        if (imgFile) {
+          formData.append('image', imgFile);
+        }
+
+        try {
+          await adsRepository.update(this.projectId, formData);
+          new ConfirmationModal({
+            message: 'Изменения сохранены!',
+            onConfirm: () => router.navigate('/projects'),
+          }).show();
+        } catch (err) {
+          console.error('Ошибка при обновлении:', err);
+        }  
+      });
+    }
+
+    // Предпросмотр
     const titleInput = document.querySelector('#title-input');
     const descInput = document.querySelector('#desc-input');
     const imgInput = document.getElementById('img-file');
@@ -168,5 +226,21 @@ async render() {
         reader.readAsDataURL(file);
       }
     });
+  }
+
+  handleDelete() {
+    if (!this.project) return;
+    const modal = new ConfirmationModal({
+      message: `Вы уверены, что хотите удалить "${this.project.title}"?`,
+      onConfirm: async () => {
+        try {
+          await adsRepository.delete(this.projectId);
+          router.navigate('/projects');
+        } catch (err) {
+          console.error('Ошибка при удалении:', err);
+        }
+      },
+    });
+    modal.show();
   }
 }

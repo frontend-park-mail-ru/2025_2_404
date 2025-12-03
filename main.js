@@ -46,6 +46,13 @@ export const router = new Router(routes, appContainer);
 export const header = new Header();
 const footer = new Footer();
 
+function updateFooterVisibility(path) {
+  const footerElement = document.querySelector('.footer');
+  if (footerElement) {
+    footerElement.style.display = path === '/' ? '' : 'none';
+  }
+}
+
 function onAuthSuccess() {
   // header.update();
   router.navigate('/projects');
@@ -104,6 +111,10 @@ async function startApp() {
   // сначала вставляем хедер и футер
   await header.update();
   document.body.appendChild(footer.render());
+
+  // управление видимостью footer (только на главной странице)
+  router.onRouteChange(updateFooterVisibility);
+  updateFooterVisibility(window.location.pathname);
 
   // подписки на изменения авторизации
   AuthService.onAuthChange(() => {

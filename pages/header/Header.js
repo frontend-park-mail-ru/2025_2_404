@@ -27,17 +27,16 @@ export default class Header {
   buildNavItems(isAuthenticated) {
     return [
       {
-        title: 'Агенства',
+        title: 'Баланс',
         items: [
-          { href: '#', text: 'Список агенств' }
+          {
+            href: isAuthenticated ? '/balance' : '#',
+            text: 'Мой баланс',
+            id: isAuthenticated ? null : 'login-for-projects-btn'
+          }
         ]
       },
-      {
-        title: 'Специалисты',
-        items: [
-          { href: '#', text: 'Список специалистов' }
-        ]
-      },
+     
       {
         title: 'Проекты',
         items: [
@@ -61,6 +60,7 @@ export default class Header {
     try {
       await this.loadTemplate();
       if (!this.template) {
+        this._updating = false;
         return;
       }
   
@@ -86,6 +86,7 @@ export default class Header {
       const sameUser = JSON.stringify(this.lastUser) === JSON.stringify(user);
   
       if (sameAuth && sameUser) {
+        this._updating = false;
         return;
       }
   
@@ -101,7 +102,7 @@ export default class Header {
     } finally{
       this.#updating = false;
     }
-  
+   
   }
 
 

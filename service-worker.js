@@ -14,7 +14,6 @@ const APP_SHELL_FILES = [
   '/services/DataBaseService.js',
   '/server/app.js',
   '/server/mockApi.js',
-  '/public/api/http1.js',
   '/public/api/http.js',
   '/public/api/ads.js',
   '/public/api/auth.js',

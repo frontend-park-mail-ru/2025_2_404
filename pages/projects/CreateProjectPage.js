@@ -6,6 +6,22 @@ import adsRepository from '../../public/repository/adsRepository.js';
 export default class CreateProjectPage {
   constructor() {
     this.template = null;
+    this.togglePreview = this.togglePreview.bind(this);
+  }
+
+  togglePreview(show) {
+    const formCard = document.getElementById('ads-edit-mode');
+    const previewCard = document.getElementById('ads-preview-card');
+    
+    if (formCard && previewCard) {
+      if (show) {
+        formCard.classList.add('is-preview-hidden');
+        previewCard.classList.add('is-active');
+      } else {
+        formCard.classList.remove('is-preview-hidden');
+        previewCard.classList.remove('is-active');
+      }
+    }
   }
 
   async loadTemplate() {
@@ -62,6 +78,18 @@ export default class CreateProjectPage {
     document.querySelector('#back-btn')?.addEventListener('click', (e) => {
       e.preventDefault();
       router.navigate('/projects');
+    });
+
+    // Кнопка "Предпросмотр" (мобильная)
+    document.querySelector('#preview-toggle-btn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.togglePreview(true);
+    });
+
+    // Кнопка "Назад к форме" в preview (мобильная)
+    document.querySelector('#preview-back-btn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.togglePreview(false);
     });
     document.querySelector('#edit-btn')?.addEventListener('click', async (e) => {
       e.preventDefault();

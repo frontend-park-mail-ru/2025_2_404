@@ -2,7 +2,12 @@ export default class Router {
   constructor(routes, rootElement) {
     this.routes = routes;
     this.rootElement = rootElement;
+    this.onRouteChangeCallback = null;
     this.initEventListeners();
+  }
+
+  onRouteChange(callback) {
+    this.onRouteChangeCallback = callback;
   }
   initEventListeners() {
     window.addEventListener('click', e => {
@@ -55,6 +60,10 @@ export default class Router {
       }
     } else {
       this.rootElement.innerHTML = '<div class="error-page"><h1>404: Страница не найдена</h1></div>';
+    }
+
+    if (this.onRouteChangeCallback) {
+      this.onRouteChangeCallback(currentPath);
     }
   }
 }
