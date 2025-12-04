@@ -1,23 +1,33 @@
-import { router } from '../../main.js';
-import ConfirmationModal from '../components/ConfirmationModal.js';
-import adsRepository from '../../public/repository/adsRepository.js'; 
-import { validateAdForm } from '../../public/utils/ValidateAdForm.js';
+import ConfirmationModal from '../components/ConfirmationModal';
+import adsRepository from '../../public/repository/adsRepository';
+import { validateAdForm } from '../../public/utils/ValidateAdForm';
+import type { HandlebarsTemplateDelegate, PageComponent, Ad } from '../../src/types';
+import type Router from '../../services/Router';
 
+let routerInstance: Router | null = null;
 
-export default class ProjectDetailPage {
-  constructor(routerInstance, projectId) {
+export function setProjectDetailRouter(r: Router): void {
+  routerInstance = r;
+}
+
+export default class ProjectDetailPage implements PageComponent {
+  projectId: string;
+  template: HandlebarsTemplateDelegate | null = null;
+  project: Ad | null = null;
+  selectedFile: File | null = null;
+  toggleEditMode: (show: boolean) => void;
+  togglePreview: (show: boolean) => void;
+
+  constructor(_routerInstance: Router, projectId: string) {
     this.projectId = projectId;
-    this.template = null;
-    this.project = null;
-    this.selectedFile = null;
-    this.toggleEditMode = this.toggleEditMode.bind(this);
-    this.togglePreview = this.togglePreview.bind(this);
+    this.toggleEditMode = this._toggleEditMode.bind(this);
+    this.togglePreview = this._togglePreview.bind(this);
   }
 
-  togglePreview(show) {
+  private _togglePreview(show: boolean): void {
     const formCard = document.getElementById('ads-edit-mode');
     const previewCard = document.getElementById('ads-preview-card');
-    
+
     if (formCard && previewCard) {
       if (show) {
         formCard.classList.add('is-preview-hidden');
@@ -29,10 +39,10 @@ export default class ProjectDetailPage {
     }
   }
 
-  toggleEditMode(show) {
+  private _toggleEditMode(show: boolean): void {
     const viewMode = document.getElementById('ads-view-mode');
     const editMode = document.getElementById('ads-edit-mode');
-    
+
     if (viewMode && editMode) {
       if (show) {
         viewMode.classList.add('is-hidden');
@@ -44,7 +54,7 @@ export default class ProjectDetailPage {
     }
   }
 
-  async loadTemplate() {
+  async loadTemplate(): Promise<void> {
     if (this.template) return;
     try {
       const response = await fetch('/pages/projects/ProjectDetailPage.hbs');
@@ -56,15 +66,15 @@ export default class ProjectDetailPage {
     }
   }
 
-  async render() {
+  async render(): Promise<string> {
     await this.loadTemplate();
     try {
       const projectData = await adsRepository.getById(this.projectId);
       if (!projectData) throw new Error('Нет данных об объявлении');
 
-      const DEFAULT_IMG = '/public/assets/default.jpg'; 
-      let imageUrl = projectData.image_url || projectData.image || '';
-      
+      const DEFAULT_IMG = '/public/assets/default.jpg';
+      let imageUrl = projectData.image_url || '';
+
       if (!imageUrl) {
         imageUrl = DEFAULT_IMG;
       } else if (
@@ -74,80 +84,72 @@ export default class ProjectDetailPage {
       ) {
         imageUrl = `data:image/jpeg;base64,${imageUrl}`;
       }
-      
+
       this.project = { ...projectData, image_url: imageUrl };
 
-      return this.template({
+      return this.template ? this.template({
         project: this.project,
         isNew: false,
         lastUpdated: !navigator.onLine && this.project.timestamp ? this.project.timestamp : null,
-      });
+      }) : '';
     } catch (err) {
       console.error(`Ошибка при рендеринге проекта ID ${this.projectId}:`, err);
-      return this.template({ error: err.message || 'Не удалось загрузить проект' });
+      return this.template ? this.template({ error: (err as Error).message || 'Не удалось загрузить проект' }) : '';
     }
   }
 
-  attachEvents() {
-    // Обычная кнопка "Назад"
+  attachEvents(): void {
     document.querySelector('#back-btn')?.addEventListener('click', (e) => {
       e.preventDefault();
-      router.navigate('/projects');
+      routerInstance?.navigate('/projects');
     });
 
-    // Мобильная кнопка "Редактировать" (в режиме просмотра)
     document.querySelector('#ads-edit-btn')?.addEventListener('click', () => {
       this.toggleEditMode(true);
     });
 
-    // Мобильная кнопка "Назад" (в режиме редактирования)
     document.querySelector('#ads-back-btn')?.addEventListener('click', () => {
       this.toggleEditMode(false);
     });
 
-    // Мобильная кнопка "Назад к списку" (в режиме просмотра)
     document.querySelector('#view-back-btn')?.addEventListener('click', () => {
-      router.navigate('/projects');
+      routerInstance?.navigate('/projects');
     });
 
-    // Мобильная кнопка "Удалить" (в режиме просмотра)
     document.querySelector('#view-delete-btn')?.addEventListener('click', () => {
       this.handleDelete();
     });
 
-    // Обычная кнопка "Удалить"
     document.querySelector('#delete-btn')?.addEventListener('click', () => {
       this.handleDelete();
     });
 
-    // Кнопка "Предпросмотр" (мобильная)
     document.querySelector('#preview-toggle-btn')?.addEventListener('click', (e) => {
       e.preventDefault();
       this.togglePreview(true);
     });
 
-    // Кнопка "Назад к форме" в preview (мобильная)
     document.querySelector('#preview-back-btn')?.addEventListener('click', (e) => {
       e.preventDefault();
       this.togglePreview(false);
     });
 
-    // Кнопка "Сохранить изменения"
     const editBtn = document.querySelector('#edit-btn');
     if (editBtn) {
       editBtn.addEventListener('click', async (e) => {
         e.preventDefault();
 
-        const title = document.getElementById('title-input').value.trim();
-        const desc = document.getElementById('desc-input').value.trim();
-        const site = document.getElementById('site-input').value.trim();
-        const budget = document.getElementById('budget-input').value.trim();
-        const imgFile = this.selectedFile; 
+        const titleEl = document.getElementById('title-input') as HTMLInputElement | null;
+        const descEl = document.getElementById('desc-input') as HTMLTextAreaElement | null;
+        const siteEl = document.getElementById('site-input') as HTMLInputElement | null;
+        const budgetEl = document.getElementById('budget-input') as HTMLInputElement | null;
 
-        console.log('Отправка данных на сервер...');
-        console.table({ title, desc, site, budget, imgFile });
+        const title = titleEl?.value.trim() || '';
+        const desc = descEl?.value.trim() || '';
+        const site = siteEl?.value.trim() || '';
+        const budget = budgetEl?.value.trim() || '';
+        const imgFile = this.selectedFile;
 
-        // Очистка старых ошибок
         document.querySelectorAll('.error-message').forEach((el) => el.remove());
         document.querySelectorAll('.input--error').forEach((el) =>
           el.classList.remove('input--error')
@@ -155,7 +157,7 @@ export default class ProjectDetailPage {
 
         const errors = validateAdForm({ title, description: desc, domain: site, budget, file: imgFile });
 
-        const fieldMap = {
+        const fieldMap: Record<string, string> = {
           title: 'title-input',
           description: 'desc-input',
           domain: 'site-input',
@@ -166,7 +168,7 @@ export default class ProjectDetailPage {
         if (Object.keys(errors).length > 0) {
           for (const [key, msg] of Object.entries(errors)) {
             const input = document.getElementById(fieldMap[key]);
-            if (input) {
+            if (input && msg) {
               input.classList.add('input--error');
               const err = document.createElement('small');
               err.textContent = msg;
@@ -177,7 +179,7 @@ export default class ProjectDetailPage {
           console.warn('Ошибки валидации:', errors);
           return;
         }
-        
+
         const formData = new FormData();
         formData.append('title', title);
         formData.append('content', desc);
@@ -191,21 +193,20 @@ export default class ProjectDetailPage {
           await adsRepository.update(this.projectId, formData);
           new ConfirmationModal({
             message: 'Изменения сохранены!',
-            onConfirm: () => router.navigate('/projects'),
+            onConfirm: () => routerInstance?.navigate('/projects'),
           }).show();
         } catch (err) {
           console.error('Ошибка при обновлении:', err);
-        }  
+        }
       });
     }
 
-    // Предпросмотр
-    const titleInput = document.querySelector('#title-input');
-    const descInput = document.querySelector('#desc-input');
-    const imgInput = document.getElementById('img-file');
+    const titleInput = document.querySelector('#title-input') as HTMLInputElement | null;
+    const descInput = document.querySelector('#desc-input') as HTMLTextAreaElement | null;
+    const imgInput = document.getElementById('img-file') as HTMLInputElement | null;
     const previewTitle = document.querySelector('.ads__preview-card h4');
     const previewDesc = document.querySelector('.ads__preview-card p');
-    const previewImg = document.querySelector('.ads__preview-image');
+    const previewImg = document.querySelector('.ads__preview-image') as HTMLImageElement | null;
 
     titleInput?.addEventListener('input', () => {
       if (previewTitle) previewTitle.textContent = titleInput.value || 'Без названия';
@@ -216,26 +217,27 @@ export default class ProjectDetailPage {
     });
 
     imgInput?.addEventListener('change', (e) => {
-      const file = e.target.files[0];
+      const target = e.target as HTMLInputElement;
+      const file = target.files?.[0];
       if (file) {
-        this.selectedFile = file; 
+        this.selectedFile = file;
         const reader = new FileReader();
         reader.onload = (event) => {
-          if (previewImg) previewImg.src = event.target.result;
+          if (previewImg && event.target?.result) previewImg.src = event.target.result as string;
         };
         reader.readAsDataURL(file);
       }
     });
   }
 
-  handleDelete() {
+  handleDelete(): void {
     if (!this.project) return;
     const modal = new ConfirmationModal({
       message: `Вы уверены, что хотите удалить "${this.project.title}"?`,
       onConfirm: async () => {
         try {
           await adsRepository.delete(this.projectId);
-          router.navigate('/projects');
+          routerInstance?.navigate('/projects');
         } catch (err) {
           console.error('Ошибка при удалении:', err);
         }

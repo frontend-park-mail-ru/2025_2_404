@@ -1,13 +1,21 @@
-import { router } from '../../main.js';
-import ConfirmationModal from '../components/ConfirmationModal.js';
-import adsRepository from '../../public/repository/adsRepository.js';
+import ConfirmationModal from '../components/ConfirmationModal';
+import adsRepository from '../../public/repository/adsRepository';
+import { listAds } from '../../public/api/ads';
+import type { HandlebarsTemplateDelegate, PageComponent, Ad } from '../../src/types';
+import type Router from '../../services/Router';
 
-export default class ProjectsPage {
-  constructor() {
-    this.template = null;
-  }
+let routerInstance: Router | null = null;
 
-  async loadTemplate() {
+export function setProjectsRouter(r: Router): void {
+  routerInstance = r;
+}
+
+export default class ProjectsPage implements PageComponent {
+  template: HandlebarsTemplateDelegate | null = null;
+
+  constructor() {}
+
+  async loadTemplate(): Promise<void> {
     if (this.template) return;
     try {
       const response = await fetch('/pages/projects/ProjectsPage.hbs');
@@ -19,54 +27,44 @@ export default class ProjectsPage {
     }
   }
 
-  async render() {
+  async render(): Promise<string> {
     await this.loadTemplate();
 
     try {
       const ads = await adsRepository.getAll();
       const lastUpdated = ads.find(ad => ad.timestamp)?.timestamp;
-      
-      return this.template({ projects: ads, lastUpdated: lastUpdated });
+
+      return this.template ? this.template({ projects: ads, lastUpdated: lastUpdated }) : '';
     } catch (err) {
-      return this.template({ error: err.message });
+      return this.template ? this.template({ error: (err as Error).message }) : '';
     }
   }
 
-  attachEvents() {
-    // Навигация на создание
+  attachEvents(): void {
     const newCampaignBtn = document.querySelector('#new-campaign-btn');
     newCampaignBtn?.addEventListener('click', () => {
-      router.navigate('/projects/create');
+      routerInstance?.navigate('/projects/create');
     });
 
-    // Навигация на карточку
     document.querySelectorAll('.projects__card').forEach(card => {
       card.addEventListener('click', (e) => {
-        if (e.target.closest('.btn-delete')) return; 
-        const projectId = card.dataset.id;
-        if (projectId) router.navigate(`/projects/${projectId}`);
+        const target = e.target as HTMLElement;
+        if (target.closest('.btn-delete')) return;
+        const projectId = (card as HTMLElement).dataset.id;
+        if (projectId) routerInstance?.navigate(`/projects/${projectId}`);
       });
     });
 
-    // Удаление через ConfirmationModal
     document.querySelectorAll('.btn-delete').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const adId = deleteBtn.dataset.id;
-        this.showDeleteModal(adId);
-        return;
+        const adId = (btn as HTMLElement).dataset.id;
+        if (adId) this.showDeleteModal(adId);
       });
-      const projectCard = target.closest('.project-card');
-      if (projectCard) {
-        const projectId = projectCard.dataset.id;
-        if (projectId) {
-          router.navigate(`/projects/${projectId}`);
-        }
-      }
     });
   }
 
-  showDeleteModal(adId) {
+  showDeleteModal(adId: string): void {
     const modal = new ConfirmationModal({
       message: 'Вы уверены, что хотите удалить это объявление?',
       onConfirm: async () => {
@@ -80,8 +78,8 @@ export default class ProjectsPage {
     });
     modal.show();
   }
-  
-  async refreshList() {
+
+  async refreshList(): Promise<void> {
     try {
       const ads = await listAds();
       const projectsListContainer = document.querySelector('.projects__list');
@@ -95,10 +93,10 @@ export default class ProjectsPage {
 
       projectsListContainer.innerHTML = ads
         .map(
-          (ad) => `
+          (ad: Ad) => `
           <div class="projects__card" data-id="${ad.id}">
             <div class="projects__card-title">
-               ${ad.title} 
+               ${ad.title}
             </div>
             <div class="projects__card-meta">
               <span class="meta-item">${ad.domain}</span>
