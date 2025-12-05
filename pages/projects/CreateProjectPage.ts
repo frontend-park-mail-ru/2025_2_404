@@ -1,18 +1,27 @@
-import ConfirmationModal from '../components/ConfirmationModal.js';
-import { validateAdForm } from '../../public/utils/ValidateAdForm.js';
-import { router } from '../../main.js';
-import adsRepository from '../../public/repository/adsRepository.js';
+import ConfirmationModal from '../components/ConfirmationModal';
+import { validateAdForm } from '../../public/utils/ValidateAdForm';
+import adsRepository from '../../public/repository/adsRepository';
+import type { HandlebarsTemplateDelegate, PageComponent } from '../../src/types';
+import type Router from '../../services/Router';
 
-export default class CreateProjectPage {
+let routerInstance: Router | null = null;
+
+export function setCreateProjectRouter(r: Router): void {
+  routerInstance = r;
+}
+
+export default class CreateProjectPage implements PageComponent {
+  template: HandlebarsTemplateDelegate | null = null;
+  togglePreview: (show: boolean) => void;
+
   constructor() {
-    this.template = null;
-    this.togglePreview = this.togglePreview.bind(this);
+    this.togglePreview = this._togglePreview.bind(this);
   }
 
-  togglePreview(show) {
+  private _togglePreview(show: boolean): void {
     const formCard = document.getElementById('ads-edit-mode');
     const previewCard = document.getElementById('ads-preview-card');
-    
+
     if (formCard && previewCard) {
       if (show) {
         formCard.classList.add('is-preview-hidden');
@@ -24,18 +33,19 @@ export default class CreateProjectPage {
     }
   }
 
-  async loadTemplate() {
+  async loadTemplate(): Promise<void> {
     if (this.template) return;
     try {
       const response = await fetch('/pages/projects/ProjectDetailPage.hbs');
       if (!response.ok) throw new Error('Не удалось загрузить шаблон');
       this.template = Handlebars.compile(await response.text());
     } catch (error) {
-        console.error(error);
-        this.template = Handlebars.compile('<h1>Ошибка загрузки страницы</h1>');
+      console.error(error);
+      this.template = Handlebars.compile('<h1>Ошибка загрузки страницы</h1>');
     }
   }
-  async render() {
+
+  async render(): Promise<string> {
     await this.loadTemplate();
     const emptyProject = {
       title: '',
@@ -44,79 +54,83 @@ export default class CreateProjectPage {
       domain: '',
       budget: ''
     };
-    return this.template({ project: emptyProject, isNew: true });
+    return this.template ? this.template({ project: emptyProject, isNew: true }) : '';
   }
-  attachEvents() {
-    const titleInput = document.querySelector('#title-input');
-    const descInput = document.querySelector('#desc-input');
-    const siteInput = document.querySelector('#site-input');
-    const budgetInput = document.querySelector('#budget-input');
-    const imgInput = document.querySelector('#img-file');
+
+  attachEvents(): void {
+    const titleInput = document.querySelector('#title-input') as HTMLInputElement | null;
+    const descInput = document.querySelector('#desc-input') as HTMLTextAreaElement | null;
+    const siteInput = document.querySelector('#site-input') as HTMLInputElement | null;
+    const budgetInput = document.querySelector('#budget-input') as HTMLInputElement | null;
+    const imgInput = document.querySelector('#img-file') as HTMLInputElement | null;
     const previewTitle = document.querySelector('.ads__preview-card h4');
     const previewDesc = document.querySelector('.ads__preview-card p');
-    const previewImg = document.querySelector('.ads__preview-card img');
+    const previewImg = document.querySelector('.ads__preview-card img') as HTMLImageElement | null;
 
-    // предпросмотр
     titleInput?.addEventListener('input', () => {
       if (previewTitle) previewTitle.textContent = titleInput.value || 'Без названия';
     });
+    
     descInput?.addEventListener('input', () => {
       if (previewDesc) previewDesc.textContent = descInput.value || 'Без описания';
     });
+    
     imgInput?.addEventListener('change', (e) => {
-      const file = e.target.files[0];
+      const target = e.target as HTMLInputElement;
+      const file = target.files?.[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = (event) => {
-          if (previewImg) previewImg.src = event.target.result;
+          if (previewImg && event.target?.result) previewImg.src = event.target.result as string;
         };
         reader.readAsDataURL(file);
       } else {
         if (previewImg) previewImg.src = '/public/assets/default.jpg';
       }
     });
+    
     document.querySelector('#back-btn')?.addEventListener('click', (e) => {
       e.preventDefault();
-      router.navigate('/projects');
+      routerInstance?.navigate('/projects');
     });
 
-    // Кнопка "Предпросмотр" (мобильная)
     document.querySelector('#preview-toggle-btn')?.addEventListener('click', (e) => {
       e.preventDefault();
       this.togglePreview(true);
     });
 
-    // Кнопка "Назад к форме" в preview (мобильная)
     document.querySelector('#preview-back-btn')?.addEventListener('click', (e) => {
       e.preventDefault();
       this.togglePreview(false);
     });
+    
     document.querySelector('#edit-btn')?.addEventListener('click', async (e) => {
       e.preventDefault();
 
-      const title = titleInput.value.trim();
-      const desc = descInput.value.trim();
-      const site = siteInput.value.trim();
-      const budget = budgetInput.value.trim();
-      const imgFile = imgInput.files[0];
+      const title = titleInput?.value.trim() || '';
+      const desc = descInput?.value.trim() || '';
+      const site = siteInput?.value.trim() || '';
+      const budget = budgetInput?.value.trim() || '';
+      const imgFile = imgInput?.files?.[0] || null;
 
-      // валидация
       document.querySelectorAll('.error-message').forEach((el) => el.remove());
       document.querySelectorAll('.input--error').forEach((el) => el.classList.remove('input--error'));
+      
       const errors = validateAdForm({ title, description: desc, domain: site, budget, file: imgFile });
-      console.log(errors);
- const fieldMap = {
+      
+      const fieldMap: Record<string, string> = {
         title: 'title-input',
         description: 'desc-input',
         domain: 'site-input',
         budget: 'budget-input',
         image: 'img-file',
       };
+      
       if (Object.keys(errors).length > 0) {
         console.warn('Ошибки валидации:', errors);
         for (const [key, msg] of Object.entries(errors)) {
           const input = document.getElementById(fieldMap[key]);
-          if (input) {
+          if (input && msg) {
             input.classList.add('input--error');
             const err = document.createElement('small');
             err.textContent = msg;
@@ -126,9 +140,10 @@ export default class CreateProjectPage {
         }
         return;
       }
+      
       const formData = new FormData();
       formData.append('title', title);
-      formData.append('content', desc); 
+      formData.append('content', desc);
       formData.append('target_url', site);
       formData.append('budget', budget);
       if (imgFile) {
@@ -139,9 +154,8 @@ export default class CreateProjectPage {
         await adsRepository.create(formData);
         new ConfirmationModal({
           message: 'Проект успешно создан',
-          onConfirm: () => router.navigate('/projects'),
+          onConfirm: () => routerInstance?.navigate('/projects'),
         }).show();
-        
       } catch (err) {
         console.error('Ошибка при создании:', err);
       }

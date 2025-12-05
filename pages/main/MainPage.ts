@@ -1,10 +1,17 @@
-import { showRegisterModal } from '../../main.js';
+import type { HandlebarsTemplateDelegate, PageComponent } from '../../src/types';
 
-export default class MainPage {
-  constructor() {
-    this.template = null;
-  }
-  async loadTemplate() {
+let showRegisterModalFn: (() => void) | null = null;
+
+export function setShowRegisterModal(fn: () => void): void {
+  showRegisterModalFn = fn;
+}
+
+export default class MainPage implements PageComponent {
+  template: HandlebarsTemplateDelegate | null = null;
+
+  constructor() {}
+
+  async loadTemplate(): Promise<void> {
     if (this.template) {
       return;
     }
@@ -19,16 +26,17 @@ export default class MainPage {
       this.template = Handlebars.compile('<h1>Не удалось загрузить страницу</h1>');
     }
   }
-  async render() {
+
+  async render(): Promise<string> {
     await this.loadTemplate();
-    return this.template();
+    return this.template ? this.template({}) : '';
   }
 
-  attachEvents() {
+  attachEvents(): void {
     const faqItems = document.querySelectorAll('.landing__faq-item');
     faqItems.forEach(item => {
       const question = item.querySelector('.landing__faq-question');
-      question.addEventListener('click', () => {
+      question?.addEventListener('click', () => {
         faqItems.forEach(otherItem => {
           if (otherItem !== item) {
             otherItem.classList.remove('active');
@@ -39,10 +47,10 @@ export default class MainPage {
     });
 
     const tryBtn = document.getElementById('try-btn');
-    if (tryBtn) {
+    if (tryBtn && showRegisterModalFn) {
       tryBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        showRegisterModal();
+        showRegisterModalFn!();
       });
     }
   }

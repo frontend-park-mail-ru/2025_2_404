@@ -1,25 +1,48 @@
-import { signin, signup, logout as apiLogout } from '../public/api/auth.js';
-import { http } from '../public/api/http.js';
+import { signin, signup } from '../public/api/auth';
+import { http } from '../public/api/http';
+import type { User, LoginCredentials, RegisterInfo } from '../src/types';
+
+interface ProfileResponse {
+  data?: {
+    client?: {
+      id: number;
+      user_name: string;
+      email: string;
+      first_name?: string;
+      last_name?: string;
+      company?: string;
+      phone?: string;
+      role?: string;
+    };
+    img?: string;
+  };
+}
+
+declare global {
+  interface Window {
+    header?: {
+      resetCache?: () => void;
+    };
+  }
+}
 
 class AuthService {
-  constructor() {
-    this.user = null;
-    this.onAuthChangeCallback = null;
-  }
+  private user: User | null = null;
+  private onAuthChangeCallback: ((user: User | null) => void) | null = null;
 
-  getToken() {
+  getToken(): string | null {
     return localStorage.getItem('token');
   }
 
-  isAuthenticated() {
+  isAuthenticated(): boolean {
     return !!this.getToken();
   }
 
-  getUser() {
+  getUser(): User | null {
     return this.user;
   }
 
-  async loadProfile() {
+  async loadProfile(): Promise<User | null> {
     if (!this.isAuthenticated()) {
       this.user = null;
       if (this.onAuthChangeCallback) this.onAuthChangeCallback(null);
@@ -27,9 +50,10 @@ class AuthService {
     }
 
     try {
-      const res = await http.get('/profile/');
+      const res = await http.get<ProfileResponse>('/profile/');
       const clientData = res.data?.client;
       if (!clientData) throw new Error("Данные клиента не найдены");
+      
       this.user = {
         id: clientData.id,
         username: clientData.user_name,
@@ -38,7 +62,7 @@ class AuthService {
         lastName: clientData.last_name || '',
         company: clientData.company || '',
         phone: clientData.phone || '',
-        role: clientData.role || 'advertiser',
+        role: (clientData.role as 'advertiser' | 'publisher') || 'advertiser',
         avatar: res.data?.img ? `data:image/jpeg;base64,${res.data.img}` : '/kit.jpg',
       };
 
@@ -54,7 +78,7 @@ class AuthService {
     }
   }
 
-  async updateProfile(formData) {
+  async updateProfile(formData: FormData): Promise<User | null> {
     if (!this.isAuthenticated()) {
       throw new Error("Пользователь не авторизован");
     }
@@ -62,17 +86,17 @@ class AuthService {
     return await this.loadProfile();
   }
 
-  async login(credentials) {
+  async login(credentials: LoginCredentials): Promise<User | null> {
     await signin(credentials);
     return await this.loadProfile();
   }
 
-  async register(info) {
+  async register(info: RegisterInfo): Promise<User | null> {
     await signup(info);
     return await this.loadProfile();
   }
 
-  logout() {
+  logout(): void {
     localStorage.removeItem('token');
     this.user = null;
 
@@ -83,11 +107,11 @@ class AuthService {
     }
   }
 
-  onAuthChange(callback) {
+  onAuthChange(callback: (user: User | null) => void): void {
     this.onAuthChangeCallback = callback;
   }
 
-  async deleteAccount() {
+  async deleteAccount(): Promise<void> {
     if (!this.isAuthenticated()) {
       throw new Error("Пользователь не авторизован для удаления.");
     }

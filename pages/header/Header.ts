@@ -1,18 +1,36 @@
-import AuthService from '../../services/ServiceAuthentification.js';
+import AuthService from '../../services/ServiceAuthentification';
+import type { HandlebarsTemplateDelegate, User } from '../../src/types';
+
+interface NavItem {
+  href: string;
+  text: string;
+  id: string | null;
+}
+
+interface NavGroup {
+  title: string;
+  items: NavItem[];
+}
+
+interface HeaderUser {
+  username: string;
+  avatar: string;
+}
 
 export default class Header {
-
   #updating = false;
+  header: HTMLElement;
+  template: HandlebarsTemplateDelegate | null = null;
+  lastUser: HeaderUser | null = null;
+  lastAuthState: boolean | null = null;
+
   constructor() {
     this.header = document.createElement('header');
     this.header.classList.add('header');
     document.body.prepend(this.header);
-    this.template = null;
-    this.lastUser = null;
-    this.lastAuthState = null;
   }
 
-  async loadTemplate() {
+  async loadTemplate(): Promise<void> {
     if (this.template) return;
     try {
       const response = await fetch('/pages/header/header.hbs');
@@ -24,7 +42,7 @@ export default class Header {
     }
   }
 
-  buildNavItems(isAuthenticated) {
+  buildNavItems(isAuthenticated: boolean): NavGroup[] {
     return [
       {
         title: 'Баланс',
@@ -36,7 +54,6 @@ export default class Header {
           }
         ]
       },
-     
       {
         title: 'Проекты',
         items: [
@@ -50,30 +67,27 @@ export default class Header {
     ];
   }
 
-
-
-  async update() {
+  async update(): Promise<void> {
     if (this.#updating) return;
     this.#updating = true;
-
 
     try {
       await this.loadTemplate();
       if (!this.template) {
-        this._updating = false;
+        this.#updating = false;
         return;
       }
-  
+
       let isAuthenticated = AuthService.isAuthenticated();
-      let user = null;
-  
+      let user: HeaderUser | null = null;
+
       if (isAuthenticated) {
         try {
-          user = await AuthService.loadProfile();
-          if (user) {
+          const profile = await AuthService.loadProfile();
+          if (profile) {
             user = {
-              username: user.username ?? user.user_name ?? "",
-              avatar: user.avatar || "/kit.jpg",
+              username: profile.username ?? '',
+              avatar: profile.avatar || '/kit.jpg',
             };
           }
         } catch {
@@ -81,34 +95,30 @@ export default class Header {
           isAuthenticated = false;
         }
       }
-  
+
       const sameAuth = this.lastAuthState === isAuthenticated;
       const sameUser = JSON.stringify(this.lastUser) === JSON.stringify(user);
-  
+
       if (sameAuth && sameUser) {
-        this._updating = false;
+        this.#updating = false;
         return;
       }
-  
+
       this.lastAuthState = isAuthenticated;
       this.lastUser = user;
-  
-      // this.header.innerHTML = this.template({ isAuthenticated, user });
+
       const navItems = this.buildNavItems(isAuthenticated);
       this.header.innerHTML = this.template({ isAuthenticated, user, navItems });
 
-    } catch(error){
+    } catch (error) {
       console.log(error);
-    } finally{
+    } finally {
       this.#updating = false;
     }
-   
   }
 
-
-  resetCache() {
+  resetCache(): void {
     this.lastAuthState = null;
     this.lastUser = null;
   }
-
 }
