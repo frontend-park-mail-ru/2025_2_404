@@ -1,14 +1,13 @@
-import { DBService } from '../../services/DataBaseService.js';
-import { listAds, getAdById, createAd, updateAd, deleteAd } from '../../public/api/ads.js';
+import { DBService } from '../../services/DataBaseService';
+import { listAds, getAdById, createAd, updateAd, deleteAd } from '../api/ads';
+import type { Ad } from '../../src/types';
 
 const adsRepository = {
-  async getAll() {
+  async getAll(): Promise<Ad[]> {
     try {
       const freshAds = await listAds();
       await DBService.saveAllAds(freshAds.map(ad => ({ ...ad, timestamp: new Date().toISOString() })));
-
       return freshAds;
-
     } catch (error) {
       console.warn("Сеть недоступна. Загружаем данные из локального хранилища.");
       
@@ -21,11 +20,11 @@ const adsRepository = {
       }
     }
   },
-  async getById(id) {
+
+  async getById(id: number | string): Promise<Ad> {
     try {
       const freshAd = await getAdById(id);
       await DBService.saveAd({ ...freshAd, timestamp: new Date().toISOString() });
-      
       return freshAd;
     } catch (error) {
       console.warn(`Сеть недоступна для объявления ID=${id}. Ищем в локальном хранилище.`);
@@ -40,21 +39,21 @@ const adsRepository = {
     }
   },
 
-  async create(formData) {
+  async create(formData: FormData): Promise<unknown> {
     if (!navigator.onLine) {
       throw new Error("Offline mode: Cannot create ad.");
     }
     return await createAd(formData);
   },
 
-  async update(id, formData) {
+  async update(id: number | string, formData: FormData): Promise<unknown> {
     if (!navigator.onLine) {
       throw new Error("Offline mode: Cannot update ad.");
     }
     return await updateAd(id, formData);
   },
 
-  async delete(adId) {
+  async delete(adId: number | string): Promise<void> {
     if (!navigator.onLine) {
       throw new Error("Offline mode: Cannot delete ad.");
     }

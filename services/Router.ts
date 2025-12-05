@@ -1,27 +1,42 @@
+import type { Routes, RouteMatch, PageComponent, PageConstructor } from '../src/types';
+
 export default class Router {
-  constructor(routes, rootElement) {
+  routes: Routes;
+  rootElement: HTMLElement;
+  private onRouteChangeCallback: ((path: string) => void) | null = null;
+
+  constructor(routes: Routes, rootElement: HTMLElement) {
     this.routes = routes;
     this.rootElement = rootElement;
-    this.onRouteChangeCallback = null;
     this.initEventListeners();
   }
 
-  onRouteChange(callback) {
+  onRouteChange(callback: (path: string) => void): void {
     this.onRouteChangeCallback = callback;
   }
-  initEventListeners() {
-    window.addEventListener('click', e => {
-      const link = e.target.closest('a');
-      if (!link || !link.hasAttribute('href') || link.getAttribute('href').startsWith('http') || link.target === '_blank') {
+
+  private initEventListeners(): void {
+    window.addEventListener('click', (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const link = target.closest('a') as HTMLAnchorElement | null;
+      
+      if (!link || !link.hasAttribute('href') || 
+          link.getAttribute('href')?.startsWith('http') || 
+          link.target === '_blank') {
         return;
       }
+      
       e.preventDefault();
-      this.navigate(link.getAttribute('href'));
+      const href = link.getAttribute('href');
+      if (href) {
+        this.navigate(href);
+      }
     });
+    
     window.addEventListener('popstate', () => this.loadRoute());
   }
 
-  navigate(path) {
+  navigate(path: string): void {
     if (window.location.pathname === path) {
       return;
     }
@@ -29,9 +44,10 @@ export default class Router {
     this.loadRoute();
   }
 
-  async loadRoute() {
+  async loadRoute(): Promise<void> {
     const currentPath = window.location.pathname;
-    let routeFound = null;
+    let routeFound: RouteMatch | null = null;
+    
     for (const routePath in this.routes) {
       const routeRegex = new RegExp(`^${routePath.replace(/:\w+/g, '([^/]+)')}$`);
       const match = currentPath.match(routeRegex);
@@ -46,7 +62,8 @@ export default class Router {
     }
 
     if (routeFound) {
-      const page = new routeFound.component(this, ...routeFound.params);
+      const PageClass = routeFound.component as PageConstructor;
+      const page: PageComponent = new PageClass(this, ...routeFound.params);
       
       try {
         const html = await page.render();
@@ -67,4 +84,3 @@ export default class Router {
     }
   }
 }
-      

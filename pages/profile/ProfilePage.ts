@@ -1,21 +1,45 @@
-import Input from '../components/Input.js';
-import Button from '../components/Button.js';
-import Select from '../components/Select.js';
-import AuthService from '../../services/ServiceAuthentification.js';
-import ConfirmationModal from '../components/ConfirmationModal.js';
-import { router } from '../../main.js';
+import Input from '../components/Input';
+import Button from '../components/Button';
+import Select from '../components/Select';
+import AuthService from '../../services/ServiceAuthentification';
+import ConfirmationModal from '../components/ConfirmationModal';
+import type { HandlebarsTemplateDelegate, User, PageComponent } from '../../src/types';
+import type Router from '../../services/Router';
 
-export default class ProfilePage {
+let routerInstance: Router | null = null;
+
+export function setRouter(r: Router): void {
+  routerInstance = r;
+}
+
+interface ProfileComponents {
+  loginInput?: Input;
+  emailInput?: Input;
+  passwordInput?: Input;
+  firstNameInput?: Input;
+  lastNameInput?: Input;
+  companyInput?: Input;
+  phoneInput?: Input;
+  roleSelect?: Select;
+  saveButton?: Button;
+  deleteButton?: Button;
+  logoutButton?: Button;
+}
+
+export default class ProfilePage implements PageComponent {
+  template: HandlebarsTemplateDelegate | null = null;
+  user: User | null = null;
+  components: ProfileComponents = {};
+  selectedFile: File | null = null;
+  handleFileChange: (event: Event) => void;
+  toggleEditMode: (show: boolean) => void;
+
   constructor() {
-    this.template = null;
-    this.user = null;
-    this.components = {};
-    this.selectedFile = null; 
-    this.handleFileChange = this.handleFileChange.bind(this);
-    this.toggleEditMode = this.toggleEditMode.bind(this);
+    this.handleFileChange = this._handleFileChange.bind(this);
+    this.toggleEditMode = this._toggleEditMode.bind(this);
   }
 
-  async loadTemplate() {
+  async loadTemplate(): Promise<void> {
     if (this.template) return;
     try {
       const response = await fetch('/pages/profile/ProfilePage.hbs');
@@ -27,13 +51,12 @@ export default class ProfilePage {
     }
   }
 
-  initComponents() {
+  initComponents(): void {
     try {
       this.components.loginInput = new Input({
         id: 'profile-login',
         label: 'Логин',
         placeholder: 'Введите логин',
-        value: this.user?.username || '',
       });
 
       this.components.emailInput = new Input({
@@ -41,7 +64,6 @@ export default class ProfilePage {
         type: 'email',
         label: 'Почта',
         placeholder: 'Введите почту',
-        value: this.user?.email || '',
       });
 
       this.components.passwordInput = new Input({
@@ -55,21 +77,18 @@ export default class ProfilePage {
         id: 'profile-firstname',
         label: 'Имя',
         placeholder: 'Введите ваше имя',
-        value: this.user?.firstName || '',
       });
-      
+
       this.components.lastNameInput = new Input({
         id: 'profile-lastname',
         label: 'Фамилия',
         placeholder: 'Введите вашу фамилию',
-        value: this.user?.lastName || '',
       });
 
       this.components.companyInput = new Input({
         id: 'profile-company',
         label: 'Компания',
         placeholder: 'Введите название компании',
-        value: this.user?.company || '',
       });
 
       this.components.phoneInput = new Input({
@@ -77,7 +96,6 @@ export default class ProfilePage {
         label: 'Номер телефона',
         placeholder: 'Введите ваш номер телефона',
         type: 'tel',
-        value: this.user?.phone || '',
       });
 
       this.components.roleSelect = new Select({
@@ -96,7 +114,7 @@ export default class ProfilePage {
         variant: 'primary',
         onClick: () => this.handleSave(),
       });
-      
+
       this.components.deleteButton = new Button({
         id: 'profile-delete',
         text: 'Удалить аккаунт',
@@ -115,12 +133,12 @@ export default class ProfilePage {
     }
   }
 
-  async render() {
+  async render(): Promise<string> {
     await this.loadTemplate();
     this.user = await AuthService.loadProfile();
 
     if (!this.user) {
-      router.navigate('/');
+      routerInstance?.navigate('/');
       return '<div>Вы не авторизованы. Перенаправление...</div>';
     }
 
@@ -141,106 +159,108 @@ export default class ProfilePage {
       deleteButtonHtml: this.components.deleteButton?.render() || '',
       logoutButtonHtml: this.components.logoutButton?.render() || ''
     };
-    return this.template(context);
+    return this.template ? this.template(context) : '';
   }
-handleFileChange(event) {
-  if (event.target.files && event.target.files[0]) {
-    this.selectedFile = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const previewElement = document.getElementById('profile-avatar-preview');
-      if (previewElement) {
-        previewElement.src = e.target.result;
-      }
-    };
-    reader.readAsDataURL(this.selectedFile);
-  }
-}
 
-toggleEditMode(show) {
-  const viewMode = document.getElementById('profile-view-mode');
-  const editMode = document.getElementById('profile-edit-mode');
-  
-  if (viewMode && editMode) {
-    if (show) {
-      viewMode.classList.add('is-hidden');
-      editMode.classList.add('is-active');
-    } else {
-      viewMode.classList.remove('is-hidden');
-      editMode.classList.remove('is-active');
+  private _handleFileChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files[0]) {
+      this.selectedFile = target.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const previewElement = document.getElementById('profile-avatar-preview') as HTMLImageElement | null;
+        if (previewElement && e.target?.result) {
+          previewElement.src = e.target.result as string;
+        }
+      };
+      reader.readAsDataURL(this.selectedFile);
     }
   }
-}
 
-  attachEvents() {
-    const componentKeys = [
-      'loginInput', 'emailInput', 'passwordInput', 'firstNameInput', 
+  private _toggleEditMode(show: boolean): void {
+    const viewMode = document.getElementById('profile-view-mode');
+    const editMode = document.getElementById('profile-edit-mode');
+
+    if (viewMode && editMode) {
+      if (show) {
+        viewMode.classList.add('is-hidden');
+        editMode.classList.add('is-active');
+      } else {
+        viewMode.classList.remove('is-hidden');
+        editMode.classList.remove('is-active');
+      }
+    }
+  }
+
+  attachEvents(): void {
+    const componentKeys: (keyof ProfileComponents)[] = [
+      'loginInput', 'emailInput', 'passwordInput', 'firstNameInput',
       'lastNameInput', 'companyInput', 'phoneInput', 'roleSelect',
       'saveButton', 'deleteButton', 'logoutButton'
     ];
 
     componentKeys.forEach(key => {
-        const component = this.components[key];
-        if (component && component.attachEvents) {
-            component.attachEvents();
-        }
+      const component = this.components[key];
+      if (component && 'attachEvents' in component && typeof component.attachEvents === 'function') {
+        component.attachEvents();
+      }
     });
 
-    // Файловый инпут для аватара
     const fileInput = document.getElementById('profile-avatar-upload');
     if (fileInput) {
       fileInput.addEventListener('change', this.handleFileChange);
     }
 
-    // Кнопка редактирования (мобильная)
     const editBtn = document.getElementById('profile-edit-btn');
     if (editBtn) {
       editBtn.addEventListener('click', () => this.toggleEditMode(true));
     }
 
-    // Кнопка назад (мобильная)
     const backBtn = document.getElementById('profile-back-btn');
     if (backBtn) {
       backBtn.addEventListener('click', () => this.toggleEditMode(false));
     }
   }
-  async handleSave() {
+
+  async handleSave(): Promise<void> {
     const formData = new FormData();
-    formData.append('user_name', document.getElementById('profile-login')?.value || '');
-    formData.append('email', document.getElementById('profile-email')?.value || '');
-    // formData.append('first_name', document.getElementById('profile-firstname')?.value || '');
-    // formData.append('last_name', document.getElementById('profile-lastname')?.value || '');
-    
-    const password = document.getElementById('profile-password')?.value;
+    const loginEl = document.getElementById('profile-login') as HTMLInputElement | null;
+    const emailEl = document.getElementById('profile-email') as HTMLInputElement | null;
+    const passwordEl = document.getElementById('profile-password') as HTMLInputElement | null;
+
+    formData.append('user_name', loginEl?.value || '');
+    formData.append('email', emailEl?.value || '');
+
+    const password = passwordEl?.value;
     if (password) {
       formData.append('password', password);
     }
     if (this.selectedFile) {
       formData.append('img', this.selectedFile);
     }
-  
+
     try {
       await AuthService.updateProfile(formData);
-      router.loadRoute();
+      routerInstance?.loadRoute();
     } catch (error) {
       console.error('Ошибка при обновлении профиля:', error);
     }
   }
-  
-  handleDelete() {
+
+  handleDelete(): void {
     const modal = new ConfirmationModal({
       message: `Вы уверены, что хотите удалить аккаунт ${this.user?.username || 'пользователя'}?`,
       onConfirm: () => {
         AuthService.deleteAccount().then(() => {
-          router.navigate('/');
+          routerInstance?.navigate('/');
         });
       },
     });
     modal.show();
   }
 
-  handleLogout() {
+  handleLogout(): void {
     AuthService.logout();
-    router.navigate('/');
+    routerInstance?.navigate('/');
   }
 }

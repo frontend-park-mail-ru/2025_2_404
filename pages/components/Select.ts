@@ -1,5 +1,13 @@
+import type { SelectProps, SelectOption } from '../../src/types';
+
 export default class Select {
-  constructor({ id, label, options, value, onChange }) {
+  id: string;
+  label: string;
+  options: SelectOption[];
+  value: string;
+  onChange?: (event: Event) => void;
+
+  constructor({ id, label, options, value, onChange }: SelectProps) {
     this.id = id;
     this.label = label;
     this.options = options || [];
@@ -7,7 +15,7 @@ export default class Select {
     this.onChange = onChange;
   }
 
-  render() {
+  render(): string {
     return `
       <div class="form-group">
         <label for="${this.id}">${this.label}</label>
@@ -22,7 +30,7 @@ export default class Select {
     `;
   }
 
-  attachEvents() {
+  attachEvents(): void {
     const select = document.getElementById(this.id);
     if (select && this.onChange) {
       select.addEventListener('change', this.onChange);

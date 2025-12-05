@@ -1,18 +1,30 @@
-import Input from '../components/Input.js';
-import Button from '../components/Button.js';
-import AuthService from '../../services/ServiceAuthentification.js';
+import Input from '../components/Input';
+import Button from '../components/Button';
+import AuthService from '../../services/ServiceAuthentification';
+import type { RegisterPageProps, HandlebarsTemplateDelegate, HttpError } from '../../src/types';
 
 export default class RegisterPage {
-  constructor({ onSuccess, onCancel, onSwitchToLogin }) {
+  onSuccess: () => void;
+  onCancel: () => void;
+  onSwitchToLogin: () => void;
+  modalEl: HTMLElement | null = null;
+  template: HandlebarsTemplateDelegate | null = null;
+  loginInput: Input;
+  emailInput: Input;
+  passwordInput: Input;
+  passwordCheckInput: Input;
+  submitButton: Button;
+
+  constructor({ onSuccess, onCancel, onSwitchToLogin }: RegisterPageProps) {
     this.onSuccess = onSuccess;
     this.onCancel = onCancel;
     this.onSwitchToLogin = onSwitchToLogin;
-    this.modalEl = null;
+
     this.loginInput = new Input({
       id: 'login',
       label: 'Логин',
       placeholder: 'Введите логин',
-      validationFn: (value) => {
+      validationFn: (value: string): string | null => {
         value = value.trim();
         if (!value) return 'Логин обязателен для заполнения';
         if (value.length < 4) return 'Логин должен содержать минимум 4 символа';
@@ -24,11 +36,12 @@ export default class RegisterPage {
         return null;
       },
     });
+
     this.emailInput = new Input({
       id: 'email',
       label: 'Почта',
       placeholder: 'Введите почту',
-      validationFn: (value) => {
+      validationFn: (value: string): string | null => {
         value = value.trim();
         if (!value) return 'Email обязателен для заполнения';
         if (value.length > 100) return 'Почта слишком длинная, введите другую';
@@ -37,12 +50,13 @@ export default class RegisterPage {
         return null;
       },
     });
+
     this.passwordInput = new Input({
       id: 'password',
       label: 'Пароль',
       placeholder: 'Введите пароль',
       showPasswordToggle: true,
-      validationFn: (value) => {
+      validationFn: (value: string): string | null => {
         value = value.trim();
         if (!value) return 'Заполните пароль';
         if (value.length < 8) return 'Пароль должен содержать минимум 8 символов';
@@ -55,34 +69,39 @@ export default class RegisterPage {
         return null;
       },
     });
+
     this.passwordCheckInput = new Input({
       id: 'passwordCheck',
       label: 'Повторите пароль',
       placeholder: 'Повторите пароль',
       showPasswordToggle: true,
-      validationFn: (value) => {
+      validationFn: (value: string): string | null => {
         value = value.trim();
-        const passwordValue = document.getElementById('password')?.value || '';
+        const passwordEl = document.getElementById('password') as HTMLInputElement | null;
+        const passwordValue = passwordEl?.value || '';
         if (!value) return 'Заполните пароль повторно';
         if (value !== passwordValue) return 'Пароли не совпадают';
         return null;
       },
     });
+
     this.submitButton = new Button({
       id: 'register-submit',
       text: 'Зарегистрироваться',
     });
+
     this.init();
   }
 
-  async init() {
+  async init(): Promise<void> {
     const response = await fetch('/pages/register/register.hbs');
     if (!response.ok) throw new Error('HTTP ошибка ' + response.status);
     const templateText = await response.text();
     this.template = Handlebars.compile(templateText);
   }
 
-  render() {
+  render(): string {
+    if (!this.template) return '';
     const context = {
       Title: 'Регистрация',
       loginInputHtml: this.loginInput.render(),
@@ -94,7 +113,7 @@ export default class RegisterPage {
     return this.template(context);
   }
 
-  show() {
+  show(): void {
     if (!this.modalEl) {
       this.modalEl = document.createElement('div');
       this.modalEl.className = 'modal__overlay';
@@ -105,21 +124,21 @@ export default class RegisterPage {
     this.modalEl.style.display = 'flex';
   }
 
-  hide() {
+  hide(): void {
     if (this.modalEl) {
       this.modalEl.remove();
       this.modalEl = null;
     }
   }
 
-  attachEvents() {
-    this.modalEl.querySelector('.close-btn').addEventListener('click', this.onCancel);
+  attachEvents(): void {
+    this.modalEl?.querySelector('.close-btn')?.addEventListener('click', this.onCancel);
     
-    const form = this.modalEl.querySelector('#register-form');
+    const form = this.modalEl?.querySelector('#register-form');
     if (form) {
       form.addEventListener('submit', (event) => this.Submit(event));
     }
-    const switchBtn = this.modalEl.querySelector('#switch-to-login-btn');
+    const switchBtn = this.modalEl?.querySelector('#switch-to-login-btn');
     if (switchBtn) {
       switchBtn.addEventListener('click', this.onSwitchToLogin);
     }
@@ -129,38 +148,45 @@ export default class RegisterPage {
     this.passwordCheckInput.attachValidationEvent();
   }
 
-async Submit(event) {
-  event.preventDefault();
-  let isValidated = true;
-  const loginValue = document.getElementById(this.loginInput.id).value;
-  const emailValue = document.getElementById(this.emailInput.id).value;
-  const passwordValue = document.getElementById(this.passwordInput.id).value;
-  const passwordCheckValue = document.getElementById(this.passwordCheckInput.id).value;
-  
-  if (this.loginInput.validate(loginValue)) isValidated = false;
-  if (this.emailInput.validate(emailValue)) isValidated = false;
-  if (this.passwordInput.validate(passwordValue)) isValidated = false;
-  if (this.passwordCheckInput.validate(passwordCheckValue)) isValidated = false;
+  async Submit(event: Event): Promise<void> {
+    event.preventDefault();
+    let isValidated = true;
+    
+    const loginEl = document.getElementById(this.loginInput.id) as HTMLInputElement | null;
+    const emailEl = document.getElementById(this.emailInput.id) as HTMLInputElement | null;
+    const passwordEl = document.getElementById(this.passwordInput.id) as HTMLInputElement | null;
+    const passwordCheckEl = document.getElementById(this.passwordCheckInput.id) as HTMLInputElement | null;
+    
+    const loginValue = loginEl?.value || '';
+    const emailValue = emailEl?.value || '';
+    const passwordValue = passwordEl?.value || '';
+    const passwordCheckValue = passwordCheckEl?.value || '';
+    
+    if (this.loginInput.validate(loginValue)) isValidated = false;
+    if (this.emailInput.validate(emailValue)) isValidated = false;
+    if (this.passwordInput.validate(passwordValue)) isValidated = false;
+    if (this.passwordCheckInput.validate(passwordCheckValue)) isValidated = false;
 
-  if (!isValidated) {
-    return;
-  }
-  try {
-    await AuthService.register({
-      user_name: loginValue,
-      email: emailValue,
-      password: passwordValue,
-    });
-    this.onSuccess();
-
-  } catch (error) {
-    console.error("Ошибка регистрации:", error);
-    if (error && error.status === 409) {
-      this.emailInput.showError('Пользователь с таким email уже существует.');
-    } else {
-      const generalErrorMessage = error.body || 'Произошла непредвиденная ошибка. Попробуйте позже.';
-      this.loginInput.showError(generalErrorMessage);
+    if (!isValidated) {
+      return;
+    }
+    
+    try {
+      await AuthService.register({
+        user_name: loginValue,
+        email: emailValue,
+        password: passwordValue,
+      });
+      this.onSuccess();
+    } catch (error) {
+      console.error("Ошибка регистрации:", error);
+      const httpError = error as HttpError;
+      if (httpError && httpError.status === 409) {
+        this.emailInput.showError('Пользователь с таким email уже существует.');
+      } else {
+        const generalErrorMessage = (httpError.body as string) || 'Произошла непредвиденная ошибка. Попробуйте позже.';
+        this.loginInput.showError(generalErrorMessage);
+      }
     }
   }
-}
 }

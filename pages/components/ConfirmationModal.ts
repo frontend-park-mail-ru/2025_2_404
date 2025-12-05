@@ -1,11 +1,18 @@
-import Button from './Button.js';
+import Button from './Button';
+import type { ConfirmationModalProps } from '../../src/types';
 
 export default class ConfirmationModal {
-  constructor({ message, onConfirm, onCancel }) {
+  message: string;
+  onConfirm?: () => void;
+  onCancel?: () => void;
+  modalElement: HTMLElement | null = null;
+  confirmButton: Button;
+  cancelButton: Button | null;
+
+  constructor({ message, onConfirm, onCancel }: ConfirmationModalProps) {
     this.message = message;
     this.onConfirm = onConfirm;
     this.onCancel = onCancel;
-    this.modalElement = null;
 
     this.confirmButton = new Button({
       id: 'confirm-btn',
@@ -23,17 +30,16 @@ export default class ConfirmationModal {
         text: 'Нет, оставить',
         variant: 'primary',
         onClick: () => {
-          this.onCancel();
+          this.onCancel!();
           this.hide();
         },
       });
     } else {
       this.cancelButton = null;
     }
-
   }
 
-  render() {
+  render(): string {
     return `
       <div class="modal__content">
         <p>${this.message}</p>
@@ -45,7 +51,7 @@ export default class ConfirmationModal {
     `;
   }
 
-  show() {
+  show(): void {
     if (!this.modalElement) {
       this.modalElement = document.createElement('div');
       this.modalElement.className = 'modal__overlay';
@@ -56,18 +62,17 @@ export default class ConfirmationModal {
     this.modalElement.style.display = 'flex';
   }
 
-  hide() {
+  hide(): void {
     if (this.modalElement) {
       this.modalElement.remove();
       this.modalElement = null;
     }
   }
 
-  attachEvents() {
-  this.confirmButton.attachEvents();
-  if (this.cancelButton) {
-    this.cancelButton.attachEvents();
+  attachEvents(): void {
+    this.confirmButton.attachEvents();
+    if (this.cancelButton) {
+      this.cancelButton.attachEvents();
+    }
   }
-}
-
 }
