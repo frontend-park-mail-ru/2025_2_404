@@ -1,64 +1,131 @@
 <div class="ads">
-    <div class="ads__form-card">
-      <h2 class="ads__title">
-        {{#if isNew}}
-          Создание кампании
-        {{else}}
-          Редактирование кампании
+
+  {{#unless isNew}}
+  <div class="ads__view-mode" id="ads-view-mode">
+    <div class="ads__view-card">
+      <img class="ads__view-image" src="{{project.image_url}}" alt="{{project.title}}">
+      <h2 class="ads__view-title">{{project.title}}</h2>
+      
+      <div class="ads__view-info">
+        {{#if project.description}}
+        <div class="ads__view-row">
+          <span class="ads__view-label">Описание:</span>
+          <span class="ads__view-value">{{project.description}}</span>
+        </div>
         {{/if}}
-      </h2>
-      <div class="ads__form">
-      <form id="{{#if isNew}}create-form{{else}}edit-form{{/if}}">
-        <label for="title-input">Заголовок</label>
-        <input class="ads__item" id="title-input" type="text" value="{{project.title}}" placeholder="Введите заголовок">
-
-        <label for="desc-input">Описание</label>
-        <textarea id="desc-input" class="ads__item ads__description" placeholder="Введите описание">{{project.description}}</textarea>
-
-        <label for="site-input">Ссылка на сайт</label>
-        <input class="ads__item" id="site-input" type="url" value="{{project.domain}}" placeholder="Введите ссылку на сайт">
-
-        <label for="budget-input">Бюджет</label>
-        <input class="ads__item" id="budget-input" type="number" value="{{project.budget}}" placeholder="Введите сумму">
-        <small>Не меньше 100₽</small>
-
-        <div class="ads__img-upload">
-          <label for="img-file" class="ads__upload-box" id="upload-box">
-            <span class="ads__upload-icon">＋</span>
-            <span class="ads__upload-text">Загрузите изображение</span>
-            <input id="img-file" type="file" accept="image/jpeg, image/png" hidden />
-          </label>
-          <small class="ads__upload-hint">Поддерживаются JPG и PNG (до 10 МБ)</small>
+        {{#if project.domain}}
+        <div class="ads__view-row">
+          <span class="ads__view-label">Сайт:</span>
+          <span class="ads__view-value">{{project.domain}}</span>
         </div>
-
-
-        <label>Даты проведения</label>
-        <div class="ads__dates">
-          <input class="ads__item" type="date" value="{{project.dateStart}}">
-          <input class="ads__item"type="date" value="{{project.dateEnd}}">
+        {{/if}}
+        {{#if project.budget}}
+        <div class="ads__view-row">
+          <span class="ads__view-label">Бюджет:</span>
+          <span class="ads__view-value">{{project.budget}}₽</span>
         </div>
-      </div>
-      <div class="ads__actions">
-        <button id="back-btn" class="btn btn--secondary">Назад</button>
-
-        {{#if isNew}}
-          <button id="edit-btn" type="button" class="btn btn--primary">Создать кампанию</button>
-        {{else}}
-          <button id="edit-btn" type="button" class="btn btn--primary">Сохранить изменения</button>
-          <button id="delete-btn" type="button" class="btn btn--danger">Удалить</button>
+        {{/if}}
+        {{#if project.dateStart}}
+        <div class="ads__view-row">
+          <span class="ads__view-label">Начало:</span>
+          <span class="ads__view-value">{{project.dateStart}}</span>
+        </div>
+        {{/if}}
+        {{#if project.dateEnd}}
+        <div class="ads__view-row">
+          <span class="ads__view-label">Окончание:</span>
+          <span class="ads__view-value">{{project.dateEnd}}</span>
+        </div>
         {{/if}}
       </div>
 
-      </form>
+      <button class="btn btn--primary ads__view-edit-btn" id="ads-edit-btn">
+        Редактировать
+      </button>
+
+      <div class="ads__view-actions">
+        <button id="view-back-btn" class="btn btn--secondary">Назад к списку</button>
+        <button id="view-delete-btn" class="btn btn--danger">Удалить</button>
+      </div>
+    </div>
+  </div>
+  {{/unless}}
+
+  <div class="ads__form-card {{#if isNew}}is-create-mode{{/if}}" id="ads-edit-mode">
+    
+    {{#unless isNew}}
+    <button class="ads__edit-back" id="ads-back-btn">
+       <span class="breadcrumbs__separator">‹</span> Назад
+    </button>
+    {{/unless}}
+
+    <h2 class="ads__title">
+      {{#if isNew}}
+        Создание кампании
+      {{else}}
+        Редактирование кампании
+      {{/if}}
+    </h2>
+    <div class="ads__form">
+    <form id="{{#if isNew}}create-form{{else}}edit-form{{/if}}">
+      <label for="title-input">Заголовок</label>
+      <input class="ads__item" id="title-input" type="text" value="{{project.title}}" placeholder="Введите заголовок">
+
+      <label for="desc-input">Описание</label>
+      <textarea id="desc-input" class="ads__item ads__description" placeholder="Введите описание">{{project.description}}</textarea>
+
+      <label for="site-input">Ссылка на сайт</label>
+      <input class="ads__item" id="site-input" type="url" value="{{project.domain}}" placeholder="Введите ссылку на сайт">
+
+      <label for="budget-input">Бюджет</label>
+      <input class="ads__item" id="budget-input" type="number" value="{{project.budget}}" placeholder="Введите сумму">
+      <small>Не меньше 100₽</small>
+
+      <div class="ads__img-upload">
+        <label for="img-file" class="ads__upload-box" id="upload-box">
+          <span class="ads__upload-icon">＋</span>
+          <span class="ads__upload-text">Загрузите изображение</span>
+          <input id="img-file" type="file" accept="image/jpeg, image/png" hidden />
+        </label>
+        <small class="ads__upload-hint">Поддерживаются JPG и PNG (до 10 МБ)</small>
+      </div>
+
+
+      <label>Даты проведения</label>
+      <div class="ads__dates">
+        <input class="ads__item" type="date" value="{{project.dateStart}}">
+        <input class="ads__item"type="date" value="{{project.dateEnd}}">
+      </div>
+    </div>
+    <div class="ads__actions">
+      {{#if isNew}}
+        <button id="edit-btn" type="button" class="btn btn--primary">Создать кампанию</button>
+      {{else}}
+        <button id="edit-btn" type="button" class="btn btn--primary">Сохранить изменения</button>
+      {{/if}}
+      
+      <div class="ads__actions-row">
+        <button id="preview-toggle-btn" type="button" class="btn btn--outline ads__preview-toggle">Предпросмотр</button>
+        <button id="back-btn" class="btn btn--secondary">Назад к списку</button>
+      </div>
+
+      {{#unless isNew}}
+        <button id="delete-btn" type="button" class="btn btn--danger ads__delete-btn">Удалить</button>
+      {{/unless}}
     </div>
 
+    </form>
+  </div>
 
-    <div class="ads__preview-card">
-      <h3>Предпросмотр</h3>
-      <img class="ads__preview-image" src="{{project.image_url}}" />
 
-      <h4>{{project.title}}</h4>
-      <p>{{project.description}}</p>
-    </div>
+  <div class="ads__preview-card" id="ads-preview-card">
+    <button id="preview-back-btn" type="button" class="ads__preview-back">
+      <span class="breadcrumbs__separator">‹</span> Назад к форме</button>
+    <h3>Предпросмотр</h3>
+    <img class="ads__preview-image" src="{{project.image_url}}" />
+
+    <h4>{{project.title}}</h4>
+    <p>{{project.description}}</p>
+  </div>
 
 </div>

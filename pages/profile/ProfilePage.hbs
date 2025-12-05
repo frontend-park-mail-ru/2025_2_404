@@ -6,19 +6,73 @@
     <span class="breadcrumbs__current">Мой профиль</span>
   </div>
 
-  <div class="profile__card">
+  <div class="profile__view-mode" id="profile-view-mode">
+    <div class="profile__view-card">
+      <img class="profile__view-avatar" src="{{avatar}}" alt="Аватар">
+      <h2 class="profile__view-name">{{username}}</h2>
+      
+      <div class="profile__view-info">
+        {{#if email}}
+        <div class="profile__view-row">
+          <span class="profile__view-label">Почта:</span>
+          <span>{{email}}</span>
+        </div>
+        {{/if}}
+        {{#if phone}}
+        <div class="profile__view-row">
+          <span class="profile__view-label">Телефон:</span>
+          <span>{{phone}}</span>
+        </div>
+        {{/if}}
+        {{#if company}}
+        <div class="profile__view-row">
+          <span class="profile__view-label">Компания:</span>
+          <span>{{company}}</span>
+        </div>
+        {{/if}}
+        <div class="profile__view-row">
+          <span class="profile__view-label">Тип аккаунта:</span>
+          <span>{{roleText}}</span>
+        </div>
+        <div class="profile__view-row">
+          <span class="profile__view-label">Регистрация:</span>
+          <span>{{registrationDate}}</span>
+        </div>
+        <div class="profile__view-row">
+          <span class="profile__view-label">Реклам:</span>
+          <span>{{adCount}}</span>
+        </div>
+      </div>
+
+      <button class="btn btn--primary profile__view-edit-btn" id="profile-edit-btn">
+        Редактировать профиль
+      </button>
+
+      <div class="profile__view-actions">
+        {{{logoutButtonHtml}}}
+        {{{deleteButtonHtml}}}
+      </div>
+    </div>
+  </div>
+
+  <div class="profile__card" id="profile-edit-mode">
+    
+    <button class="profile__edit-back" id="profile-back-btn">
+       <span class="breadcrumbs__separator">‹</span> Назад
+    </button>
+
     <div class="profile__content">
 
       <div class="profile__sidebar">
         <img class="profile__avatar" id="profile-avatar-preview" src="{{avatar}}" alt="Аватар пользователя">
-        <label for="profile-avatar-upload" class="btn btn--secondary profile__button-upload ">
+        <label for="profile-avatar-upload" class="btn btn--secondary profile__button-upload">
           Сменить аватар
         </label>
         <input class="profile__avatar-input" type="file" id="profile-avatar-upload" accept="image/png, image/jpeg, image/gif">
 
         {{{roleSelectHtml}}}
-          <p><strong>Дата регистрации:</strong> {{registrationDate}}</p>
-          <p><strong>Количество реклам:</strong> {{adCount}}</p>
+        <p><strong>Дата регистрации:</strong> {{registrationDate}}</p>
+        <p><strong>Количество реклам:</strong> {{adCount}}</p>
       </div>
 
       <div class="profile__main">
@@ -31,12 +85,13 @@
         {{/if}}
 
         <form id="profile-form">
-            {{{loginInputHtml}}}
-            {{{emailInputHtml}}}
-            {{{firstNameInputHtml}}}
-            {{{lastNameInputHtml}}}
-            {{{companyInputHtml}}}
-            {{{phoneInputHtml}}}
+          {{{loginInputHtml}}}
+          {{{emailInputHtml}}}
+          {{{firstNameInputHtml}}}
+          {{{lastNameInputHtml}}}
+          {{{companyInputHtml}}}
+          {{{phoneInputHtml}}}
+          {{{passwordInputHtml}}}
         </form>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { http } from './http1.js';
+import { http } from './http.js';
 
 
 export async function signup(data) {

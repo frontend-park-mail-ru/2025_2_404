@@ -1,5 +1,5 @@
 import { signin, signup, logout as apiLogout } from '../public/api/auth.js';
-import { http } from '../public/api/http1.js';
+import { http } from '../public/api/http.js';
 
 class AuthService {
   constructor() {
@@ -71,14 +71,6 @@ class AuthService {
     await signup(info);
     return await this.loadProfile();
   }
-
-  // logout() {
-  //   const token = this.getToken();
-  //   localStorage.removeItem('token');
-  //   this.user = null;
-
-  //   if (this.onAuthChangeCallback) this.onAuthChangeCallback(null);
-  // }
 
   logout() {
     localStorage.removeItem('token');
