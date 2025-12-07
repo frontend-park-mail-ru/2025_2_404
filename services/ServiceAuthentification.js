@@ -34,7 +34,7 @@ async loadProfile() {
     const res = await http.get('/profile');
     
     // Ищем данные клиента
-    let clientData = res.client || res.data?.client || res.body?.client;
+    let clientData = res.data || res;
     if (!clientData && res && res.user_name) {
         clientData = res; 
     }

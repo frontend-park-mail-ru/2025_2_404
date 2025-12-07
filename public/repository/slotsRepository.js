@@ -13,7 +13,7 @@ class SlotsRepository {
       if (!res) return [];
 
       // Безопасное чтение массива
-      const slotsData = res.slots || res.data?.slots || res.body?.slots || res; 
+      const slotsData = res.data || [];
       const list = Array.isArray(slotsData) ? slotsData : [];
 
       return list.map(slot => ({
@@ -40,7 +40,7 @@ async getById(id) {
       }
 
       // Универсальное чтение
-      const slot = res.slot || res.data?.slot || res.body?.slot || res;
+      const slot = res.data || res;
 
       // Если после всех попыток slot пустой
       if (!slot) return null;

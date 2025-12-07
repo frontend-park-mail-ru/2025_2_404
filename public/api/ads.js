@@ -1,11 +1,11 @@
 import { http } from './http1.js';
 
-function normalizeImageUrl(ad, image) {
+function normalizeImageUrl(ad, image, img_type) {
   const BACKEND_SERVER_BASE = 'http://localhost:8080';
   if (typeof image === 'string') {
     const v = image.trim();
     if (v.startsWith('/9j/') || v.startsWith('iVBOR')) {
-      return `data:image/jpeg;base64,${v}`;
+      return `data:${img_type};base64,${v}`;
     }
     if (v.startsWith('data:image')) {
       return v;
@@ -25,7 +25,7 @@ export async function listAds() {
   // 1. Получаем массив. 
   // Судя по скриншоту, сервер присылает массив сразу, без обертки "data" или "ads".
   // Но оставим проверки на всякий случай.
-  let ads = Array.isArray(res) ? res : (res.ads || res.data?.ads || []);
+  const ads = Array.isArray(res) ? res : (res.data || []);
 
   return ads.map((ad) => ({
     // ИСПРАВЛЕНИЕ 1: Сервер шлет "id", а не "add_id"
@@ -44,18 +44,17 @@ export async function listAds() {
 export async function getAdById(ad_id) {
   const res = await http.get(`/ads/${ad_id}`);
   
-  // Сервер может вернуть объект напрямую или в обертке
-  const ad = res.ad || res.data?.ad || res || {};
-  const image = res.image || res.data?.image || ad.image || null; 
+  const ad = res.data?.ad || {};
+  const imageBase64 = res.data?.imageData?.image_data || null;  // 1
+  const imageType = res.data?.imageData?.image_type || 'image/jpeg';  //2
 
   return {
-    // И здесь тоже исправляем поля под ответ сервера
-    id: ad.id || ad.add_id,
+    id: ad.id,
     title: ad.title,
     description: ad.content,
-    domain: ad.targeturl || ad.target_url,
+    domain: ad.targeturl || '',
     budget: ad.amount_for_ad,
-    image_url: normalizeImageUrl(ad, image),
+    image_url: normalizeImageUrl(ad, imageBase64, imageType), //3
   };
 }
 

@@ -30,7 +30,7 @@ async render() {
     if (!projectData) throw new Error('Нет данных об объявлении');
 
     const DEFAULT_IMG = '/public/assets/default.jpg'; 
-    let imageUrl = projectData.image_url || projectData.image || '';
+    const imageUrl = projectData.image_url || '/public/assets/default.jpg';
     
     if (!imageUrl) {
       imageUrl = DEFAULT_IMG;
