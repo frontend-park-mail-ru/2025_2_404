@@ -1,7 +1,7 @@
 import { http } from '../api/http1.js'; // Убедитесь, что путь до http1.js верный
 
 // ВАЖНО: Это адрес вашего БЭКЕНДА, откуда будут грузиться баннеры
-const BASE = "https://adnet.website/api/"; 
+const BASE = "https://adnet.website/api"; 
 
 class SlotsRepository {
 

@@ -1,4 +1,4 @@
-export const BASE = "https://adnet.website/api/"; 
+export const BASE = "https://adnet.website/api"; 
 
 export async function request(path, init = {}) {
   const token = localStorage.getItem('token');
