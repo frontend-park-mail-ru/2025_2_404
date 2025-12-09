@@ -1,7 +1,7 @@
 import { http } from './http1.js';
 
 function normalizeImageUrl(ad, image, img_type) {
-  const BACKEND_SERVER_BASE = 'https://adnet.website/api';
+  const BACKEND_SERVER_BASE = 'https://adnet.website';
   if (typeof image === 'string') {
     const v = image.trim();
     if (v.startsWith('/9j/') || v.startsWith('iVBOR')) {
