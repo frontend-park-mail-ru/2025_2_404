@@ -7,6 +7,9 @@ RUN npm install
 
 COPY . .
 
+# Собираем TypeScript через Vite
+RUN npm run build
+
 EXPOSE 8000
 
 CMD ["node", "server/app.cjs"]
