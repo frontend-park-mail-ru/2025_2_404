@@ -2,7 +2,8 @@ import { http } from './http';
 import type { Ad } from '../../src/types';
 
 // URL для загрузки изображений напрямую с бэкенда
-const BACKEND_SERVER_BASE = 'http://localhost:8080';
+// const BACKEND_SERVER_BASE = 'http://localhost:8080';
+const BACKEND_SERVER_BASE = 'https://adnet.website/api';
 
 interface AdApiResponse {
   add_id: number;

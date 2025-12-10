@@ -2,7 +2,8 @@
 // В production можно указать полный URL бэкенда
 //
 // export const BASE = "";
-export const BASE = "http://89.208.230.119:8080"; 
+// export const BASE = "http://89.208.230.119:8080"; 
+export const BASE = "https://adnet.website/api";
 
 
 interface RequestInit {
