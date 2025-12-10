@@ -1,5 +1,6 @@
 // В dev режиме Vite проксирует запросы на localhost:8080
 // В production можно указать полный URL бэкенда
+//
 // export const BASE = "";
 export const BASE = "http://89.208.230.119:8080"; 
 
