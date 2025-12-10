@@ -69,7 +69,7 @@ export const DBService = {
     performTransaction<Transaction[]>('transactions', 'readonly', store => store.getAll()) as Promise<Transaction[]>,
   
   saveProfile: (profileData: ProfileRecord): Promise<void> => 
-    performTransaction<void>('profile', 'readwrite', store => store.put({ id: 1, ...profileData })),
+    performTransaction<void>('profile', 'readwrite', store => store.put({ ...profileData, id: 1 })),
   
   getProfile: async (): Promise<ProfileRecord | undefined> => 
     await performTransaction<ProfileRecord>('profile', 'readonly', store => store.get(1)),

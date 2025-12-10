@@ -14,8 +14,8 @@ import RegisterPage from './pages/register/Register';
 
 import type { Routes, PageConstructor } from './src/types';
 
-Handlebars.registerHelper('formatDate', function (dateString: string): string {
-  if (!dateString) return '';
+Handlebars.registerHelper('formatDate', function (dateString: unknown): string {
+  if (!dateString || typeof dateString !== 'string') return '';
   return new Date(dateString).toLocaleString('ru-RU');
 });
 
