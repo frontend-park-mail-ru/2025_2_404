@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["node", "server/app.js"]
+CMD ["node", "server/app.cjs"]
