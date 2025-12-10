@@ -70,39 +70,29 @@ class AuthService {
   }
 
   async loadProfile(): Promise<User | null> {
-    console.log('🔍 loadProfile: токен есть?', !!localStorage.getItem('token'));
-    
     if (!this.isAuthenticated()) {
-      console.log('❌ Нет токена, выходим');
       this.user = null;
       if (this.onAuthChangeCallback) this.onAuthChangeCallback(null);
       return null;
     }
 
     try {
-      console.log('➡️ Делаю запрос на /profile');
       const res = await http.get<ProfileResponse>('/profile');
-      console.log('✅ Ответ от /profile:', res);
       
       // Универсальное чтение данных профиля
       const profileData = (res as any).data || res || {};
       
       if (!profileData || Object.keys(profileData).length === 0) {
-        console.error('❌ Данные профиля пустые!');
         throw new Error("Данные профиля не получены");
       }
-      
-      console.log('📦 Данные профиля получены:', profileData);
 
       // Обработка картинки
       let avatarUrl = '/kit.jpg';
       if (profileData.imageData && profileData.imageData.image_data) {
         const type = profileData.imageData.content_type || 'image/jpeg';
         avatarUrl = `data:${type};base64,${profileData.imageData.image_data}`;
-        console.log('🖼️ Аватар из base64');
       } else if (profileData.avatar_path) {
         avatarUrl = `https://adnet.website/api/${profileData.avatar_path}`;
-        console.log('🖼️ Аватар из пути:', avatarUrl);
       }
 
       this.user = {
@@ -117,16 +107,12 @@ class AuthService {
         avatar: avatarUrl,
       };
 
-      console.log('👤 User object created:', this.user);
-
       if (this.onAuthChangeCallback) {
-        console.log('🔄 Вызываю onAuthChangeCallback с user');
         this.onAuthChangeCallback(this.user);
       }
 
       return this.user;
     } catch (err) {
-      console.error('💥 Ошибка при загрузке профиля:', err);
       return null;
     }
   }
