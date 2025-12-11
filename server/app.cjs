@@ -4,7 +4,10 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = 8000;
-const ROOT = path.join(__dirname, '..'); 
+
+// Production: раздаём из dist, Development: из корня
+const distPath = path.join(__dirname, '..', 'dist');
+const ROOT = fs.existsSync(distPath) ? distPath : path.join(__dirname, '..'); 
 const requestHandler = (request, response) => {
     let filePath = path.join(ROOT, request.url);
     if (filePath.endsWith(path.sep) || request.url === '/') {
@@ -16,13 +19,19 @@ const requestHandler = (request, response) => {
         '.html': 'text/html; charset=utf-8',
         '.css': 'text/css; charset=utf-8',
         '.js': 'text/javascript; charset=utf-8',
+        '.mjs': 'text/javascript; charset=utf-8',
+        '.ts': 'text/javascript; charset=utf-8',
         '.hbs': 'text/plain; charset=utf-8',
+        '.json': 'application/json; charset=utf-8',
         '.jpg': 'image/jpeg',
         '.jpeg': 'image/jpeg',
         '.png': 'image/png',
         '.gif': 'image/gif',
         '.svg': 'image/svg+xml',
+        '.woff': 'font/woff',
         '.woff2': 'font/woff2',
+        '.ttf': 'font/ttf',
+        '.ico': 'image/x-icon',
     };
     
     const contentType = mimeTypes[ext] || 'application/octet-stream';
@@ -80,4 +89,5 @@ if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
 
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Сервер запущен: ${protocol}://localhost:${PORT}`);
+    console.log(`Раздача файлов из: ${ROOT}`);
 });

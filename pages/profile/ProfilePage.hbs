@@ -1,45 +1,107 @@
-<div class="profile-container">
-  <div class="profile-header">
-    <a href="/">Главная</a> > <span>Мой профиль</span>
+<div class="profile">
+
+  <div class="breadcrumbs">
+    <a class="breadcrumbs__link" href="/">Главная</a> 
+    <span class="breadcrumbs__separator">›</span>
+    <span class="breadcrumbs__current">Мой профиль</span>
   </div>
 
-  <div class="profile-card">
-    <div class="profile-content">
-<div class="profile-sidebar">
-  <img src="{{avatar}}" alt="Аватар пользователя" class="profile-avatar" id="profile-avatar-img">
-  <label for="avatar-upload" class="btn btn--secondary" style="width: 100%; margin: 10px 0; text-align: center; cursor: pointer;">
-    Сменить аватар
-  </label>
-  <input type="file" id="avatar-upload" accept="image/png, image/jpeg, image/gif" style="display: none;">
+  <div class="profile__view-mode" id="profile-view-mode">
+    <div class="profile__view-card">
+      <img class="profile__view-avatar" src="{{avatar}}" alt="Аватар">
+      <h2 class="profile__view-name">{{username}}</h2>
+      
+      <div class="profile__view-info">
+        {{#if email}}
+        <div class="profile__view-row">
+          <span class="profile__view-label">Почта:</span>
+          <span>{{email}}</span>
+        </div>
+        {{/if}}
+        {{#if phone}}
+        <div class="profile__view-row">
+          <span class="profile__view-label">Телефон:</span>
+          <span>{{phone}}</span>
+        </div>
+        {{/if}}
+        {{#if company}}
+        <div class="profile__view-row">
+          <span class="profile__view-label">Компания:</span>
+          <span>{{company}}</span>
+        </div>
+        {{/if}}
+        <div class="profile__view-row">
+          <span class="profile__view-label">Тип аккаунта:</span>
+          <span>{{roleText}}</span>
+        </div>
+        <div class="profile__view-row">
+          <span class="profile__view-label">Регистрация:</span>
+          <span>{{registrationDate}}</span>
+        </div>
+        <div class="profile__view-row">
+          <span class="profile__view-label">Реклам:</span>
+          <span>{{adCount}}</span>
+        </div>
+      </div>
 
-  {{{roleSelectHtml}}}
-  <div class="profile-info">
-    <p><strong>Дата регистрации:</strong> {{registrationDate}}</p>
-    <p><strong>Количество реклам:</strong> {{adCount}}</p>
+      <button class="btn btn--primary profile__view-edit-btn" id="profile-edit-btn">
+        Редактировать профиль
+      </button>
+
+      <div class="profile__view-actions">
+        {{{logoutButtonHtml}}}
+        {{{deleteButtonHtml}}}
+      </div>
+    </div>
   </div>
-</div>
 
-      <div class="profile-main">
-        <h2>{{username}}</h2>
-        <form id="profile-form">
-          <div class="profile-form-fields">
-            {{{loginInputHtml}}}
-            {{{emailInputHtml}}}
-            {{{firstNameInputHtml}}}
-            {{{lastNameInputHtml}}}
-            {{{companyInputHtml}}}
-            {{{phoneInputHtml}}}
+  <div class="profile__card" id="profile-edit-mode">
+    
+    <button class="profile__edit-back" id="profile-back-btn">
+       <span class="breadcrumbs__separator">‹</span> Назад
+    </button>
+
+    <div class="profile__content">
+
+      <div class="profile__sidebar">
+        <img class="profile__avatar" id="profile-avatar-preview" src="{{avatar}}" alt="Аватар пользователя">
+        <label for="profile-avatar-upload" class="btn btn--secondary profile__button-upload">
+          Сменить аватар
+        </label>
+        <input class="profile__avatar-input" type="file" id="profile-avatar-upload" accept="image/png, image/jpeg, image/gif">
+
+        {{{roleSelectHtml}}}
+        <p><strong>Дата регистрации:</strong> {{registrationDate}}</p>
+        <p><strong>Количество реклам:</strong> {{adCount}}</p>
+      </div>
+
+      <div class="profile__main">
+        <h2 class="profile__username">{{username}}</h2>
+        {{#if lastUpdated}}
+          <div class="offline-data-indicator">
+            <p>Вы в офлайн-режиме. Данные могут быть неактуальны.</p>
+            <small>Последнее обновление: {{formatDate lastUpdated}}</small>
           </div>
+        {{/if}}
+
+        <form id="profile-form">
+          {{{loginInputHtml}}}
+          {{{emailInputHtml}}}
+          {{{firstNameInputHtml}}}
+          {{{lastNameInputHtml}}}
+          {{{companyInputHtml}}}
+          {{{phoneInputHtml}}}
+          {{{passwordInputHtml}}}
         </form>
       </div>
     </div>
 
-      <div class="profile-form-footer">
-        <div class="footer-actions-left">
-          {{{deleteButtonHtml}}}
-          {{{logoutButtonHtml}}}
-        </div>
-        {{{saveButtonHtml}}}
+    <div class="profile__footer">
+      <div class="profile__footer-left">
+        {{{deleteButtonHtml}}}
+        {{{logoutButtonHtml}}}
       </div>
+      {{{saveButtonHtml}}}
+    </div>
   </div>
 </div>
