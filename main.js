@@ -4,6 +4,7 @@ import Footer from './pages/footer/Footer.js';
 import SupportWidget from './pages/components/SupportWidget.js';
 import AuthService from './services/ServiceAuthentification.js';
 // Импорт страниц
+import LowBalanceNotification from './pages/components/LowBalanceNotification.js';
 import MainPage from './pages/main/MainPage.js';
 import ProfilePage from './pages/profile/ProfilePage.js';
 import ProjectsPage from './pages/projects/ProjectsPage.js';
@@ -14,7 +15,6 @@ import CreateSlotPage from './pages/slots/CreateSlotPage.js';
 import BalancePage from './pages/balance/BalancePage.js';
 import LoginPage from './pages/login/LoginPage.js';
 import RegisterPage from './pages/register/Register.js';
-
 // const offlineIndicator = document.getElementById('offline-indicator');
 
 // function updateOnlineStatus() {
@@ -30,11 +30,11 @@ import RegisterPage from './pages/register/Register.js';
 
 // Вызываем функцию при первой загрузке, чтобы установить начальное состояние
 // updateOnlineStatus();
-
 Handlebars.registerHelper('formatDate', function (dateString) {
   if (!dateString) return '';
   return new Date(dateString).toLocaleString('ru-RU');
 });
+
 const appContainer = document.getElementById('app');
 const routes = {
   '/': MainPage,
@@ -42,8 +42,8 @@ const routes = {
   '/projects': ProjectsPage,
   '/projects/create': CreateProjectPage,
   '/projects/:id': ProjectDetailPage,
-  '/balance': BalancePage,      // Список слотов и реклам здесь
-  '/slots': ProjectsPage,          // <--- ДОБАВЬТЕ ЭТО, если хотите открывать список по /slots
+  '/balance': BalancePage,
+  '/slots': ProjectsPage,
   '/slots/create': CreateSlotPage,
   '/slots/:id': SlotDetailPage,
 };
@@ -53,15 +53,11 @@ export const header = new Header();
 const footer = new Footer();
 
 function onAuthSuccess() {
-  // header.update();
   router.navigate('/projects');
 }
 
 let loginModal = null;
 let registerModal = null;
-// function onAuthSuccess() {
-//   router.navigate('/projects');
-// }
 
 function showLoginModal() {
   if (registerModal) registerModal.hide();
@@ -108,11 +104,26 @@ async function startApp() {
   ]);
   document.body.prepend(header.render());
   document.body.appendChild(footer.render());
+  
   const supportWidget = new SupportWidget();
   supportWidget.init();
+
+  // Инициализация уведомления о низком балансе
+  const lowBalanceNotification = new LowBalanceNotification();
+  
+  // Подписываемся на изменения авторизации
   AuthService.onAuthChange((user) => {
+    // 1. Обновляем Header
     header.update(user);
+    
+    // 2. Запускаем или останавливаем проверку баланса
+    if (user) {
+        lowBalanceNotification.startPolling();
+    } else {
+        lowBalanceNotification.stopPolling();
+    }
   });
+
   document.addEventListener('click', (e) => {
     const target = e.target;
 
@@ -131,7 +142,9 @@ async function startApp() {
       router.navigate('/');
     }
   });
+  
   await AuthService.loadProfile();
+  
   if (AuthService.isAuthenticated() && window.location.pathname === '/') {
     router.navigate('/projects');
   } else {
