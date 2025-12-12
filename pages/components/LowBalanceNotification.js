@@ -18,7 +18,7 @@ export default class LowBalanceNotification {
     if (this.template) return;
     try {
       // Путь должен вести к файлу, который вы создали в шаге 1
-      const response = await fetch('/public/components/LowBalanceNotification.hbs');
+      const response = await fetch('/pages/components/LowBalanceNotification.hbs');
       if (!response.ok) throw new Error('Failed to load notification template');
       this.template = Handlebars.compile(await response.text());
     } catch (e) {

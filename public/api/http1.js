@@ -1,4 +1,4 @@
-export const BASE = "https://localhost:8080/api"; 
+export const BASE = "http://localhost:8080/api"; 
 
 export async function request(path, init = {}) {
   const token = localStorage.getItem('token');
