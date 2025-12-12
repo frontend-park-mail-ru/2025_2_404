@@ -1,35 +1,32 @@
 <div class="header__content">
+    {{#if isAuthenticated}}
+    <a href="/projects" class="header__logo-link">
+    {{else}}
     <a href="/" class="header__logo-link">
+    {{/if}}
         <div class="logo">
             <img src="/public/assets/logo.svg" alt="Ad.net logo" />
             <span class="logo__text">Ad.net</span>
         </div>
     </a>
+    {{#if isAuthenticated}}
     <nav class="header__nav">
-        <div class="header__nav-dropdown">
-            <a href="#" class="header__nav-link">Агенства</a>
-            <div class="header__dropdown">
-                <a href="#" class="header__dropdown-item">Список агенств</a>
-            </div>
-        </div>
-        <div class="header__nav-dropdown">
-            <a href="#" class="header__nav-link">Специалисты</a>
-            <div class="header__dropdown">
-                <a href="#" class="header__dropdown-item">Список специалистов</a>
-            </div>
-        </div>
+        <!-- 1. Ссылка "О нас" -->
+        <a href="/" class="header__nav-link">О нас</a>
+
+        <!-- 2. Выпадающий список "Проекты" -->
         <div class="header__nav-dropdown">
             <a href="#" class="header__nav-link">Проекты</a>
             <div class="header__dropdown">
-                {{#if isAuthenticated}}
-                <a href="/projects" class="header__dropdown-item">Мои проекты</a>
-                {{else}}
-                <a href="#" id="login-for-projects-btn" class="header__dropdown-item">Мои проекты</a>
-                {{/if}}
+                    <!-- Ссылки для авторизованного пользователя -->
+                    <!-- При клике на эти ссылки роутер сам переключит страницу -->
+                    <a href="/projects" class="header__dropdown-item" onclick="localStorage.setItem('projects_tab', 'ads')">Мои объявления</a>
+                    <a href="/slots" class="header__dropdown-item" onclick="localStorage.setItem('projects_tab', 'slots')">Мои слоты</a>
             </div>
         </div>
     </nav>
-    {{#if isAuthenticated}}
+    {{/if}}
+  {{#if isAuthenticated}}
     <div class="profile-dropdown">
         <div class="profile-dropdown__user">
             <span class="profile-dropdown__username">{{user.username}}</span>

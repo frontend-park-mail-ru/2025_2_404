@@ -3,6 +3,8 @@ import Header from './pages/header/Header.js';
 import Footer from './pages/footer/Footer.js';
 import SupportWidget from './pages/components/SupportWidget.js';
 import AuthService from './services/ServiceAuthentification.js';
+import ConfirmationModal from './pages/components/ConfirmationModal.js'; // <--- Импорт модалки
+
 // Импорт страниц
 import LowBalanceNotification from './pages/components/LowBalanceNotification.js';
 import MainPage from './pages/main/MainPage.js';
@@ -15,21 +17,7 @@ import CreateSlotPage from './pages/slots/CreateSlotPage.js';
 import BalancePage from './pages/balance/BalancePage.js';
 import LoginPage from './pages/login/LoginPage.js';
 import RegisterPage from './pages/register/Register.js';
-// const offlineIndicator = document.getElementById('offline-indicator');
 
-// function updateOnlineStatus() {
-//   if (navigator.onLine) {
-//     offlineIndicator.classList.add('hidden');
-//   } else {
-//     offlineIndicator.classList.remove('hidden');
-//   }
-// }
-
-// window.addEventListener('online', updateOnlineStatus);
-// window.addEventListener('offline', updateOnlineStatus);
-
-// Вызываем функцию при первой загрузке, чтобы установить начальное состояние
-// updateOnlineStatus();
 Handlebars.registerHelper('formatDate', function (dateString) {
   if (!dateString) return '';
   return new Date(dateString).toLocaleString('ru-RU');
@@ -48,9 +36,27 @@ const routes = {
   '/slots/:id': SlotDetailPage,
 };
 
-export const router = new Router(routes, appContainer);
 export const header = new Header();
 const footer = new Footer();
+
+// --- ЛОГИКА ОТОБРАЖЕНИЯ ФУТЕРА ---
+// Рендерим футер один раз и сохраняем ссылку на элемент
+const footerElement = footer.render();
+
+function updateFooterVisibility(path) {
+  // Показываем футер только если путь точно равен '/'
+  if (path === '/' || path === '') {
+    footerElement.style.display = ''; // Показать
+  } else {
+    footerElement.style.display = 'none'; // Скрыть
+  }
+}
+// ---------------------------------
+
+// Инициализируем роутер, передавая callback для обновления футера
+export const router = new Router(routes, appContainer, (currentPath) => {
+  updateFooterVisibility(currentPath);
+});
 
 function onAuthSuccess() {
   router.navigate('/projects');
@@ -102,8 +108,9 @@ async function startApp() {
     header.loadTemplate(),
     footer.loadTemplate()
   ]);
+  
   document.body.prepend(header.render());
-  document.body.appendChild(footer.render());
+  document.body.appendChild(footerElement); // Добавляем футер
   
   const supportWidget = new SupportWidget();
   supportWidget.init();
@@ -127,7 +134,7 @@ async function startApp() {
   document.addEventListener('click', (e) => {
     const target = e.target;
 
-    if (target.closest('#login-btn-header')) {
+    if (target.closest('#login-btn-header') || target.closest('#login-trigger-ads') || target.closest('#login-trigger-slots')) {
       e.preventDefault();
       showLoginModal();
     } else if (target.closest('#register-btn-header')) {
@@ -138,13 +145,30 @@ async function startApp() {
       target.closest('#profile-logout')
     ) {
       e.preventDefault();
-      AuthService.logout();
-      router.navigate('/');
+      
+      // --- ЛОГИКА ВЫХОДА ЧЕРЕЗ МОДАЛЬНОЕ ОКНО ---
+      const modal = new ConfirmationModal({
+        message: 'Вы действительно хотите выйти из аккаунта?',
+        confirmText: 'Да, выйти',
+        cancelText: 'Отмена',
+        onConfirm: () => {
+          AuthService.logout();
+          router.navigate('/');
+        },
+        onCancel: () => {
+           // Модалка просто закроется
+        }
+      });
+      modal.show();
+      // ------------------------------------------
     }
   });
   
   await AuthService.loadProfile();
   
+  // Принудительно проверяем футер при первой загрузке
+  updateFooterVisibility(window.location.pathname);
+
   if (AuthService.isAuthenticated() && window.location.pathname === '/') {
     router.navigate('/projects');
   } else {
@@ -153,15 +177,3 @@ async function startApp() {
 }
 
 startApp();
-
-
-// startApp();
-
-// if ('serviceWorker' in navigator) {
-//   window.addEventListener('load', () => {
-//     navigator.serviceWorker.register('/service-worker.js')
-//       .catch(error => {
-//         console.error('Ошибка регистрации Service Worker:', error);
-//       });
-//   });
-// }

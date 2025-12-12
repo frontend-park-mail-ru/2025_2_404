@@ -9,7 +9,7 @@ export default class ConfirmationModal {
 
     this.confirmButton = new Button({
       id: 'confirm-btn',
-      text: this.onCancel ? 'Да, удалить' : 'Ок',
+      text: this.onCancel ? 'Да, выйти' : 'Ок',
       variant: 'secondary',
       onClick: () => {
         if (this.onConfirm) this.onConfirm();
@@ -20,7 +20,7 @@ export default class ConfirmationModal {
     if (this.onCancel) {
       this.cancelButton = new Button({
         id: 'cancel-btn',
-        text: 'Нет, оставить',
+        text: 'Нет, остаться',
         variant: 'primary',
         onClick: () => {
           this.onCancel();
@@ -68,6 +68,15 @@ export default class ConfirmationModal {
   if (this.cancelButton) {
     this.cancelButton.attachEvents();
   }
+   if (this.modalElement) {
+      this.modalElement.addEventListener('click', (e) => {
+        // e.target — это то, куда нажали. this.modalElement — это весь оверлей.
+        if (e.target === this.modalElement) {
+           if (this.onCancel) this.onCancel();
+           this.hide();
+        }
+      });
+    }
 }
 
 }

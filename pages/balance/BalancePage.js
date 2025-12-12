@@ -116,25 +116,35 @@ export default class BalancePage {
   }
 
   attachActionButtons() {
-    // --- ПОПОЛНЕНИЕ ---
-    document.getElementById('add-funds-btn')?.addEventListener('click', () => {
-      const modal = new AddFundsModal({
-        onConfirm: async (amount) => {
-          try {
-              // Запрос на сервер
-              await balanceRepository.addBalance(amount);
-              
-              // Обновляем данные с сервера (чтобы получить точный баланс и новую запись в истории)
-              await this.refreshData();
-              
-          } catch (error) {
-              alert("Ошибка при пополнении баланса");
-              console.error(error);
+document.getElementById('add-funds-btn')?.addEventListener('click', () => {
+  const modal = new AddFundsModal({
+    onConfirm: async (amount) => {
+      try {
+          // 1. Делаем запрос
+          const response = await balanceRepository.createPayment(amount);
+          
+          console.log("Ответ от сервера:", response); // Для отладки
+
+          // 2. ИЗВЛЕКАЕМ ССЫЛКУ ПРАВИЛЬНО
+          // Ссылка лежит в response.data.payment_url
+          const paymentUrl = response.data?.payment_url || response.payment_url;
+
+          if (paymentUrl) {
+              // 3. Редирект
+              console.log("Переходим на:", paymentUrl);
+              window.location.href = paymentUrl;
+          } else {
+              alert("Ошибка: сервер не вернул ссылку на оплату");
           }
-        },
-      });
-      modal.show();
-    });
+          
+      } catch (error) {
+          alert("Ошибка при создании платежа");
+          console.error(error);
+      }
+    },
+  });
+  modal.show();
+});
 
     // --- ВЫВОД ---
     document.getElementById('withdraw-btn')?.addEventListener('click', () => {

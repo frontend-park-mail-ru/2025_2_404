@@ -10,12 +10,11 @@ export default class AddFundsModal {
     this.amountInput = new Input({
       id: 'add-funds-amount',
       label: 'Сумма пополнения, ₽',
-      placeholder: 'Например, 5000',
-      type: 'text',
+      placeholder: 'Например, 1000',
+      type: 'number', // Лучше поставить type: 'number' для мобильных
       validationFn: (value) => {
-        value = value.trim();
+        value = String(value).trim(); // Приводим к строке на всякий случай
         if (!value) return 'Введите сумму';
-        if (!/^\d+(\.\d+)?$/.test(value)) return 'Сумма должна быть числом';
         if (parseFloat(value) <= 0) return 'Сумма должна быть больше нуля';
         return null;
       },
@@ -23,16 +22,18 @@ export default class AddFundsModal {
 
     this.confirmButton = new Button({
       id: 'confirm-add-funds-btn',
-      text: 'Пополнить',
+      // ИЗМЕНЕНИЕ: Меняем текст, чтобы пользователь понимал, что сейчас будет редирект
+      text: 'Перейти к оплате', 
       variant: 'primary',
     });
   }
+
   render() {
     return `
         <div class="confirmation-modal">
           <button class="close-btn" id="cancel-add-funds">&times;</button>
           <h2 class="confirmation-modal__title">Пополнение баланса</h2>
-          <p class="confirmation-modal__subtitle">Введите сумму для зачисления на ваш счет</p>
+          <p class="confirmation-modal__subtitle">Вы будете перенаправлены на страницу оплаты</p>
           
           <form id="add-funds-form">
             ${this.amountInput.render()}
@@ -43,7 +44,7 @@ export default class AddFundsModal {
         </div>
       `;
   }
-
+  // ... Остальной код (show, hide, attachEvents) оставляем без изменений ...
   show() {
     if (!this.modalElement) {
       this.modalElement = document.createElement('div');
@@ -73,6 +74,7 @@ export default class AddFundsModal {
       const errorMessage = this.amountInput.validate(amountValue);
 
       if (!errorMessage) {
+        // Передаем число в onConfirm
         this.onConfirm(parseFloat(amountValue));
         this.hide();
       }

@@ -1,6 +1,7 @@
 import AuthService from '../../services/ServiceAuthentification.js';
 import balanceRepository from '../../public/repository/balanceRepository.js';
 import { router } from '../../main.js';
+import adsRepository from '../../public/repository/adsRepository.js';
 
 const POLLING_INTERVAL = 20 * 1000; // 20 секунд
 const NOTIFICATION_COOLDOWN = 10 * 60 * 1000; // 10 минут
@@ -65,7 +66,7 @@ export default class LowBalanceNotification {
     this.closeModal(); // Закрываем, если пользователь вышел
   }
 
-  async checkBalance() {
+async checkBalance() {
     // Не спамим, если модалка уже открыта
     if (this.isModalOpen) return;
 
@@ -74,6 +75,23 @@ export default class LowBalanceNotification {
       const balance = data.balance;
 
       if (balance <= THRESHOLD) {
+        
+        // --- НОВАЯ ПРОВЕРКА: ЕСТЬ ЛИ ОБЪЯВЛЕНИЯ? ---
+        try {
+            // Запрашиваем список всех объявлений
+            const ads = await adsRepository.getAll();
+            
+            // Если массив пустой или null -> у пользователя нет рекламы -> выходим
+            if (!ads || ads.length === 0) {
+                console.log('📉 Баланс низкий, но объявлений нет. Уведомление скрыто.');
+                return;
+            }
+        } catch (err) {
+            console.warn("Не удалось проверить объявления, пропускаем уведомление", err);
+            return;
+        }
+        // -------------------------------------------
+
         const now = Date.now();
         // Проверяем кулдаун (10 минут)
         if (now - this.lastNotificationTime > NOTIFICATION_COOLDOWN) {
@@ -115,15 +133,27 @@ export default class LowBalanceNotification {
     this.attachEvents();
   }
 
-  attachEvents() {
+attachEvents() {
     const overlay = document.getElementById('low-balance-overlay');
     const closeBtn = document.getElementById('low-balance-close');
     const actionBtn = document.getElementById('low-balance-btn');
 
     const closeHandler = () => this.closeModal();
 
+    // Закрытие по крестику
     if (closeBtn) closeBtn.addEventListener('click', closeHandler);
     
+    // Закрытие по клику на фон (overlay)
+    if (overlay) {
+      overlay.addEventListener('click', (e) => {
+        // Проверяем, что кликнули именно по фону, а не по контенту внутри
+        if (e.target === overlay) {
+          closeHandler();
+        }
+      });
+    }
+
+    // Кнопка действия
     if (actionBtn) {
       actionBtn.addEventListener('click', () => {
         this.closeModal();

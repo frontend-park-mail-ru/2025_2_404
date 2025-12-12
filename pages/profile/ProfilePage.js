@@ -110,15 +110,6 @@ initComponents() {
         return null;
       },
     });
-    this.components.roleSelect = new Select({
-      id: 'user-role',
-      label: 'Тип аккаунта',
-      options: [
-        { value: 'advertiser', text: 'Рекламодатель' },
-        { value: 'publisher', text: 'Рекламораспространитель' }
-      ],
-      value: this.user?.role || 'advertiser',
-    });
 
     this.components.saveButton = new Button({
       id: 'profile-save',
@@ -170,7 +161,6 @@ initComponents() {
       lastNameInputHtml: this.components.lastNameInput?.render() || '',
       companyInputHtml: this.components.companyInput?.render() || '',
       phoneInputHtml: this.components.phoneInput?.render() || '',
-      roleSelectHtml: this.components.roleSelect?.render() || '',
       saveButtonHtml: this.components.saveButton?.render() || '',
       deleteButtonHtml: this.components.deleteButton?.render() || '',
       logoutButtonHtml: this.components.logoutButton?.render() || ''
@@ -215,7 +205,6 @@ initComponents() {
     const lastNameValue = document.getElementById('profile-lastname')?.value || '';
     const companyValue = document.getElementById('profile-company')?.value || '';
     const phoneValue = document.getElementById('profile-phone')?.value || '';
-    const roleValue = document.getElementById('user-role')?.value || 'advertiser';  
     if (this.components.loginInput.validate(loginValue)) isValidated = false;
     if (this.components.emailInput.validate(emailValue)) isValidated = false;
     
@@ -244,7 +233,6 @@ initComponents() {
     formData.append('company', companyValue);
 
     // Добавляем роль (бэк ждет profile_type)
-    formData.append('profile_type', roleValue);
     
     // Исправляем имя файла (бэк ждет avatar)
     if (this.selectedFile) {

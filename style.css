@@ -2048,7 +2048,7 @@ body {
 
 .low-balance-text {
     font-size: 18px;
-    color: #9E9E9E; /* Светло-серый */
+    color: #BAA2FA; /* Светло-серый */
     margin-bottom: 10px;
     line-height: 1.4;
 }
@@ -2061,8 +2061,8 @@ body {
 
 .low-balance-subtext {
     font-size: 18px;
-    color: #B0B0FF; /* Бледно-фиолетовый */
-    margin-bottom: 30px;
+    color: #BAA2FA; /* Бледно-фиолетовый */
+    margin-bottom: 35px;
     line-height: 1.4;
 }
 
@@ -2081,4 +2081,19 @@ body {
 
 .low-balance-btn:hover {
     transform: translateY(-2px);
+}
+
+/* Центрируем логотип внутри модального окна */
+.low-balance-modal .logo {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* <-- Это свойство выравнивает содержимое по центру */
+    margin-bottom: 35px;     /* Добавляем отступ снизу для красоты */
+    width: 100%;             /* Убеждаемся, что блок занимает всю ширину */
+}
+
+/* На всякий случай, если картинка слишком большая */
+.low-balance-modal .logo img {
+    max-height: 40px;        /* Ограничиваем высоту лого */
+    width: auto;
 }
