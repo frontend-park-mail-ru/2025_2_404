@@ -10,6 +10,7 @@ import ProjectDetailPage, { setProjectDetailRouter } from './pages/projects/Proj
 import CreateProjectPage, { setCreateProjectRouter } from './pages/projects/CreateProjectPage';
 import BalancePage, { setBalanceRouter } from './pages/balance/BalancePage';
 import InfoPage from './pages/info/InfoPage';
+import SlotStatisticsPage, { setSlotStatisticsRouter } from './pages/slots/SlotStatisticsPage';
 import LoginPage from './pages/login/LoginPage';
 import RegisterPage from './pages/register/Register';
 
@@ -30,6 +31,7 @@ const routes: Routes = {
   '/projects/:id': ProjectDetailPage as unknown as PageConstructor,
   '/balance': BalancePage as unknown as PageConstructor,
   '/info': InfoPage as unknown as PageConstructor,
+  '/slots/:id/statistics': SlotStatisticsPage as unknown as PageConstructor,
 };
 
 export const router = new Router(routes, appContainer);
@@ -41,6 +43,7 @@ setProjectsRouter(router);
 setProjectDetailRouter(router);
 setCreateProjectRouter(router);
 setBalanceRouter(router);
+setSlotStatisticsRouter(router);
 
 function updateFooterVisibility(path: string): void {
   const footerElement = document.querySelector('.footer') as HTMLElement | null;

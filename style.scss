@@ -1616,8 +1616,16 @@ body {
   font-size: 32px;
   font-weight: 400;
   color: #555;
+  text-align: center;
+  padding: 0 20px;
 }
 
+@media (max-width: 768px) {
+  .error-page {
+    font-size: 24px;
+    height: 30vh;
+  }
+}
 
 
 // app
@@ -2840,6 +2848,190 @@ body {
   }
 }
 
+// Статистика рекламных кампаний
+.stats {
+  grid-column: 1 / -1;
+  background: var(--white);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  &__title {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-color);
+  }
+
+  &__select {
+    padding: 10px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-purple);
+    }
+  }
+
+  &__summary {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  &__card {
+    background: linear-gradient(135deg, #F8F5FF 0%, #fff 100%);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(124, 84, 232, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(124, 84, 232, 0.15);
+    }
+
+    &-icon {
+      font-size: 28px;
+    }
+
+    &-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    &-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-color);
+    }
+
+    &-label {
+      font-size: 13px;
+      color: var(--gray-text);
+      margin-top: 2px;
+    }
+
+    &--impressions {
+      background: linear-gradient(135deg, #EDE9FE 0%, #fff 100%);
+    }
+
+    &--clicks {
+      background: linear-gradient(135deg, #FCE7F3 0%, #fff 100%);
+    }
+
+    &--ctr {
+      background: linear-gradient(135deg, #ECFDF5 0%, #fff 100%);
+    }
+
+    &--spent {
+      background: linear-gradient(135deg, #FEF3C7 0%, #fff 100%);
+    }
+
+    &--earned {
+      background: linear-gradient(135deg, #D1FAE5 0%, #fff 100%);
+    }
+  }
+
+  &__charts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+
+  &__chart-container {
+    background: #FAFAFA;
+    border-radius: 16px;
+    padding: 20px;
+    
+    &--wide {
+      grid-column: 1 / -1;
+    }
+
+    canvas {
+      height: 250px !important;
+    }
+  }
+
+  &__chart-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 16px;
+    color: var(--text-color);
+  }
+
+  &__table-container {
+    background: #FAFAFA;
+    border-radius: 16px;
+    padding: 20px;
+  }
+
+  &__table-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 16px;
+    color: var(--text-color);
+  }
+
+  &__table-wrapper {
+    overflow-x: auto;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+
+    th,
+    td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background: #F3F0FF;
+      font-weight: 600;
+      color: var(--text-color);
+      white-space: nowrap;
+    }
+
+    td {
+      color: var(--text-color);
+    }
+
+    tbody tr:hover {
+      background-color: #F8F5FF;
+    }
+
+    &-loading,
+    &-empty {
+      text-align: center;
+      color: var(--gray-text);
+      padding: 32px !important;
+    }
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -2848,6 +3040,22 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (max-width: 1200px) {
+  .stats {
+    &__summary {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    &__charts {
+      grid-template-columns: 1fr;
+    }
+
+    &__chart-container--wide {
+      grid-column: 1;
+    }
   }
 }
 
@@ -3011,6 +3219,67 @@ body {
       }
     }
   }
+
+  .stats {
+    padding: 20px;
+    border-radius: 16px;
+
+    &__header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    &__title {
+      font-size: 20px;
+    }
+
+    &__summary {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    &__card {
+      padding: 16px;
+
+      &-icon {
+        font-size: 24px;
+      }
+
+      &-value {
+        font-size: 16px;
+      }
+
+      &-label {
+        font-size: 12px;
+      }
+    }
+
+    &__charts {
+      gap: 16px;
+    }
+
+    &__chart-container {
+      padding: 16px;
+
+      canvas {
+        height: 200px !important;
+      }
+    }
+
+    &__chart-title,
+    &__table-title {
+      font-size: 14px;
+    }
+
+    &__table {
+      font-size: 12px;
+
+      th,
+      td {
+        padding: 8px 10px;
+      }
+    }
+  }
 }
 
 @media (max-width: 480px) {
@@ -3094,6 +3363,196 @@ body {
         width: 20px;
         height: 20px;
       }
+    }
+  }
+
+  .stats {
+    padding: 16px;
+
+    &__summary {
+      grid-template-columns: 1fr;
+    }
+
+    &__card {
+      flex-direction: row;
+      justify-content: flex-start;
+    }
+  }
+}
+
+// Страница статистики слота
+.slot-stats {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 30px 20px;
+
+  // Хлебные крошки
+  &__breadcrumbs {
+    font-size: 14px;
+    color: var(--gray-text);
+    margin-bottom: 20px;
+  }
+
+  &__breadcrumb-link {
+    color: var(--gray-text);
+    text-decoration: none;
+    transition: color 0.2s;
+
+    &:hover {
+      color: var(--primary-purple);
+    }
+  }
+
+  &__breadcrumb-sep {
+    margin: 0 8px;
+    color: #ccc;
+  }
+
+  &__breadcrumb-current {
+    color: var(--text-color);
+  }
+
+  // Заголовок
+  &__header {
+    margin-bottom: 30px;
+  }
+
+  &__title {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0 0 8px;
+  }
+
+  &__status {
+    display: inline-block;
+    font-size: 14px;
+    color: var(--gray-text);
+
+    &--active {
+      color: #4CAF50;
+    }
+
+    &--inactive {
+      color: #F44336;
+    }
+  }
+
+  // Фильтры
+  &__filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+    background: #F8F5FF;
+    border-radius: 16px;
+    padding: 24px;
+  }
+
+  &__filter-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__filter-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 12px;
+  }
+
+  &__select-wrapper {
+    position: relative;
+  }
+
+  &__select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23888' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    transition: border-color 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-purple);
+    }
+
+    &:hover {
+      border-color: var(--primary-purple);
+    }
+
+    option {
+      padding: 12px;
+    }
+  }
+
+  // Итоговые показатели
+  &__totals {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    margin-bottom: 30px;
+  }
+
+  &__total-item {
+    text-align: center;
+  }
+
+  &__total-label {
+    font-size: 14px;
+    color: var(--text-color);
+    margin-right: 8px;
+  }
+
+  &__total-value {
+    font-size: 20px;
+    font-weight: 700;
+
+    &--purple {
+      color: var(--primary-purple);
+    }
+  }
+
+  // График
+  &__chart-container {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    height: 300px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+}
+
+@media (max-width: 768px) {
+  .slot-stats {
+    padding: 20px 16px;
+
+    &__title {
+      font-size: 22px;
+    }
+
+    &__filters {
+      grid-template-columns: 1fr;
+      gap: 20px;
+      padding: 16px;
+    }
+
+    &__totals {
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+    }
+
+    &__chart-container {
+      height: 250px;
+      padding: 16px;
     }
   }
 }

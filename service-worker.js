@@ -12,7 +12,6 @@ const APP_SHELL_FILES = [
   '/services/Router.js',
   '/services/ServiceAuthentification.js',
   '/services/DataBaseService.js',
-  '/server/app.js',
   '/server/mockApi.js',
   '/public/api/http.js',
   '/public/api/ads.js',

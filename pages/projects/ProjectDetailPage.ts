@@ -1,8 +1,13 @@
 import ConfirmationModal from '../components/ConfirmationModal';
 import adsRepository from '../../public/repository/adsRepository';
+import statisticsRepository from '../../public/repository/statisticsRepository';
 import { validateAdForm } from '../../public/utils/ValidateAdForm';
-import type { HandlebarsTemplateDelegate, PageComponent, Ad } from '../../src/types';
+import type { HandlebarsTemplateDelegate, PageComponent, Ad, AdStatistics } from '../../src/types';
 import type Router from '../../services/Router';
+import { Chart, registerables } from 'chart.js';
+
+// Регистрируем все компоненты Chart.js
+Chart.register(...registerables);
 
 let routerInstance: Router | null = null;
 
@@ -17,6 +22,12 @@ export default class ProjectDetailPage implements PageComponent {
   selectedFile: File | null = null;
   toggleEditMode: (show: boolean) => void;
   togglePreview: (show: boolean) => void;
+  
+  // Графики
+  private impressionsClicksChart: Chart | null = null;
+  private ctrChart: Chart | null = null;
+  private financeChart: Chart | null = null;
+  private currentStatistics: AdStatistics | null = null;
 
   constructor(_routerInstance: Router, projectId: string) {
     this.projectId = projectId;
@@ -228,6 +239,10 @@ export default class ProjectDetailPage implements PageComponent {
         reader.readAsDataURL(file);
       }
     });
+
+    // Инициализация статистики
+    this.attachStatsEvents();
+    this.loadStatistics(30);
   }
 
   handleDelete(): void {
@@ -244,5 +259,240 @@ export default class ProjectDetailPage implements PageComponent {
       },
     });
     modal.show();
+  }
+
+  // === Методы для статистики ===
+
+  async loadStatistics(days: number = 30): Promise<void> {
+    try {
+      const dateTo = new Date().toISOString().split('T')[0];
+      const dateFrom = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      
+      // projectId - это UUID строка
+      this.currentStatistics = await statisticsRepository.getStatisticsForAd(
+        this.projectId,
+        dateFrom,
+        dateTo
+      );
+      
+      this.updateSummaryCards();
+      this.renderCharts();
+      this.renderTable();
+    } catch (err) {
+      console.error('Ошибка при загрузке статистики:', err);
+    }
+  }
+
+  private updateSummaryCards(): void {
+    if (!this.currentStatistics) return;
+
+    const formatNumber = (num: number): string => {
+      return num.toLocaleString('ru-RU');
+    };
+
+    const impressionsEl = document.getElementById('total-impressions');
+    const clicksEl = document.getElementById('total-clicks');
+    const ctrEl = document.getElementById('total-ctr');
+    const spentEl = document.getElementById('total-spent');
+    const earnedEl = document.getElementById('total-earned');
+
+    if (impressionsEl) impressionsEl.textContent = formatNumber(this.currentStatistics.total_impressions);
+    if (clicksEl) clicksEl.textContent = formatNumber(this.currentStatistics.total_clicks);
+    if (ctrEl) ctrEl.textContent = `${this.currentStatistics.total_ctr}%`;
+    if (spentEl) spentEl.textContent = `${formatNumber(this.currentStatistics.total_spent)}₽`;
+    if (earnedEl) earnedEl.textContent = `${formatNumber(this.currentStatistics.total_earned)}₽`;
+  }
+
+  private renderCharts(): void {
+    if (!this.currentStatistics) return;
+
+    const { daily_stats } = this.currentStatistics;
+    const labels = daily_stats.map(d => this.formatDate(d.date));
+    
+    // Уничтожаем старые графики
+    this.destroyCharts();
+
+    // График показов и кликов
+    const impressionsClicksCanvas = document.getElementById('impressions-clicks-chart') as HTMLCanvasElement;
+    if (impressionsClicksCanvas) {
+      this.impressionsClicksChart = new Chart(impressionsClicksCanvas, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Показы',
+              data: daily_stats.map(d => d.impressions),
+              backgroundColor: 'rgba(124, 84, 232, 0.7)',
+              borderColor: 'rgba(124, 84, 232, 1)',
+              borderWidth: 1,
+            },
+            {
+              label: 'Клики',
+              data: daily_stats.map(d => d.clicks),
+              backgroundColor: 'rgba(255, 115, 175, 0.7)',
+              borderColor: 'rgba(255, 115, 175, 1)',
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+          },
+        },
+      });
+    }
+
+    // График CTR
+    const ctrCanvas = document.getElementById('ctr-chart') as HTMLCanvasElement;
+    if (ctrCanvas) {
+      this.ctrChart = new Chart(ctrCanvas, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'CTR (%)',
+              data: daily_stats.map(d => d.ctr),
+              borderColor: 'rgba(76, 175, 80, 1)',
+              backgroundColor: 'rgba(76, 175, 80, 0.1)',
+              fill: true,
+              tension: 0.4,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: (value) => `${value}%`,
+              },
+            },
+          },
+        },
+      });
+    }
+
+    // График финансов
+    const financeCanvas = document.getElementById('finance-chart') as HTMLCanvasElement;
+    if (financeCanvas) {
+      this.financeChart = new Chart(financeCanvas, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Списано (₽)',
+              data: daily_stats.map(d => d.spent),
+              borderColor: 'rgba(244, 67, 54, 1)',
+              backgroundColor: 'rgba(244, 67, 54, 0.1)',
+              fill: false,
+              tension: 0.4,
+            },
+            {
+              label: 'Заработано (₽)',
+              data: daily_stats.map(d => d.earned),
+              borderColor: 'rgba(76, 175, 80, 1)',
+              backgroundColor: 'rgba(76, 175, 80, 0.1)',
+              fill: false,
+              tension: 0.4,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: (value) => `${value}₽`,
+              },
+            },
+          },
+        },
+      });
+    }
+  }
+
+  private renderTable(): void {
+    if (!this.currentStatistics) return;
+
+    const tbody = document.getElementById('stats-table-body');
+    if (!tbody) return;
+
+    const { daily_stats } = this.currentStatistics;
+
+    if (daily_stats.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="stats__table-empty">Нет данных за выбранный период</td></tr>';
+      return;
+    }
+
+    // Сортируем по убыванию даты (новые сверху)
+    const sortedStats = [...daily_stats].reverse();
+
+    tbody.innerHTML = sortedStats.map(stat => `
+      <tr>
+        <td>${this.formatDate(stat.date)}</td>
+        <td>${stat.impressions.toLocaleString('ru-RU')}</td>
+        <td>${stat.clicks.toLocaleString('ru-RU')}</td>
+        <td>${stat.ctr}%</td>
+        <td>${stat.spent.toLocaleString('ru-RU')}₽</td>
+        <td>${stat.earned.toLocaleString('ru-RU')}₽</td>
+      </tr>
+    `).join('');
+  }
+
+  private formatDate(dateStr: string): string {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+  }
+
+  private destroyCharts(): void {
+    if (this.impressionsClicksChart) {
+      this.impressionsClicksChart.destroy();
+      this.impressionsClicksChart = null;
+    }
+    if (this.ctrChart) {
+      this.ctrChart.destroy();
+      this.ctrChart = null;
+    }
+    if (this.financeChart) {
+      this.financeChart.destroy();
+      this.financeChart = null;
+    }
+  }
+
+  private attachStatsEvents(): void {
+    const periodSelect = document.getElementById('stats-period') as HTMLSelectElement;
+    if (periodSelect) {
+      periodSelect.addEventListener('change', () => {
+        const days = parseInt(periodSelect.value);
+        this.loadStatistics(days);
+      });
+    }
   }
 }

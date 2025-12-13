@@ -51,7 +51,7 @@ const requestHandler = (request, response) => {
             });
           } else {
             response.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
-            response.end('<div class="error-page"><h1>404: Страница не найдена</h1></div>');
+            response.end('<div class="error-page">404: Страница не найдена</div>');
           }
         } else {
           response.writeHead(500);

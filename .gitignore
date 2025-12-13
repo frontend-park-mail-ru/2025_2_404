@@ -1,4 +1,5 @@
 /node_modules
+/dist
 /server/mockApi.js
 *.css.map
 /dist
