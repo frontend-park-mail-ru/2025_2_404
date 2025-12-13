@@ -179,6 +179,40 @@ export interface HttpError {
   body: unknown;
 }
 
+// Статистика рекламных кампаний
+// Соответствует структуре бэкенда: таблица slot_event
+export interface SlotEvent {
+  slot_id: string;       // UUID слота
+  ad_detail_id: string;  // UUID рекламы (ad_detail)
+  event_type: 'impression' | 'click';
+  created_time: string;  // ISO timestamp
+}
+
+export interface DailyStats {
+  date: string;
+  impressions: number;
+  clicks: number;
+  ctr: number; // конверсия (clicks / impressions * 100)
+  spent: number; // списания
+  earned: number; // заработок
+}
+
+export interface AdStatistics {
+  ad_id: string;  // UUID
+  total_impressions: number;
+  total_clicks: number;
+  total_ctr: number;
+  total_spent: number;
+  total_earned: number;
+  daily_stats: DailyStats[];
+}
+
+export interface StatisticsFilters {
+  ad_id: string;  // UUID
+  date_from?: string;
+  date_to?: string;
+}
+
 export interface ApiResponse<T = unknown> {
   data?: T;
   error?: {

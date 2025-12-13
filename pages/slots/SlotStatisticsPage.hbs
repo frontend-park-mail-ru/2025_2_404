@@ -1,0 +1,59 @@
+<div class="slot-stats">
+  <!-- Хлебные крошки -->
+  <nav class="slot-stats__breadcrumbs">
+    <a href="/slots" class="slot-stats__breadcrumb-link">Мои слоты</a>
+    <span class="slot-stats__breadcrumb-sep">›</span>
+    <a href="/slots/{{slot.id}}" class="slot-stats__breadcrumb-link">{{slot.name}}</a>
+    <span class="slot-stats__breadcrumb-sep">›</span>
+    <span class="slot-stats__breadcrumb-current">Статистика по {{slot.name}}</span>
+  </nav>
+
+  <!-- Заголовок -->
+  <div class="slot-stats__header">
+    <h1 class="slot-stats__title">Статистика по {{slot.name}}</h1>
+    <span class="slot-stats__status slot-stats__status--{{slot.statusClass}}">{{slot.status}}</span>
+  </div>
+
+  <!-- Фильтры -->
+  <div class="slot-stats__filters">
+    <div class="slot-stats__filter-group">
+      <label class="slot-stats__filter-label">Метрика</label>
+      <div class="slot-stats__select-wrapper">
+        <select id="metric-select" class="slot-stats__select">
+          <option value="impressions" selected>Показы</option>
+          <option value="clicks">Клики</option>
+          <option value="ctr">CTR (конверсия)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="slot-stats__filter-group">
+      <label class="slot-stats__filter-label">Период</label>
+      <div class="slot-stats__select-wrapper">
+        <select id="period-select" class="slot-stats__select">
+          <option value="7">Неделя</option>
+          <option value="30" selected>Месяц</option>
+          <option value="365">Год</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Итоговые показатели -->
+  <div class="slot-stats__totals">
+    <div class="slot-stats__total-item">
+      <span class="slot-stats__total-label">Количество показов:</span>
+      <span class="slot-stats__total-value slot-stats__total-value--purple" id="total-impressions">0</span>
+    </div>
+    <div class="slot-stats__total-item">
+      <span class="slot-stats__total-label">Количество кликов:</span>
+      <span class="slot-stats__total-value slot-stats__total-value--purple" id="total-clicks">0</span>
+    </div>
+  </div>
+
+  <!-- График -->
+  <div class="slot-stats__chart-container">
+    <canvas id="main-chart"></canvas>
+  </div>
+
+</div>
