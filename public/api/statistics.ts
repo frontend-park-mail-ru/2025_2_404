@@ -2,8 +2,27 @@ import { http } from './http';
 import { getMockStatistics } from './statisticsMock';
 import type { AdStatistics, StatisticsFilters, SlotEvent, DailyStats } from '../../src/types';
 
-// Флаг для использования моков (установить false когда бэкенд будет готов)
-const USE_MOCKS = true;
+const USE_MOCKS = false;
+
+// Интерфейсы для ответа бэкенда /api/slots/{slot_id}/statistics
+interface BackendDailyStat {
+  slot_id: string;
+  clicks: number;
+  impressions: number;
+  date: string;
+}
+
+interface BackendSlotStatistics {
+  slot_id: string;
+  total_clicks: number;
+  total_impressions: number;
+  daily_stats: BackendDailyStat[];
+}
+
+interface BackendStatisticsResponse {
+  data: BackendSlotStatistics;
+  message: string;
+}
 
 /**
  * Получить статистику для рекламной кампании
@@ -52,6 +71,92 @@ export async function getAdStatistics(filters: StatisticsFilters): Promise<AdSta
   const url = `/ads/${filters.ad_id}/statistics${queryString ? `?${queryString}` : ''}`;
   
   return http.get<AdStatistics>(url);
+}
+
+/**
+ * Получить статистику для слота
+ * GET /api/slots/{slot_id}/statistics
+ * 
+ * Использует моки если USE_MOCKS=true или при ошибке API (fallback)
+ */
+export async function getSlotStatistics(slotId: string): Promise<AdStatistics> {
+  if (USE_MOCKS) {
+    // Используем моки пока бэкенд не задеплоит ручку
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return getMockStatistics(slotId);
+  }
+
+  try {
+    const response = await http.get<BackendStatisticsResponse>(`/slots/${slotId}/statistics`);
+    return transformBackendStatistics(response.data);
+  } catch (error) {
+    console.warn('API /slots/{id}/statistics недоступен, используем моки:', error);
+    // Fallback на моки при ошибке
+    return getMockStatistics(slotId);
+  }
+}
+
+/**
+ * Преобразование ответа бэкенда в формат фронтенда
+ */
+function transformBackendStatistics(backend: BackendSlotStatistics): AdStatistics {
+  const costPerClick = 5; // Стоимость клика для расчётов
+  
+  // Парсинг даты из Go формата: "time.Date(2025, time.December, 13, 0, 0, 0, 0, time.UTC)"
+  const parseGoDate = (dateStr: string): string => {
+    const match = dateStr.match(/time\.Date\((\d+),\s*time\.(\w+),\s*(\d+)/);
+    if (match) {
+      const year = match[1];
+      const monthName = match[2];
+      const day = match[3].padStart(2, '0');
+      
+      const months: Record<string, string> = {
+        January: '01', February: '02', March: '03', April: '04',
+        May: '05', June: '06', July: '07', August: '08',
+        September: '09', October: '10', November: '11', December: '12',
+      };
+      const month = months[monthName] || '01';
+      
+      return `${year}-${month}-${day}`;
+    }
+    // Если формат уже ISO или другой — вернуть как есть
+    return dateStr.split('T')[0] || dateStr;
+  };
+
+  // Преобразуем daily_stats (может быть null)
+  const dailyStats: DailyStats[] = (backend.daily_stats || []).map((stat) => {
+    const ctr = stat.impressions > 0 ? (stat.clicks / stat.impressions) * 100 : 0;
+    // Траты рекламодателя = (клики + показы) * 3
+    const spent = (stat.clicks + stat.impressions) * 3;
+    const earned = stat.clicks * (costPerClick * 0.7);
+
+    return {
+      date: parseGoDate(stat.date),
+      impressions: stat.impressions,
+      clicks: stat.clicks,
+      ctr: Math.round(ctr * 100) / 100,
+      spent,
+      earned: Math.round(earned * 100) / 100,
+    };
+  });
+
+  // Вычисляем CTR из общих значений
+  const totalCtr = backend.total_impressions > 0 
+    ? (backend.total_clicks / backend.total_impressions) * 100 
+    : 0;
+
+  // Траты рекламодателя = (клики + показы) * 3
+  const totalSpent = (backend.total_clicks + backend.total_impressions) * 3;
+
+  return {
+    ad_id: backend.slot_id,
+    total_impressions: backend.total_impressions,
+    total_clicks: backend.total_clicks,
+    total_ctr: Math.round(totalCtr * 100) / 100,
+    total_spent: totalSpent,
+    total_earned: Math.round(backend.total_clicks * costPerClick * 0.7 * 100) / 100,
+    daily_stats: dailyStats,
+  };
 }
 
 /**

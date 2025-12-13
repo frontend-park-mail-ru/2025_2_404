@@ -28,17 +28,10 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/auth': {
-        target: 'http://localhost:8080',
+      '/api': {
+        target: 'https://adnet.website',
         changeOrigin: true,
-      },
-      '/profile': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-      },
-      '/ads': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
+        secure: true,
       },
     },
   },

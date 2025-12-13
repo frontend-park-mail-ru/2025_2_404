@@ -77,10 +77,10 @@ export default class SlotStatisticsPage implements PageComponent {
 
   async loadStatistics(): Promise<void> {
     try {
-      const dateTo = new Date().toISOString().split('T')[0];
-      const dateFrom = new Date(Date.now() - this.currentPeriod * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      // Используем реальный API бэкенда: GET /api/slots/{slot_id}/statistics
+      this.statistics = await statisticsRepository.getSlotStatistics(this.slotId);
       
-      this.statistics = await statisticsRepository.getStatisticsForAd(this.slotId, dateFrom, dateTo);
+      console.log('Статистика слота загружена:', this.statistics);
       
       this.updateTotals();
       this.updateChart();
@@ -94,12 +94,18 @@ export default class SlotStatisticsPage implements PageComponent {
 
     const impressionsEl = document.getElementById('total-impressions');
     const clicksEl = document.getElementById('total-clicks');
+    const spentEl = document.getElementById('total-spent');
 
     if (impressionsEl) {
       impressionsEl.textContent = this.statistics.total_impressions.toLocaleString('ru-RU');
     }
     if (clicksEl) {
       clicksEl.textContent = this.statistics.total_clicks.toLocaleString('ru-RU');
+    }
+    if (spentEl) {
+      // Траты = (клики + показы) * 3
+      const spent = (this.statistics.total_clicks + this.statistics.total_impressions) * 3;
+      spentEl.textContent = spent.toLocaleString('ru-RU') + ' ₽';
     }
   }
 
@@ -134,6 +140,11 @@ export default class SlotStatisticsPage implements PageComponent {
         data: daily_stats.map(d => d.ctr),
         label: 'CTR (%)',
         color: '#4CAF50',
+      },
+      spent: {
+        data: daily_stats.map(d => d.spent),
+        label: 'Траты (₽)',
+        color: '#F59E0B',
       },
     };
 

@@ -45,7 +45,7 @@ function normalizeImageUrl(ad: AdApiResponse | null, image: string | null, imgTy
 }
 
 export async function listAds(): Promise<Ad[]> {
-  const res = await http.get<AdApiResponse[] | { data?: AdApiResponse[] }>('/ads');
+  const res = await http.get<AdApiResponse[] | { data?: AdApiResponse[] }>('/api/ads');
   
   // Сервер может вернуть массив напрямую или в обёртке data
   const ads = Array.isArray(res) ? res : ((res as any).data || []);
@@ -61,7 +61,7 @@ export async function listAds(): Promise<Ad[]> {
 }
 
 export async function getAdById(ad_id: number | string): Promise<Ad> {
-  const res = await http.get<GetAdResponse>(`/ads/${ad_id}`);
+  const res = await http.get<GetAdResponse>(`/api/ads/${ad_id}`);
   
   const ad = res.data?.ad || {} as AdApiResponse;
   const imageBase64 = res.data?.imageData?.image_data || null;
@@ -78,13 +78,13 @@ export async function getAdById(ad_id: number | string): Promise<Ad> {
 }
 
 export async function deleteAd(adId: number | string): Promise<void> {
-  await http.delete(`/ads/${adId}`);
+  await http.delete(`/api/ads/${adId}`);
 }
 
 export async function createAd(formData: FormData): Promise<unknown> {
-  return http.post('/ads', formData);
+  return http.post('/api/ads', formData);
 }
 
 export async function updateAd(adId: number | string, formData: FormData): Promise<unknown> {
-  return http.put(`/ads/${adId}`, formData);
+  return http.put(`/api/ads/${adId}`, formData);
 }
