@@ -39,7 +39,7 @@ class AuthService {
         const type = profileData.imageData.content_type || 'image/jpeg';
         avatarUrl = `data:${type};base64,${profileData.imageData.image_data}`;
       } else if (profileData.avatar_path) {
-        avatarUrl = `https://adnet.website:8080/api/${profileData.avatar_path}`;
+        avatarUrl = `https://adnet.website/api/${profileData.avatar_path}`;
       }
 
       this.user = {
