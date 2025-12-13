@@ -1,0 +1,177 @@
+<main class="info-page">
+  <div class="info-page__container">
+    <h1 class="info-page__title">Информация</h1>
+    
+    <nav class="info-page__nav">
+      <a href="#getting-started" class="info-page__nav-item is-active" data-section="getting-started">Как начать</a>
+      <a href="#contacts" class="info-page__nav-item" data-section="contacts">Контакты</a>
+      <a href="#statistics" class="info-page__nav-item" data-section="statistics">Статистика</a>
+      <a href="#roadmap" class="info-page__nav-item" data-section="roadmap">Планы развития</a>
+    </nav>
+
+    <!-- Как начать -->
+    <section id="getting-started" class="info-page__section is-active">
+      <h2 class="info-page__section-title">Как начать работу с Ad.net</h2>
+      
+      <div class="info-page__steps">
+        <div class="info-page__step">
+          <div class="info-page__step-number">1</div>
+          <div class="info-page__step-content">
+            <h3>Зарегистрируйтесь</h3>
+            <p>Создайте аккаунт за пару минут. Укажите email и придумайте надёжный пароль.</p>
+          </div>
+        </div>
+        
+        <div class="info-page__step">
+          <div class="info-page__step-number">2</div>
+          <div class="info-page__step-content">
+            <h3>Пополните баланс</h3>
+            <p>Внесите средства на счёт любым удобным способом.</p>
+          </div>
+        </div>
+        
+        <div class="info-page__step">
+          <div class="info-page__step-number">3</div>
+          <div class="info-page__step-content">
+            <h3>Создайте проект</h3>
+            <p> Настройте первую рекламную кампанию.</p>
+          </div>
+        </div>
+        
+        <div class="info-page__step">
+          <div class="info-page__step-number">4</div>
+          <div class="info-page__step-content">
+            <h3>Запустите рекламу</h3>
+            <p>Результаты увидите уже через час!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Контакты -->
+    <section id="contacts" class="info-page__section">
+      <h2 class="info-page__section-title">Контакты</h2>
+      
+      <div class="info-page__contacts">
+        <div class="info-page__contacts-info">
+          <div class="info-page__contact-item">
+            <div class="info-page__contact-icon">
+              <img src="/public/assets/mail.svg" alt="Email">
+            </div>
+            <div class="info-page__contact-content">
+              <h4>Email</h4>
+              <a href="mailto:adnet.website.sprt@internet.ru">adnet.website.sprt@internet.ru</a>
+            </div>
+          </div>
+          
+          <div class="info-page__contact-item">
+            <div class="info-page__contact-icon">
+              <img src="/public/assets/phone.svg" alt="Телефон">
+            </div>
+            <div class="info-page__contact-content">
+              <h4>Телефон</h4>
+              <a href="tel:+79532748634">8 (953) 274-86-34</a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="info-page__contacts-form">
+          <h3>Напишите нам</h3>
+          <form id="contact-form" class="info-page__form">
+            <div class="form-group">
+              <label class="form-group__label" for="contact-name">Ваше имя</label>
+              <input type="text" class="form-group__input" id="contact-name" placeholder="Иван Иванов">
+              <div class="error-message" id="error-contact-name"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-group__label" for="contact-email">Ваш email</label>
+              <input type="email" class="form-group__input" id="contact-email" placeholder="example@mail.ru">
+              <div class="error-message" id="error-contact-email"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-group__label" for="contact-message">Сообщение</label>
+              <textarea class="form-group__input info-page__textarea" id="contact-message" placeholder="Ваш вопрос..."></textarea>
+              <div class="error-message" id="error-contact-message"></div>
+            </div>
+            <button type="submit" class="btn btn--primary">Отправить</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Статистика -->
+    <section id="statistics" class="info-page__section">
+      <h2 class="info-page__section-title">Статистика платформы</h2>
+      
+      <div class="info-page__statistics">
+        <div class="info-page__stat-card">
+          <div class="info-page__stat-value">1000+</div>
+          <div class="info-page__stat-label">Активных рекламодателей</div>
+        </div>
+        
+        <div class="info-page__stat-card">
+          <div class="info-page__stat-value">5 млн</div>
+          <div class="info-page__stat-label">Показов в день</div>
+        </div>
+        
+        <div class="info-page__stat-card">
+          <div class="info-page__stat-value">98%</div>
+          <div class="info-page__stat-label">Довольных клиентов</div>
+        </div>
+        
+        <div class="info-page__stat-card">
+          <div class="info-page__stat-value">24/7</div>
+          <div class="info-page__stat-label">Поддержка</div>
+        </div>
+      </div>
+      
+      <div class="info-page__chart-placeholder">
+        <h3>Рост платформы за 2024 год</h3>
+        <div class="info-page__chart-bars">
+          <div class="info-page__chart-bar" style="--height: 40%"><span>Q1</span></div>
+          <div class="info-page__chart-bar" style="--height: 55%"><span>Q2</span></div>
+          <div class="info-page__chart-bar" style="--height: 75%"><span>Q3</span></div>
+          <div class="info-page__chart-bar" style="--height: 100%"><span>Q4</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Планы развития -->
+    <section id="roadmap" class="info-page__section">
+      <h2 class="info-page__section-title">Планы развития</h2>
+      
+      <div class="info-page__roadmap">
+        <div class="info-page__roadmap-item info-page__roadmap-item--done">
+          <div class="info-page__roadmap-marker"></div>
+          <div class="info-page__roadmap-content">
+            <div class="info-page__roadmap-date">Q4 2024</div>
+            <h4>Запуск платформы</h4>
+            <p>Базовый функционал рекламного кабинета, создание кампаний, аналитика</p>
+            <span class="info-page__roadmap-status info-page__roadmap-status--done">Выполнено</span>
+          </div>
+        </div>
+        
+        <div class="info-page__roadmap-item info-page__roadmap-item--current">
+          <div class="info-page__roadmap-marker"></div>
+          <div class="info-page__roadmap-content">
+            <div class="info-page__roadmap-date">Q1 2025</div>
+            <h4>Расширенная аналитика</h4>
+            <p>Детальные отчёты, когортный анализ, интеграция с внешними системами</p>
+            <span class="info-page__roadmap-status info-page__roadmap-status--current">В работе</span>
+          </div>
+        </div>
+        
+        <div class="info-page__roadmap-item">
+          <div class="info-page__roadmap-marker"></div>
+          <div class="info-page__roadmap-content">
+            <div class="info-page__roadmap-date">Q2 2025</div>
+            <h4>AI-оптимизация</h4>
+            <p>Автоматические рекомендации и настройки, чтобы запускать кампании быстрее и эффективнее
+благодаря машинному обучению</p>
+            <span class="info-page__roadmap-status">Планируется</span>
+          </div>
+        </div>
+        
+    </section>
+  </div>
+</main>

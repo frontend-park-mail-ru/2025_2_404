@@ -9,6 +9,7 @@ import ProjectsPage, { setProjectsRouter } from './pages/projects/ProjectsPage';
 import ProjectDetailPage, { setProjectDetailRouter } from './pages/projects/ProjectDetailPage';
 import CreateProjectPage, { setCreateProjectRouter } from './pages/projects/CreateProjectPage';
 import BalancePage, { setBalanceRouter } from './pages/balance/BalancePage';
+import InfoPage from './pages/info/InfoPage';
 import LoginPage from './pages/login/LoginPage';
 import RegisterPage from './pages/register/Register';
 
@@ -28,6 +29,7 @@ const routes: Routes = {
   '/projects/create': CreateProjectPage as unknown as PageConstructor,
   '/projects/:id': ProjectDetailPage as unknown as PageConstructor,
   '/balance': BalancePage as unknown as PageConstructor,
+  '/info': InfoPage as unknown as PageConstructor,
 };
 
 export const router = new Router(routes, appContainer);
@@ -43,7 +45,8 @@ setBalanceRouter(router);
 function updateFooterVisibility(path: string): void {
   const footerElement = document.querySelector('.footer') as HTMLElement | null;
   if (footerElement) {
-    footerElement.style.display = path === '/' ? '' : 'none';
+    const showFooterPaths = ['/', '/info'];
+    footerElement.style.display = showFooterPaths.includes(path) ? '' : 'none';
   }
 }
 
