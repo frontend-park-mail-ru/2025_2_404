@@ -37,9 +37,18 @@ export default class Router {
   }
 
   navigate(path: string): void {
-    if (window.location.pathname === path) {
+    const [pathname, hash] = path.split('#');
+    const currentPathname = window.location.pathname;
+    
+    if (currentPathname === pathname) {
+      // Если мы уже на этой странице, просто обновляем хеш
+      if (hash) {
+        history.pushState({}, '', path);
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+      }
       return;
     }
+    
     history.pushState({}, '', path);
     this.loadRoute();
   }
