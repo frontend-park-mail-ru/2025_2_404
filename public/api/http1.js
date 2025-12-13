@@ -1,4 +1,4 @@
-export const BASE = "https://adnet.website:8080"; 
+export const BASE = "https://adnet.website:8080/api"; 
 
 export async function request(path, init = {}) {
   const token = localStorage.getItem('token');

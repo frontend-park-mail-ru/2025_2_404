@@ -1,5 +1,5 @@
 import { http } from '../api/http1.js'; 
-const BASE = "https://localhost:8080/api"; 
+const BASE = "https://adnet.website:8080/api"; 
 
 class SlotsRepository {
 
