@@ -2,7 +2,7 @@ import { http } from './http';
 import type { AuthResponse, LoginCredentials, RegisterInfo } from '../../src/types';
 
 export async function signup(data: RegisterInfo): Promise<AuthResponse> {
-  const res = await http.post<AuthResponse>('/auth/register', data);
+  const res = await http.post<AuthResponse>('/api/auth/register', data);
   // Ищем токен везде
   const token = (res as any).token || (res as any).data?.token || (res as any).body?.token;
   if (token) {
@@ -12,7 +12,7 @@ export async function signup(data: RegisterInfo): Promise<AuthResponse> {
 }
 
 export async function signin(data: LoginCredentials): Promise<AuthResponse> {
-  const res = await http.post<AuthResponse>('/auth/login', data);
+  const res = await http.post<AuthResponse>('/api/auth/login', data);
   // Ищем токен везде
   const token = (res as any).token || (res as any).data?.token || (res as any).body?.token;
   if (token) {
