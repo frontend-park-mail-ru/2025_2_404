@@ -155,7 +155,7 @@ export interface Transaction {
   date: string;
   description: string;
   time: string;
-  amount: string;
+  amount: string | number;
   type: 'positive' | 'negative';
 }
 

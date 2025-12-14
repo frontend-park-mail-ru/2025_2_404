@@ -50,7 +50,6 @@ export default class LoginPage {
     this.submitButton = new Button({
       id: 'login-submit',
       text: 'Войти',
-      type: 'submit',
     });
     
     this.init();

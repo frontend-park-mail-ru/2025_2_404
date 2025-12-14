@@ -42,12 +42,13 @@ export default class ProjectsPage implements PageComponent {
 
   async loadTemplate(): Promise<void> {
     if (this.template) return;
-    Handlebars.registerHelper('eq', (a: unknown, b: unknown) => a == b);
-    Handlebars.registerHelper('gt', (a: number, b: number) => a > b);
-    Handlebars.registerHelper('add', (a: number, b: number) => a + b);
-    Handlebars.registerHelper('sub', (a: number, b: number) => a - b);
+    Handlebars.registerHelper('eq', (...args: unknown[]) => args[0] == args[1]);
+    Handlebars.registerHelper('gt', (...args: unknown[]) => (args[0] as number) > (args[1] as number));
+    Handlebars.registerHelper('add', (...args: unknown[]) => (args[0] as number) + (args[1] as number));
+    Handlebars.registerHelper('sub', (...args: unknown[]) => (args[0] as number) - (args[1] as number));
 
-    Handlebars.registerHelper('formatDate', (dateStr: string) => {
+    Handlebars.registerHelper('formatDate', (...args: unknown[]) => {
+      const dateStr = args[0] as string;
       return dateStr ? new Date(dateStr).toLocaleDateString('ru-RU') : '06.06.2026';
     });
 
