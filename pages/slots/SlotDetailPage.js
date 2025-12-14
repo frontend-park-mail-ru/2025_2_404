@@ -184,5 +184,10 @@ async render() {
     const goBack = (e) => { e.preventDefault(); router.navigate('/projects'); };
     document.getElementById('back-link-top')?.addEventListener('click', goBack);
     document.getElementById('back-btn-bottom')?.addEventListener('click', goBack);
+
+    // Кнопка "Показать статистику"
+    document.getElementById('show-stats-btn')?.addEventListener('click', () => {
+      router.navigate(`/slots/${this.slotId}/statistics`);
+    });
   }
 }

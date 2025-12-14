@@ -40,25 +40,34 @@
     </div>
   </div>
 
-  <!-- Итоговые показатели -->
-  <div class="slot-stats__totals">
-    <div class="slot-stats__total-item">
-      <span class="slot-stats__total-label">Количество показов:</span>
-      <span class="slot-stats__total-value slot-stats__total-value--purple" id="total-impressions">0</span>
-    </div>
-    <div class="slot-stats__total-item">
-      <span class="slot-stats__total-label">Количество кликов:</span>
-      <span class="slot-stats__total-value slot-stats__total-value--purple" id="total-clicks">0</span>
-    </div>
-    <div class="slot-stats__total-item">
-      <span class="slot-stats__total-label">Траты рекламодателя:</span>
-      <span class="slot-stats__total-value slot-stats__total-value--purple" id="total-spent">0 ₽</span>
-    </div>
+  <!-- Сообщение об ошибке/пустых данных -->
+  <div class="slot-stats__message" id="stats-message" style="display: none;">
+    <p class="slot-stats__message-text" id="stats-message-text"></p>
+    <button class="btn btn--secondary" id="stats-retry-btn" style="display: none;">Попробовать снова</button>
   </div>
 
-  <!-- График -->
-  <div class="slot-stats__chart-container">
-    <canvas id="main-chart"></canvas>
+  <!-- Контент статистики -->
+  <div id="stats-content">
+    <!-- Итоговые показатели -->
+    <div class="slot-stats__totals">
+      <div class="slot-stats__total-item">
+        <span class="slot-stats__total-label">Количество показов:</span>
+        <span class="slot-stats__total-value slot-stats__total-value--purple" id="total-impressions">0</span>
+      </div>
+      <div class="slot-stats__total-item">
+        <span class="slot-stats__total-label">Количество кликов:</span>
+        <span class="slot-stats__total-value slot-stats__total-value--purple" id="total-clicks">0</span>
+      </div>
+      <div class="slot-stats__total-item">
+        <span class="slot-stats__total-label">Траты рекламодателя:</span>
+        <span class="slot-stats__total-value slot-stats__total-value--purple" id="total-spent">0 ₽</span>
+      </div>
+    </div>
+
+    <!-- График -->
+    <div class="slot-stats__chart-container">
+      <canvas id="main-chart"></canvas>
+    </div>
   </div>
 
 </div>

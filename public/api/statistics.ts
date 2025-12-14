@@ -76,8 +76,6 @@ export async function getAdStatistics(filters: StatisticsFilters): Promise<AdSta
 /**
  * Получить статистику для слота
  * GET /api/slots/{slot_id}/statistics
- * 
- * Использует моки если USE_MOCKS=true или при ошибке API (fallback)
  */
 export async function getSlotStatistics(slotId: string): Promise<AdStatistics> {
   if (USE_MOCKS) {
@@ -86,14 +84,23 @@ export async function getSlotStatistics(slotId: string): Promise<AdStatistics> {
     return getMockStatistics(slotId);
   }
 
-  try {
-    const response = await http.get<BackendStatisticsResponse>(`/slots/${slotId}/statistics`);
-    return transformBackendStatistics(response.data);
-  } catch (error) {
-    console.warn('API /slots/{id}/statistics недоступен, используем моки:', error);
-    // Fallback на моки при ошибке
-    return getMockStatistics(slotId);
+  const response = await http.get<BackendStatisticsResponse>(`/slots/${slotId}/statistics`);
+  
+  // Проверяем, есть ли данные в ответе
+  if (!response || !response.data) {
+    // Возвращаем пустую статистику
+    return {
+      ad_id: slotId,
+      total_impressions: 0,
+      total_clicks: 0,
+      total_ctr: 0,
+      total_spent: 0,
+      total_earned: 0,
+      daily_stats: [],
+    };
   }
+  
+  return transformBackendStatistics(response.data);
 }
 
 /**

@@ -39,6 +39,14 @@ export default class Footer {
     if (firstColumn) {
       firstColumn.classList.add('is-open');
     }
+
+    // Плавный скролл наверх при клике на ссылки в футере
+    const links = this.footer.querySelectorAll('.footer__links-item');
+    links.forEach((link) => {
+      link.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
   }
 
   private _handleTitleClick(event: Event): void {

@@ -1,4 +1,5 @@
 import adsRepository from '../../public/repository/adsRepository';
+import slotsRepository from '../../public/repository/slotsRepository';
 import type { HandlebarsTemplateDelegate, PageComponent } from '../../src/types';
 import type Router from '../../services/Router';
 
@@ -8,22 +9,12 @@ export function setProjectsRouter(r: Router): void {
   routerInstance = r;
 }
 
-// Динамический импорт slotsRepository (JS файл из новой ветки)
-async function getSlotsRepository(): Promise<{
-  getAll: () => Promise<unknown[]>;
-}> {
-  const module = await import('../../public/repository/slotsRepository.js');
-  return module.default;
-}
-
-interface Item {
-  id?: number | string;
+interface ProjectItem {
+  id: string | number;
   title?: string;
-  name?: string;
   status?: string;
-  created_at?: string;
+  createdAt?: string;
   displayNumber?: number;
-  [key: string]: unknown;
 }
 
 interface PaginationData {
@@ -35,13 +26,18 @@ interface PaginationData {
 export default class ProjectsPage implements PageComponent {
   template: HandlebarsTemplateDelegate | null = null;
   activeTab: string;
-  items: Item[] = [];
-  allItems: Item[] = [];
-  currentPage = 1;
-  itemsPerPage = 5;
+  items: ProjectItem[];
+  allItems: ProjectItem[];
+  currentPage: number;
+  itemsPerPage: number;
 
   constructor() {
+    this.template = null;
     this.activeTab = localStorage.getItem('projects_tab') || 'slots';
+    this.items = [];
+    this.allItems = [];
+    this.currentPage = 1;
+    this.itemsPerPage = 5;
   }
 
   async loadTemplate(): Promise<void> {
@@ -50,9 +46,9 @@ export default class ProjectsPage implements PageComponent {
     Handlebars.registerHelper('gt', (a: number, b: number) => a > b);
     Handlebars.registerHelper('add', (a: number, b: number) => a + b);
     Handlebars.registerHelper('sub', (a: number, b: number) => a - b);
-    
+
     Handlebars.registerHelper('formatDate', (dateStr: string) => {
-      return dateStr ? new Date(dateStr).toLocaleDateString('ru-RU') : "06.06.2026";
+      return dateStr ? new Date(dateStr).toLocaleDateString('ru-RU') : '06.06.2026';
     });
 
     try {
@@ -68,15 +64,14 @@ export default class ProjectsPage implements PageComponent {
     try {
       if (this.activeTab === 'ads') {
         const ads = await adsRepository.getAll();
-        this.allItems = (ads as Item[]).map((item, index) => ({
+        this.allItems = ads.map((item: ProjectItem, index: number) => ({
           ...item,
           status: 'active',
           displayNumber: index + 1
         }));
       } else {
-        const slotsRepository = await getSlotsRepository();
         const slots = await slotsRepository.getAll();
-        this.allItems = (slots as Item[]).map((item, index) => ({
+        this.allItems = slots.map((item: ProjectItem, index: number) => ({
           ...item,
           displayNumber: index + 1
         }));
@@ -87,7 +82,7 @@ export default class ProjectsPage implements PageComponent {
     }
   }
 
-  getPaginationData(): { visibleItems: Item[]; pagination: PaginationData } {
+  getPaginationData(): { visibleItems: ProjectItem[]; pagination: PaginationData } {
     const totalItems = this.allItems.length;
     const totalPages = Math.ceil(totalItems / this.itemsPerPage);
     if (this.currentPage > totalPages && totalPages > 0) {
@@ -119,11 +114,13 @@ export default class ProjectsPage implements PageComponent {
 
     const { visibleItems, pagination } = this.getPaginationData();
 
-    return this.template ? this.template({
-      items: visibleItems,
-      activeTab: this.activeTab,
-      pagination: pagination
-    }) : '';
+    return this.template
+      ? this.template({
+          items: visibleItems,
+          activeTab: this.activeTab,
+          pagination: pagination
+        })
+      : '';
   }
 
   async rerender(): Promise<void> {
@@ -138,14 +135,14 @@ export default class ProjectsPage implements PageComponent {
     const trigger = document.getElementById('title-dropdown-trigger');
     const menu = document.getElementById('title-dropdown-menu');
     const arrow = document.querySelector('.dropdown-arrow');
-    
+
     if (trigger && menu) {
       trigger.addEventListener('click', () => {
         menu.classList.toggle('show');
         arrow?.classList.toggle('rotate');
       });
 
-      document.querySelectorAll('.dropdown-option').forEach(option => {
+      document.querySelectorAll('.dropdown-option').forEach((option) => {
         option.addEventListener('click', async (e) => {
           const target = e.target as HTMLElement;
           const newType = target.dataset.type;
@@ -154,15 +151,14 @@ export default class ProjectsPage implements PageComponent {
             localStorage.setItem('projects_tab', newType);
             this.currentPage = 1;
             this.allItems = [];
-            
+
             await this.rerender();
           }
         });
       });
 
       document.addEventListener('click', (e) => {
-        const target = e.target as Node;
-        if (!trigger.contains(target)) {
+        if (!trigger.contains(e.target as Node)) {
           menu.classList.remove('show');
           arrow?.classList.remove('rotate');
         }
@@ -174,7 +170,7 @@ export default class ProjectsPage implements PageComponent {
       routerInstance?.navigate(path);
     });
 
-    document.querySelectorAll('.project-card').forEach(card => {
+    document.querySelectorAll('.project-card').forEach((card) => {
       card.addEventListener('click', () => {
         const id = (card as HTMLElement).dataset.id;
         if (this.activeTab === 'ads') {
@@ -185,11 +181,10 @@ export default class ProjectsPage implements PageComponent {
       });
     });
 
-    document.querySelectorAll('.page-btn').forEach(btn => {
+    document.querySelectorAll('.page-btn').forEach((btn) => {
       btn.addEventListener('click', async () => {
-        const button = btn as HTMLButtonElement;
-        if (button.hasAttribute('disabled') || button.classList.contains('active')) return;
-        const newPage = parseInt(button.dataset.page || '1', 10);
+        if (btn.hasAttribute('disabled') || btn.classList.contains('active')) return;
+        const newPage = parseInt((btn as HTMLElement).dataset.page || '0', 10);
         if (newPage && newPage > 0) {
           this.currentPage = newPage;
           await this.rerender();

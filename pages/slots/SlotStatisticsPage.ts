@@ -71,8 +71,43 @@ export default class SlotStatisticsPage implements PageComponent {
       this.loadStatistics();
     });
 
+    // Кнопка повторной попытки
+    document.getElementById('stats-retry-btn')?.addEventListener('click', () => {
+      this.loadStatistics();
+    });
+
     // Загружаем статистику сразу
     this.loadStatistics();
+  }
+
+  private showMessage(message: string, showRetry: boolean = false): void {
+    const messageContainer = document.getElementById('stats-message');
+    const messageText = document.getElementById('stats-message-text');
+    const retryBtn = document.getElementById('stats-retry-btn');
+    const content = document.getElementById('stats-content');
+
+    if (messageContainer && messageText) {
+      messageContainer.style.display = 'flex';
+      messageText.textContent = message;
+    }
+    if (retryBtn) {
+      retryBtn.style.display = showRetry ? 'inline-block' : 'none';
+    }
+    if (content) {
+      content.style.display = 'none';
+    }
+  }
+
+  private hideMessage(): void {
+    const messageContainer = document.getElementById('stats-message');
+    const content = document.getElementById('stats-content');
+
+    if (messageContainer) {
+      messageContainer.style.display = 'none';
+    }
+    if (content) {
+      content.style.display = 'block';
+    }
   }
 
   async loadStatistics(): Promise<void> {
@@ -81,11 +116,24 @@ export default class SlotStatisticsPage implements PageComponent {
       this.statistics = await statisticsRepository.getSlotStatistics(this.slotId);
       
       console.log('Статистика слота загружена:', this.statistics);
-      
+
+      // Проверяем, есть ли данные
+      const hasData = this.statistics && 
+        (this.statistics.total_impressions > 0 || 
+         this.statistics.total_clicks > 0 ||
+         (this.statistics.daily_stats && this.statistics.daily_stats.length > 0));
+
+      if (!hasData) {
+        this.showMessage('Данных для показа пока нет. Статистика появится после первых показов рекламы.', false);
+        return;
+      }
+
+      this.hideMessage();
       this.updateTotals();
       this.updateChart();
     } catch (err) {
       console.error('Ошибка при загрузке статистики:', err);
+      this.showMessage('Ошибка сервера. Пожалуйста, попробуйте зайти позже.', true);
     }
   }
 

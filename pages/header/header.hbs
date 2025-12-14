@@ -1,9 +1,5 @@
 <div class="header__content">
-    {{#if isAuthenticated}}
-    <a href="/projects" class="header__logo-link">
-    {{else}}
     <a href="/" class="header__logo-link">
-    {{/if}}
         <div class="logo">
             <img src="/public/assets/logo.svg" alt="Ad.net logo" />
             <span class="logo__text">Ad.net</span>
@@ -15,8 +11,8 @@
         <div class="header__nav-dropdown">
             <a href="#" class="header__nav-link">Проекты</a>
             <div class="header__dropdown">
-                    <a href="/projects" class="header__dropdown-item" onclick="localStorage.setItem('projects_tab', 'ads')">Мои объявления</a>
-                    <a href="/projects" class="header__dropdown-item" onclick="localStorage.setItem('projects_tab', 'slots')">Мои слоты</a>
+                    <a href="/projects" class="header__dropdown-item" data-tab="ads">Мои объявления</a>
+                    <a href="/projects" class="header__dropdown-item" data-tab="slots">Мои слоты</a>
             </div>
         </div>
     </nav>
