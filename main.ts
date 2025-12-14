@@ -3,6 +3,7 @@ import Header from './pages/header/Header';
 import Footer from './pages/footer/Footer';
 import AuthService from './services/ServiceAuthentification';
 
+// Импорты страниц
 import MainPage, { setShowRegisterModal, setMainPageRouter } from './pages/main/MainPage';
 import ProfilePage, { setRouter as setProfileRouter } from './pages/profile/ProfilePage';
 import ProjectsPage, { setProjectsRouter } from './pages/projects/ProjectsPage';
@@ -16,7 +17,12 @@ import SlotDetailPage from './pages/slots/SlotDetailPage';
 import LoginPage from './pages/login/LoginPage';
 import RegisterPage from './pages/register/Register';
 
+// Импорт компонентов
+import ConfirmationModal from './pages/components/ConfirmationModal';
+import LowBalanceNotification from './pages/components/LowBalanceNotification';
+
 import type { Routes, PageConstructor } from './src/types';
+
 
 Handlebars.registerHelper('formatDate', function (dateString: unknown): string {
   if (!dateString || typeof dateString !== 'string') return '';
@@ -24,7 +30,6 @@ Handlebars.registerHelper('formatDate', function (dateString: unknown): string {
 });
 
 const appContainer = document.getElementById('app') as HTMLElement;
-
 const routes: Routes = {
   '/': MainPage as unknown as PageConstructor,
   '/profile': ProfilePage as unknown as PageConstructor,
@@ -104,34 +109,35 @@ export function showRegisterModal(): void {
 }
 
 setShowRegisterModal(showRegisterModal);
-
 async function startApp(): Promise<void> {
   await Promise.all([
     header.loadTemplate(),
     footer.loadTemplate()
   ]);
-
+  if (header.header && !document.body.contains(header.header)) {
+    document.body.prepend(header.header);
+  }
   await header.update();
   document.body.appendChild(footer.render());
-
   router.onRouteChange(updateFooterVisibility);
   updateFooterVisibility(window.location.pathname);
-
-  AuthService.onAuthChange(() => {
+  const lowBalanceNotification = new LowBalanceNotification();
+  AuthService.onAuthChange((user) => {
     header.resetCache();
     header.update();
+    if (user) {
+        lowBalanceNotification.startPolling();
+    } else {
+        lowBalanceNotification.stopPolling();
+    }
   });
-
   document.addEventListener('click', (e: MouseEvent) => {
     const target = e.target as HTMLElement;
-
-    // Обработка переключения вкладок в хедере
     const dropdownItem = target.closest('.header__dropdown-item[data-tab]') as HTMLElement | null;
     if (dropdownItem) {
       const tab = dropdownItem.dataset.tab;
       if (tab) {
         localStorage.setItem('projects_tab', tab);
-        // Если уже на /projects, принудительно перезагружаем страницу
         if (window.location.pathname === '/projects') {
           e.preventDefault();
           router.loadRoute();
@@ -139,26 +145,48 @@ async function startApp(): Promise<void> {
         }
       }
     }
-
-    if (target.closest('#login-btn-header')) {
+    if (target.closest('#login-btn-header') || target.closest('#login-trigger-ads') || target.closest('#login-trigger-slots')) {
       e.preventDefault();
       showLoginModal();
     } else if (target.closest('#register-btn-header')) {
       e.preventDefault();
       showRegisterModal();
-    } else if (
+    } 
+    else if (
       target.closest('#logout-btn') ||
       target.closest('#profile-logout')
     ) {
       e.preventDefault();
-      AuthService.logout();
-      header.resetCache();
-      router.navigate('/');
-      header.update();
+      const modal = new ConfirmationModal({
+        message: 'Вы действительно хотите выйти из аккаунта?',
+        confirmText: 'Да, выйти',
+        cancelText: 'Отмена',
+        onConfirm: () => {
+          lowBalanceNotification.stopPolling();
+          
+          AuthService.logout();
+          header.resetCache();
+          router.navigate('/');
+          header.update();
+        },
+        onCancel: () => {}
+      }) as any;
+      
+      modal.show();
     }
   });
+  await AuthService.loadProfile();
 
-  router.loadRoute();
+  if (AuthService.isAuthenticated()) {
+      lowBalanceNotification.startPolling();
+      if (window.location.pathname === '/') {
+        router.navigate('/projects');
+      } else {
+        router.loadRoute();
+      }
+  } else {
+      router.loadRoute();
+  }
 }
 
 startApp();

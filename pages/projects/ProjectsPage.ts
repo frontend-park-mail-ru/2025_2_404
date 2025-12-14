@@ -67,7 +67,7 @@ export default class ProjectsPage implements PageComponent {
         const ads = await adsRepository.getAll();
         this.allItems = ads.map((item: ProjectItem, index: number) => ({
           ...item,
-          status: 'active',
+          status: item.status || 'non-active', 
           displayNumber: index + 1
         }));
       } else {

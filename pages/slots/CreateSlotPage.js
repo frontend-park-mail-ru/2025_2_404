@@ -138,13 +138,11 @@ export default class CreateSlotPage {
             e.preventDefault();
             
             if (this.createdSlotId) {
-                 alert("Слот уже создан. Код ниже.");
                  return;
             }
 
             const slotData = getFormData();
             if (!slotData.minPrice || !slotData.format) {
-                alert('Пожалуйста, укажите цену и формат объявления.');
                 return;
             }
 
@@ -167,7 +165,6 @@ export default class CreateSlotPage {
 
             } catch (err) {
                 console.error(err);
-                alert('Ошибка при создании слота');
                 generateBtn.disabled = false;
                 generateBtn.textContent = 'Сгенерировать код для вставки';
             }

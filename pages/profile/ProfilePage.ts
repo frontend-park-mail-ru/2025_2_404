@@ -203,10 +203,29 @@ export default class ProfilePage implements PageComponent {
 
     this.initComponents();
     const roleText = this.user?.role === 'advertiser' ? 'Рекламодатель' : 'Рекламораспространитель';
+    
+    // --- ИЗМЕНЕНИЯ ЗДЕСЬ ---
+    // Приводим user к any, чтобы достать ads_count и created_at, 
+    // если их нет в основном интерфейсе User
+    const rawUser = this.user as any;
+    
+    // 1. Достаем количество объявлений
+    const adCount = rawUser.ads_count !== undefined ? rawUser.ads_count : 0;
+
+    // 2. Достаем дату регистрации и форматируем её
+    let registrationDate = '—';
+    if (rawUser.created_at) {
+        // Форматируем дату (например: 15.12.2025)
+        registrationDate = new Date(rawUser.created_at).toLocaleDateString('ru-RU');
+    }
+    // -----------------------
+
     const context = {
       ...this.user,
       avatar: this.user.avatar,
       roleText,
+      adCount, // Передаем в шаблон переменную {{adCount}}
+      registrationDate, // Передаем в шаблон переменную {{registrationDate}}
       loginInputHtml: this.components.loginInput?.render() || '',
       emailInputHtml: this.components.emailInput?.render() || '',
       passwordInputHtml: this.components.passwordInput?.render() || '',
