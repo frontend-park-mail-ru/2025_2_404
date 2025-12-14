@@ -16,7 +16,7 @@ export default class ConfirmationModal {
 
     this.confirmButton = new Button({
       id: 'confirm-btn',
-      text: this.onCancel ? 'Да, удалить' : 'Ок',
+      text: this.onCancel ? 'Да, выйти' : 'Ок',
       variant: 'secondary',
       onClick: () => {
         if (this.onConfirm) this.onConfirm();
@@ -27,7 +27,7 @@ export default class ConfirmationModal {
     if (this.onCancel) {
       this.cancelButton = new Button({
         id: 'cancel-btn',
-        text: 'Нет, оставить',
+        text: 'Нет, остаться',
         variant: 'primary',
         onClick: () => {
           this.onCancel!();
@@ -73,6 +73,15 @@ export default class ConfirmationModal {
     this.confirmButton.attachEvents();
     if (this.cancelButton) {
       this.cancelButton.attachEvents();
+    }
+    // Закрытие при клике на overlay (из новой ветки)
+    if (this.modalElement) {
+      this.modalElement.addEventListener('click', (e) => {
+        if (e.target === this.modalElement) {
+          if (this.onCancel) this.onCancel();
+          this.hide();
+        }
+      });
     }
   }
 }

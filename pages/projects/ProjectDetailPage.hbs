@@ -171,8 +171,28 @@
       <input class="ads__item" id="site-input" type="url" value="{{project.domain}}" placeholder="Введите ссылку на сайт">
 
       <label for="budget-input">Бюджет</label>
-      <input class="ads__item" id="budget-input" type="number" value="{{project.budget}}" placeholder="Введите сумму">
+      <input class="ads__item" id="budget-input" type="number" value="{{project.budget}}" placeholder="Введите сумму" min="0">
       <small>Не меньше 100₽</small>
+
+      {{#unless isNew}}
+        <div class="ads__status-wrapper">
+          <div class="ads__status-row">
+            <label class="ads__status-label">Статус объявления</label>
+            <div class="ads__switch-group">
+              <label class="switch">
+                <input type="checkbox" id="status-switch" {{#if isActive}}checked{{/if}} {{#if isLowBudget}}disabled{{/if}}>
+                <span class="slider round"></span>
+              </label>
+              <span id="status-text" style="font-weight: bold;">
+                {{#if isActive}}Активно{{else}}Приостановлено{{/if}}
+              </span>
+            </div>
+          </div>
+          <small id="status-lock-msg" class="ads__lock-msg" style="display: {{#if isLowBudget}}block{{else}}none{{/if}};">
+            (для активации введите бюджет больше 100₽)
+          </small>
+        </div>
+      {{/unless}}
 
       <div class="ads__img-upload">
         <label for="img-file" class="ads__upload-box" id="upload-box">

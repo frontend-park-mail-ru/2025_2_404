@@ -34,8 +34,7 @@ export default class Select {
     const select = document.getElementById(this.id);
     if (select && this.onChange) {
       select.addEventListener('change', this.onChange);
-    } else {
-      console.warn(`Select element ${this.id} not found for event attachment`);
     }
+    // Не выводим предупреждение - элемент может отсутствовать в некоторых режимах просмотра
   }
 }

@@ -22,6 +22,7 @@ export async function request<T = unknown>(path: string, init: RequestInit = {})
   const res = await fetch(BASE + path, {
     ...init,
     headers,
+    credentials: 'include',
   });
   
   const text = await res.text();

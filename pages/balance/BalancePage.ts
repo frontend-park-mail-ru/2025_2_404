@@ -19,7 +19,18 @@ export function setBalanceRouter(r: Router): void {
 
 interface ServerData {
   balance: number;
-  allTransactions: Transaction[];
+  transactions: Transaction[];
+}
+
+// Импортируем balanceRepository (предполагается, что он будет на TS или совместим)
+// Если balanceRepository.js существует, можно использовать его напрямую
+async function getBalanceRepository(): Promise<{
+  getBalanceAndTransactions: () => Promise<ServerData>;
+  createPayment: (amount: number) => Promise<{ data?: { payment_url?: string }; payment_url?: string }>;
+  subtractBalance: (amount: number) => Promise<void>;
+}> {
+  const module = await import('../../public/repository/balanceRepository.js');
+  return module.default;
 }
 
 export default class BalancePage implements PageComponent {
@@ -67,26 +78,6 @@ export default class BalancePage implements PageComponent {
     }
   }
 
-  async fetchFromServer(): Promise<ServerData> {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const serverData: ServerData = {
-          balance: Math.floor(20000 + Math.random() * 5000),
-          allTransactions: [
-            { id: 1, date: '2025-10-27T12:48:34Z', description: 'Пополнение через СБП', amount: '+25000', type: 'positive' },
-            { id: 2, date: '2025-10-26T13:28:35Z', description: 'Оплата Рекламное объявление №1', amount: '-25000', type: 'negative' },
-            { id: 3, date: '2025-10-26T10:00:00Z', description: 'Покупка лицензии', amount: '-10000', type: 'negative' },
-            { id: 4, date: '2025-09-10T18:00:12Z', description: 'Пополнение баланса', amount: '+50000', type: 'positive' },
-          ].map(t => ({
-            ...t,
-            time: new Date(t.date).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
-          })) as Transaction[]
-        };
-        resolve(serverData);
-      }, 1000);
-    });
-  }
-
   async render(): Promise<string> {
     if (!AuthService.isAuthenticated()) {
       routerInstance?.navigate('/');
@@ -94,7 +85,7 @@ export default class BalancePage implements PageComponent {
     }
     await this.loadTemplate();
     const cachedBalance = await DBService.getBalance();
-    this.balance = cachedBalance;
+    this.balance = cachedBalance || 0;
     return this.template ? this.template({ balance: this.balance.toLocaleString('ru-RU') }) : '';
   }
 
@@ -104,15 +95,30 @@ export default class BalancePage implements PageComponent {
     this.attachActionButtons();
 
     try {
-      const serverData = await this.fetchFromServer();
-      this.balance = serverData.balance;
-      this.allTransactions = serverData.allTransactions;
-    } catch (error) {
-      console.warn((error as Error).message, "Загружаем данные из локального кэша (IndexedDB).");
-      this.balance = await DBService.getBalance();
-      this.allTransactions = await DBService.getAllTransactions();
-    } finally {
+      this.balance = await DBService.getBalance() || 0;
+      this.allTransactions = await DBService.getAllTransactions() || [];
       this.updateDisplay();
+    } catch (e) {
+      console.error("Ошибка чтения кэша", e);
+    }
+
+    await this.refreshData();
+  }
+
+  async refreshData(): Promise<void> {
+    try {
+      const balanceRepository = await getBalanceRepository();
+      const serverData = await balanceRepository.getBalanceAndTransactions();
+      
+      this.balance = serverData.balance;
+      this.allTransactions = serverData.transactions || [];
+      
+      await DBService.saveBalance(this.balance);
+      await DBService.saveAllTransactions(this.allTransactions);
+      
+      this.updateDisplay();
+    } catch (e) {
+      console.error("Не удалось обновить данные после операции", e);
     }
   }
 
@@ -120,19 +126,20 @@ export default class BalancePage implements PageComponent {
     document.getElementById('add-funds-btn')?.addEventListener('click', () => {
       const modal = new AddFundsModal({
         onConfirm: async (amount: number) => {
-          this.balance += amount;
-          const newTransaction: Transaction = {
-            date: new Date().toISOString(),
-            description: `Пополнение баланса`,
-            time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
-            amount: `+${amount.toLocaleString('ru-RU')}`,
-            type: 'positive'
-          };
+          try {
+            const balanceRepository = await getBalanceRepository();
+            const response = await balanceRepository.createPayment(amount);
+            const paymentUrl = response.data?.payment_url || response.payment_url;
 
-          await DBService.addTransaction(newTransaction);
-          await DBService.saveBalance(this.balance);
-          this.allTransactions.unshift(newTransaction);
-          this.updateDisplay();
+            if (paymentUrl) {
+              window.location.href = paymentUrl;
+            } else {
+              alert("Ошибка: сервер не вернул ссылку на оплату");
+            }
+          } catch (error) {
+            alert("Ошибка при создании платежа");
+            console.error(error);
+          }
         },
       });
       modal.show();
@@ -142,19 +149,15 @@ export default class BalancePage implements PageComponent {
       const modal = new WithdrawModal({
         balance: this.balance,
         onConfirm: async (amount: number) => {
-          this.balance -= amount;
-          const newTransaction: Transaction = {
-            date: new Date().toISOString(),
-            description: `Вывод средств`,
-            time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
-            amount: `-${amount.toLocaleString('ru-RU')}`,
-            type: 'negative'
-          };
-
-          await DBService.addTransaction(newTransaction);
-          await DBService.saveBalance(this.balance);
-          this.allTransactions.unshift(newTransaction);
-          this.updateDisplay();
+          try {
+            const balanceRepository = await getBalanceRepository();
+            await balanceRepository.subtractBalance(amount);
+            await this.refreshData();
+            alert(`Заявка на вывод ${amount} ₽ принята.`);
+          } catch (error) {
+            alert("Ошибка при выводе средств. Проверьте баланс.");
+            console.error(error);
+          }
         },
       });
       modal.show();
@@ -196,17 +199,11 @@ export default class BalancePage implements PageComponent {
     let totalEarned = 0;
 
     this.currentTransactions.forEach(t => {
-      if (typeof t.amount !== 'string') {
-        console.error("Транзакция без 'amount' или 'amount' не является строкой:", t);
-        return;
+      let amount = t.amount;
+      if (typeof amount === 'string') {
+        amount = parseInt((amount as string).replace(/[+\s]/g, ''), 10);
       }
-      const amountString = t.amount.replace(/[+\s]/g, '');
-      const amount = parseInt(amountString, 10);
-
-      if (isNaN(amount)) {
-        console.error("Не удалось спарсить 'amount' в число:", t);
-        return;
-      }
+      if (typeof amount !== 'number' || isNaN(amount)) return;
 
       if (t.type === 'negative') {
         totalSpent += Math.abs(amount);
