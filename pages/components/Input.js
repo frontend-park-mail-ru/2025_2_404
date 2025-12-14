@@ -1,4 +1,3 @@
-// pages/components/Input.js
 
 const ICON_OPEN = './public/assets/eye-show.svg';
 const ICON_CLOSE = './public/assets/eye-close.svg';

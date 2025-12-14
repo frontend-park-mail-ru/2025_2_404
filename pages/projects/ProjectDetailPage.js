@@ -3,7 +3,6 @@ import ConfirmationModal from '../components/ConfirmationModal.js';
 import adsRepository from '../../public/repository/adsRepository.js'; 
 import { validateAdForm } from '../../public/utils/ValidateAdForm.js';
 
-
 export default class ProjectDetailPage {
   constructor(routerInstance, projectId) {
     this.projectId = projectId;
@@ -11,6 +10,7 @@ export default class ProjectDetailPage {
     this.project = null;
     this.selectedFile = null; 
   }
+
   async loadTemplate() {
     if (this.template) return;
     try {
@@ -23,37 +23,43 @@ export default class ProjectDetailPage {
     }
   }
 
-async render() {
-  await this.loadTemplate();
-  try {
-    const projectData = await adsRepository.getById(this.projectId);
-    if (!projectData) throw new Error('Нет данных об объявлении');
+  async render() {
+    await this.loadTemplate();
+    try {
+      const projectData = await adsRepository.getById(this.projectId);
+      if (!projectData) throw new Error('Нет данных об объявлении');
 
-    const DEFAULT_IMG = '/public/assets/default.jpg'; 
-    const imageUrl = projectData.image_url || '/public/assets/default.jpg';
-    
-    if (!imageUrl) {
-      imageUrl = DEFAULT_IMG;
-    } else if (
-      !imageUrl.startsWith('data:image') &&
-      !imageUrl.startsWith('http') &&
-      !imageUrl.startsWith('/')
-    ) {
-      imageUrl = `data:image/jpeg;base64,${imageUrl}`;
+      const DEFAULT_IMG = '/public/assets/default.jpg'; 
+      const imageUrl = projectData.image_url || DEFAULT_IMG;
+      
+      let finalImageUrl = imageUrl;
+      if (
+        imageUrl !== DEFAULT_IMG &&
+        !imageUrl.startsWith('data:image') &&
+        !imageUrl.startsWith('http') &&
+        !imageUrl.startsWith('/')
+      ) {
+        finalImageUrl = `data:image/jpeg;base64,${imageUrl}`;
+      }
+      
+      this.project = { ...projectData, image_url: finalImageUrl };
+      const isActive = this.project.status === 'active';
+      const budgetVal = Number(this.project.budget) || 0;
+      const isLowBudget = budgetVal <= 100;
+
+      return this.template({
+        project: this.project,
+        isNew: false, 
+        isActive: isActive,
+        isLowBudget: isLowBudget, 
+        lastUpdated: !navigator.onLine && this.project.timestamp ? this.project.timestamp : null,
+      });
+
+    } catch (err) {
+      console.error(`Ошибка при рендеринге проекта ID ${this.projectId}:`, err);
+      return this.template({ error: err.message || 'Не удалось загрузить проект' });
     }
-    
-    this.project = { ...projectData, image_url: imageUrl };
-
-    return this.template({
-      project: this.project,
-      isNew: false,
-      lastUpdated: !navigator.onLine && this.project.timestamp ? this.project.timestamp : null,
-    });
-  } catch (err) {
-    console.error(`Ошибка при рендеринге проекта ID ${this.projectId}:`, err);
-    return this.template({ error: err.message || 'Не удалось загрузить проект' });
   }
-}
 
   attachEvents() {
     document.querySelector('#back-btn')?.addEventListener('click', (e) => {
@@ -75,6 +81,40 @@ async render() {
       });
       modal.show();
     });
+    const budgetInput = document.getElementById('budget-input');
+    const statusSwitch = document.getElementById('status-switch');
+    const statusText = document.getElementById('status-text');
+    const statusLockMsg = document.getElementById('status-lock-msg');
+
+    const handleBudgetInput = () => {
+        const val = parseFloat(budgetInput.value);
+        if (isNaN(val) || val <= 100) {
+            if (statusSwitch) {
+                statusSwitch.checked = false; 
+                statusSwitch.disabled = true; 
+            }
+            if (statusText) statusText.textContent = 'Неактивно';
+            if (statusLockMsg) statusLockMsg.style.display = 'block';
+        } else {
+            if (statusSwitch) statusSwitch.disabled = false;
+            if (statusLockMsg) statusLockMsg.style.display = 'none';
+        }
+        if (budgetInput.classList.contains('input--error')) {
+            if (!isNaN(val) && val >= 0) {
+                budgetInput.classList.remove('input--error');
+                const nextEl = budgetInput.nextElementSibling;
+                if (nextEl && nextEl.classList.contains('error-message')) {
+                    nextEl.remove();
+                }
+            }
+        }
+    };
+    budgetInput?.addEventListener('input', handleBudgetInput);
+    statusSwitch?.addEventListener('change', (e) => {
+        if (statusText) {
+            statusText.textContent = e.target.checked ? 'Активно' : 'Неактивно';
+        }
+    });
     const editBtn = document.querySelector('#edit-btn');
     if (!editBtn) return;
 
@@ -84,21 +124,26 @@ async render() {
       const title = document.getElementById('title-input').value.trim();
       const desc = document.getElementById('desc-input').value.trim();
       const site = document.getElementById('site-input').value.trim();
-      const budget = document.getElementById('budget-input').value.trim();
+      const budgetRaw = document.getElementById('budget-input').value.trim(); 
       const imgFile = this.selectedFile; 
-
-      console.log('Отправка данных на сервер...');
-      console.table({ title, desc, site, budget, imgFile });
-
-      document.querySelectorAll('.error-message').forEach((el) => el.remove());
+      document.querySelectorAll('.error-message').forEach((el) => {
+          if (el.id !== 'status-lock-msg') el.remove();
+      });
       document.querySelectorAll('.input--error').forEach((el) =>
         el.classList.remove('input--error')
       );
-      // document.querySelectorAll('.error-msg').forEach((el) => el.remove());
-      // document.querySelectorAll('.input-error').forEach((el) => el.classList.remove('input-error'));
-
-      const errors = validateAdForm({ title, description: desc, domain: site, budget, file: imgFile });
-
+      const budgetNum = Number(budgetRaw);
+      if (budgetRaw === '' || isNaN(budgetNum) || budgetNum < 0) {
+          const input = document.getElementById('budget-input');
+          input.classList.add('input--error');
+          const err = document.createElement('small');
+          err.textContent = 'Бюджет не может быть меньше 0';
+          err.classList.add('error-message');
+          input.insertAdjacentElement('afterend', err);
+          return;
+      }
+      const errors = validateAdForm({ title, description: desc, domain: site, budget: budgetRaw, file: imgFile });
+      
       const fieldMap = {
         title: 'title-input',
         description: 'desc-input',
@@ -111,6 +156,8 @@ async render() {
         for (const [key, msg] of Object.entries(errors)) {
           const input = document.getElementById(fieldMap[key]);
           if (input) {
+            if (key === 'budget' && input.classList.contains('input--error')) continue;
+
             input.classList.add('input--error');
             const err = document.createElement('small');
             err.textContent = msg;
@@ -118,14 +165,18 @@ async render() {
             input.insertAdjacentElement('afterend', err);
           }
         }
-        console.warn('Ошибки валидации:', errors);
         return;
       }
       const formData = new FormData();
       formData.append('title', title);
       formData.append('content', desc);
       formData.append('target_url', site);
-      formData.append('budget', budget);
+      formData.append('budget', budgetRaw);
+
+      const isSwitchChecked = statusSwitch ? statusSwitch.checked : false;
+      const statusValue = isSwitchChecked ? 'active' : 'paused'; 
+      formData.append('status', statusValue); 
+
       if (imgFile) {
         formData.append('image', imgFile);
       }

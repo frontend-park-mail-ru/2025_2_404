@@ -11,15 +11,10 @@
     </a>
     {{#if isAuthenticated}}
     <nav class="header__nav">
-        <!-- 1. Ссылка "О нас" -->
         <a href="/" class="header__nav-link">О нас</a>
-
-        <!-- 2. Выпадающий список "Проекты" -->
         <div class="header__nav-dropdown">
             <a href="#" class="header__nav-link">Проекты</a>
             <div class="header__dropdown">
-                    <!-- Ссылки для авторизованного пользователя -->
-                    <!-- При клике на эти ссылки роутер сам переключит страницу -->
                     <a href="/projects" class="header__dropdown-item" onclick="localStorage.setItem('projects_tab', 'ads')">Мои объявления</a>
                     <a href="/slots" class="header__dropdown-item" onclick="localStorage.setItem('projects_tab', 'slots')">Мои слоты</a>
             </div>

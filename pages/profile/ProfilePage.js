@@ -208,13 +208,11 @@ initComponents() {
     if (this.components.loginInput.validate(loginValue)) isValidated = false;
     if (this.components.emailInput.validate(emailValue)) isValidated = false;
     
-    // ИСПРАВЛЕНИЕ: Добавляем if (...) isValidated = false для остальных полей
     if (this.components.firstNameInput.validate(firstNameValue)) isValidated = false;
     if (this.components.lastNameInput.validate(lastNameValue)) isValidated = false;
     if (this.components.companyInput.validate(companyValue)) isValidated = false;
     if (this.components.phoneInput.validate(phoneValue)) isValidated = false;
 
-    // Теперь, если хотя бы в одном поле ошибка, код остановится здесь
     if (!isValidated) {
       return;
     }
@@ -223,20 +221,12 @@ initComponents() {
     
  formData.append('user_name', loginValue);
     formData.append('email', emailValue);
-
-    // Исправляем имена полей под Go-структуру
-    formData.append('first_name', firstNameValue); // Было user_first_name
-    formData.append('last_name', lastNameValue);   // Было user_second_name
-    formData.append('phone', phoneValue);          // Было phone_number
-    
-    // Компанию оставляем как есть
+    formData.append('first_name', firstNameValue);
+    formData.append('last_name', lastNameValue); 
+    formData.append('phone', phoneValue);         
     formData.append('company', companyValue);
-
-    // Добавляем роль (бэк ждет profile_type)
-    
-    // Исправляем имя файла (бэк ждет avatar)
     if (this.selectedFile) {
-      formData.append('avatar', this.selectedFile); // Было img
+      formData.append('avatar', this.selectedFile);
     }
       
     try {

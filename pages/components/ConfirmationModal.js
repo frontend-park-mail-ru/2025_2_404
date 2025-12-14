@@ -70,7 +70,6 @@ export default class ConfirmationModal {
   }
    if (this.modalElement) {
       this.modalElement.addEventListener('click', (e) => {
-        // e.target — это то, куда нажали. this.modalElement — это весь оверлей.
         if (e.target === this.modalElement) {
            if (this.onCancel) this.onCancel();
            this.hide();

@@ -11,9 +11,9 @@ export default class AddFundsModal {
       id: 'add-funds-amount',
       label: 'Сумма пополнения, ₽',
       placeholder: 'Например, 1000',
-      type: 'number', // Лучше поставить type: 'number' для мобильных
+      type: 'number', 
       validationFn: (value) => {
-        value = String(value).trim(); // Приводим к строке на всякий случай
+        value = String(value).trim();
         if (!value) return 'Введите сумму';
         if (parseFloat(value) <= 0) return 'Сумма должна быть больше нуля';
         return null;
@@ -22,7 +22,6 @@ export default class AddFundsModal {
 
     this.confirmButton = new Button({
       id: 'confirm-add-funds-btn',
-      // ИЗМЕНЕНИЕ: Меняем текст, чтобы пользователь понимал, что сейчас будет редирект
       text: 'Перейти к оплате', 
       variant: 'primary',
     });
@@ -44,7 +43,6 @@ export default class AddFundsModal {
         </div>
       `;
   }
-  // ... Остальной код (show, hide, attachEvents) оставляем без изменений ...
   show() {
     if (!this.modalElement) {
       this.modalElement = document.createElement('div');
@@ -74,7 +72,6 @@ export default class AddFundsModal {
       const errorMessage = this.amountInput.validate(amountValue);
 
       if (!errorMessage) {
-        // Передаем число в onConfirm
         this.onConfirm(parseFloat(amountValue));
         this.hide();
       }

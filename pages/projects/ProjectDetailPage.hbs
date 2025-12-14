@@ -9,6 +9,7 @@
       </h2>
       <div class="ads__form">
       <form id="{{#if isNew}}create-form{{else}}edit-form{{/if}}">
+        
         <label for="title-input">Заголовок</label>
         <input class="ads__item" id="title-input" type="text" value="{{project.title}}" placeholder="Введите заголовок">
 
@@ -19,8 +20,30 @@
         <input class="ads__item" id="site-input" type="url" value="{{project.domain}}" placeholder="Введите ссылку на сайт">
 
         <label for="budget-input">Бюджет</label>
-        <input class="ads__item" id="budget-input" type="number" value="{{project.budget}}" placeholder="Введите сумму">
-        <small>Не меньше 100₽</small>
+        <input class="ads__item" id="budget-input" type="number" value="{{project.budget}}" placeholder="Введите сумму" min="0">
+        {{#unless isNew}}
+          <div class="ads__status-wrapper">
+            
+            <div class="ads__status-row">
+                <label class="ads__status-label">Статус объявления</label>
+                
+                <div class="ads__switch-group">
+                    <label class="switch">
+                      <input type="checkbox" id="status-switch" {{#if isActive}}checked{{/if}} {{#if isLowBudget}}disabled{{/if}}>
+                      <span class="slider round"></span>
+                    </label>
+                    
+                    <span id="status-text" style="font-weight: bold;">
+                        {{#if isActive}}Активно{{else}}Приостановлено{{/if}}
+                    </span>
+                </div>
+            </div>
+            <small id="status-lock-msg" class="ads__lock-msg" style="display: {{#if isLowBudget}}block{{else}}none{{/if}};">
+                (для активации введите бюджет больше 100₽)
+            </small>
+
+          </div>
+        {{/unless}}
 
         <div class="ads__img-upload">
           <label for="img-file" class="ads__upload-box" id="upload-box">
@@ -31,13 +54,13 @@
           <small class="ads__upload-hint">Поддерживаются JPG и PNG (до 10 МБ)</small>
         </div>
 
-
         <label>Даты проведения</label>
         <div class="ads__dates">
           <input class="ads__item" type="date" value="{{project.dateStart}}">
-          <input class="ads__item"type="date" value="{{project.dateEnd}}">
+          <input class="ads__item" type="date" value="{{project.dateEnd}}">
         </div>
       </div>
+
       <div class="ads__actions">
         <button id="back-btn" class="btn btn--secondary">Назад</button>
 
@@ -52,13 +75,10 @@
       </form>
     </div>
 
-
     <div class="ads__preview-card">
       <h3>Предпросмотр</h3>
       <img class="ads__preview-image" src="{{project.image_url}}" />
-
       <h4>{{project.title}}</h4>
       <p>{{project.description}}</p>
     </div>
-
 </div>

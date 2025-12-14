@@ -3,7 +3,7 @@ import { router } from '../../main.js';
 import AddFundsModal from '../components/modals/AddFundsModal.js';
 import WithdrawModal from '../components/modals/WithdrawModal.js';
 import { DBService } from '../../services/DataBaseService.js';
-import balanceRepository from '../../public/repository/balanceRepository.js'; // <--- ИМПОРТ
+import balanceRepository from '../../public/repository/balanceRepository.js';
 
 export default class BalancePage {
   constructor() {
@@ -56,8 +56,6 @@ export default class BalancePage {
       return '<div>Доступ запрещен.</div>';
     }
     await this.loadTemplate();
-    
-    // Сначала показываем кэш, чтобы было быстро
     const cachedBalance = await DBService.getBalance();
     this.balance = cachedBalance || 0;
     
@@ -68,47 +66,27 @@ export default class BalancePage {
     this.initCalendar();
     document.getElementById('reset-filter-btn')?.addEventListener('click', () => this.resetFilter());
     this.attachActionButtons();
-
-    // 1. Сначала грузим из кэша (IndexedDB)
     try {
         this.balance = await DBService.getBalance() || 0;
         this.allTransactions = await DBService.getAllTransactions() || [];
         this.updateDisplay();
     } catch (e) { console.error("Ошибка чтения кэша", e); }
 
-    // 2. Потом идем на сервер за свежими данными
-    try {
-      const serverData = await balanceRepository.getBalanceAndTransactions();
-      
-      this.balance = serverData.balance;
-      
-      // Если сервер вернул транзакции, обновляем их
-      if (serverData.transactions && serverData.transactions.length > 0) {
-          this.allTransactions = serverData.transactions;
-      }
-
-      // Сохраняем свежие данные в кэш
-      await DBService.saveBalance(this.balance);
-      if (this.allTransactions.length > 0) {
-          await DBService.saveAllTransactions(this.allTransactions);
-      }
-      
-      this.updateDisplay();
-    } catch (error) {
-      console.warn("Сервер недоступен, остаемся на данных из кэша.", error);
-    }
+    await this.refreshData();
   }
-
-  // Метод для обновления данных после пополнения/снятия
-  async refreshData() {
+async refreshData() {
       try {
+          // Запрашиваем уже обработанные данные из репозитория
           const serverData = await balanceRepository.getBalanceAndTransactions();
+          
           this.balance = serverData.balance;
-          if (serverData.transactions) {
-             this.allTransactions = serverData.transactions;
-          }
+          // Гарантируем, что это массив
+          this.allTransactions = serverData.transactions || [];
+          
+          // Сохраняем в кэш
           await DBService.saveBalance(this.balance);
           await DBService.saveAllTransactions(this.allTransactions);
+          
           this.updateDisplay();
       } catch (e) {
           console.error("Не удалось обновить данные после операции", e);
@@ -116,50 +94,37 @@ export default class BalancePage {
   }
 
   attachActionButtons() {
-document.getElementById('add-funds-btn')?.addEventListener('click', () => {
-  const modal = new AddFundsModal({
-    onConfirm: async (amount) => {
-      try {
-          // 1. Делаем запрос
-          const response = await balanceRepository.createPayment(amount);
-          
-          console.log("Ответ от сервера:", response); // Для отладки
+    document.getElementById('add-funds-btn')?.addEventListener('click', () => {
+      const modal = new AddFundsModal({
+        onConfirm: async (amount) => {
+          try {
+              const response = await balanceRepository.createPayment(amount);
+              const paymentUrl = response.data?.payment_url || response.payment_url;
 
-          // 2. ИЗВЛЕКАЕМ ССЫЛКУ ПРАВИЛЬНО
-          // Ссылка лежит в response.data.payment_url
-          const paymentUrl = response.data?.payment_url || response.payment_url;
-
-          if (paymentUrl) {
-              // 3. Редирект
-              console.log("Переходим на:", paymentUrl);
-              window.location.href = paymentUrl;
-          } else {
-              alert("Ошибка: сервер не вернул ссылку на оплату");
+              if (paymentUrl) {
+                  window.location.href = paymentUrl;
+              } else {
+                  alert("Ошибка: сервер не вернул ссылку на оплату");
+              }
+          } catch (error) {
+              alert("Ошибка при создании платежа");
+              console.error(error);
           }
-          
-      } catch (error) {
-          alert("Ошибка при создании платежа");
-          console.error(error);
-      }
-    },
-  });
-  modal.show();
-});
-
-    // --- ВЫВОД ---
+        },
+      });
+      modal.show();
+    });
     document.getElementById('withdraw-btn')?.addEventListener('click', () => {
         const modal = new WithdrawModal({
-            balance: this.balance,
+            balance: this.balance, 
             onConfirm: async (amount) => {
                 try {
-                    // Запрос на сервер
                     await balanceRepository.subtractBalance(amount);
-                    
-                    // Обновляем данные
                     await this.refreshData();
+                    alert(`Заявка на вывод ${amount} ₽ принята.`);
 
                 } catch (error) {
-                    alert("Ошибка при выводе средств");
+                    alert("Ошибка при выводе средств. Проверьте баланс.");
                     console.error(error);
                 }
             },
@@ -173,8 +138,6 @@ document.getElementById('add-funds-btn')?.addEventListener('click', () => {
     if (balanceAmountEl) {
         balanceAmountEl.textContent = `${this.balance.toLocaleString('ru-RU')} ₽`;
     }
-    
-    // ... Фильтрация по датам (оставляем без изменений) ...
     this.currentTransactions = this.selectedDates
       ? this.allTransactions.filter(transaction => {
           const transactionDate = new Date(transaction.date);
@@ -198,51 +161,37 @@ document.getElementById('add-funds-btn')?.addEventListener('click', () => {
     this.renderTransactionList(groupedData);
     this.renderPagination();
   }
-
-  // ... Остальные методы (calculateAndRenderSummary, renderTransactionList, initCalendar и т.д.)
-  // оставляем без изменений, они работают с this.allTransactions корректно ...
-  
   calculateAndRenderSummary() {
-    let totalSpent = 0;
-    let totalEarned = 0;
+      let totalSpent = 0;
+      let totalEarned = 0;
+      this.currentTransactions.forEach(t => {
+        let amount = t.amount;
+        if (typeof amount === 'string') amount = parseInt(amount.replace(/[+\s]/g, ''), 10);
+        if (isNaN(amount)) return;
 
-    this.currentTransactions.forEach(t => {
-      // Превращаем amount в число, если это строка
-      let amount = t.amount;
-      if (typeof amount === 'string') {
-          amount = parseInt(amount.replace(/[+\s]/g, ''), 10);
-      }
-      
-      if (isNaN(amount)) return;
+        if (t.type === 'negative') totalSpent += Math.abs(amount);
+        else totalEarned += amount;
+      });
+      const totalTransactionsValue = totalSpent + totalEarned;
+      const spentPercentage = totalTransactionsValue > 0 ? (totalSpent / totalTransactionsValue) * 100 : 0;
+      const earnedPercentage = totalTransactionsValue > 0 ? (totalEarned / totalTransactionsValue) * 100 : 0;
 
-      if (t.type === 'negative') {
-        totalSpent += Math.abs(amount);
+      document.getElementById('summary-spent').innerText = `${totalSpent.toLocaleString('ru-RU')} ₽`;
+      document.getElementById('summary-earned').innerText = `${totalEarned.toLocaleString('ru-RU')} ₽`;
+      document.getElementById('spent-progress').style.width = `${spentPercentage}%`;
+      document.getElementById('earned-progress').style.width = `${earnedPercentage}%`;
+      const dateRangeEl = document.getElementById('summary-date-range');
+      const dateRangeElEarned = document.getElementById('summary-date-range-earned');
+      if (this.selectedDates && this.selectedDates.length > 0) {
+          const start = flatpickr.formatDate(this.selectedDates[0], "d.m.Y");
+          const end = this.selectedDates.length > 1 ? flatpickr.formatDate(this.selectedDates[1], "d.m.Y") : start;
+          const dateText = start === end ? start : `${start} – ${end}`;
+          dateRangeEl.innerText = dateText;
+          dateRangeElEarned.innerText = dateText;
       } else {
-        totalEarned += amount;
+          dateRangeEl.innerText = 'За все время';
+          dateRangeElEarned.innerText = 'За все время';
       }
-    });
-
-    const totalTransactionsValue = totalSpent + totalEarned;
-    const spentPercentage = totalTransactionsValue > 0 ? (totalSpent / totalTransactionsValue) * 100 : 0;
-    const earnedPercentage = totalTransactionsValue > 0 ? (totalEarned / totalTransactionsValue) * 100 : 0;
-
-    document.getElementById('summary-spent').innerText = `${totalSpent.toLocaleString('ru-RU')} ₽`;
-    document.getElementById('summary-earned').innerText = `${totalEarned.toLocaleString('ru-RU')} ₽`;
-    document.getElementById('spent-progress').style.width = `${spentPercentage}%`;
-    document.getElementById('earned-progress').style.width = `${earnedPercentage}%`;
-
-    const dateRangeEl = document.getElementById('summary-date-range');
-    const dateRangeElEarned = document.getElementById('summary-date-range-earned');
-    if (this.selectedDates && this.selectedDates.length > 0) {
-        const start = flatpickr.formatDate(this.selectedDates[0], "d.m.Y");
-        const end = this.selectedDates.length > 1 ? flatpickr.formatDate(this.selectedDates[1], "d.m.Y") : start;
-        const dateText = start === end ? start : `${start} – ${end}`;
-        dateRangeEl.innerText = dateText;
-        dateRangeElEarned.innerText = dateText;
-    } else {
-        dateRangeEl.innerText = 'За все время';
-        dateRangeElEarned.innerText = 'За все время';
-    }
   }
 
   renderTransactionList(groupedData) {
@@ -253,104 +202,73 @@ document.getElementById('add-funds-btn')?.addEventListener('click', () => {
   }
 
   renderPagination() {
-    const container = document.getElementById('pagination-container');
-    if (!container) return;
-
-    const totalPages = Math.ceil(this.currentTransactions.length / this.itemsPerPage);
-    if (totalPages <= 1) {
-      container.innerHTML = '';
-      return;
-    }
-
-    let paginationHTML = '';
-    for (let i = 1; i <= totalPages; i++) {
-      paginationHTML += `<button class="pagination__item ${i === this.currentPage ? 'pagination__item--active' : ''}" data-page="${i}">${i}</button>`;
-    }
-    container.innerHTML = paginationHTML;
-
-    container.querySelectorAll('.pagination__item').forEach(button => {
-      button.addEventListener('click', (e) => {
-        this.currentPage = parseInt(e.target.dataset.page, 10);
-        this.updateDisplay();
-      });
-    });
+     const container = document.getElementById('pagination-container');
+     if (!container) return;
+     const totalPages = Math.ceil(this.currentTransactions.length / this.itemsPerPage);
+     if (totalPages <= 1) { container.innerHTML = ''; return; }
+     let paginationHTML = '';
+     for (let i = 1; i <= totalPages; i++) {
+       paginationHTML += `<button class="pagination__item ${i === this.currentPage ? 'pagination__item--active' : ''}" data-page="${i}">${i}</button>`;
+     }
+     container.innerHTML = paginationHTML;
+     container.querySelectorAll('.pagination__item').forEach(button => {
+       button.addEventListener('click', (e) => {
+         this.currentPage = parseInt(e.target.dataset.page, 10);
+         this.updateDisplay();
+       });
+     });
   }
 
   initCalendar() {
-    flatpickr.localize(flatpickr.l10ns.ru);
-    const datePickerButton = document.getElementById('date-range-picker');
-    const resetBtn = document.getElementById('reset-filter-btn');
-
-    if (datePickerButton) {
-      this.flatpickrInstance = flatpickr(datePickerButton, {
-        mode: "range",
-        dateFormat: "Y-m-d",
-        onClose: (selectedDates) => {
-          if (selectedDates.length > 0) {
-            this.selectedDates = selectedDates;
-            this.currentPage = 1;
-            
-            const start = flatpickr.formatDate(selectedDates[0], "d.m.Y");
-            const end = selectedDates.length > 1 ? flatpickr.formatDate(selectedDates[1], "d.m.Y") : start;
-            datePickerButton.innerHTML = `    <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12.0833 1.25V4.58333M5.41667 1.25V4.58333M1.25 7.91667H16.25M2.91667 2.91667H14.5833C15.5038 2.91667 16.25 3.66286 16.25 4.58333V16.25C16.25 17.1705 15.5038 17.9167 14.5833 17.9167H2.91667C1.99619 17.9167 1.25 17.1705 1.25 16.25V4.58333C1.25 3.66286 1.99619 2.91667 2.91667 2.91667Z" stroke="#F3F3F3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg> ${start} - ${end}`; 
-            resetBtn.style.display = 'inline-block';
-
-            this.updateDisplay();
-          }
-        }
-      });
-    }
+     flatpickr.localize(flatpickr.l10ns.ru);
+     const datePickerButton = document.getElementById('date-range-picker');
+     const resetBtn = document.getElementById('reset-filter-btn');
+     if (datePickerButton) {
+       this.flatpickrInstance = flatpickr(datePickerButton, {
+         mode: "range",
+         dateFormat: "Y-m-d",
+         onClose: (selectedDates) => {
+           if (selectedDates.length > 0) {
+             this.selectedDates = selectedDates;
+             this.currentPage = 1;
+             const start = flatpickr.formatDate(selectedDates[0], "d.m.Y");
+             const end = selectedDates.length > 1 ? flatpickr.formatDate(selectedDates[1], "d.m.Y") : start;
+             datePickerButton.innerHTML = `<svg width="18" height="20" ...></svg> ${start} - ${end}`;
+             resetBtn.style.display = 'inline-block';
+             this.updateDisplay();
+           }
+         }
+       });
+     }
   }
 
   resetFilter() {
     this.selectedDates = null;
     this.currentPage = 1;
-
     const datePickerButton = document.getElementById('date-range-picker');
-    if (datePickerButton) {
-        datePickerButton.innerHTML = '<svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.0833 1.25V4.58333M5.41667 1.25V4.58333M1.25 7.91667H16.25M2.91667 2.91667H14.5833C15.5038 2.91667 16.25 3.66286 16.25 4.58333V16.25C16.25 17.1705 15.5038 17.9167 14.5833 17.9167H2.91667C1.99619 17.9167 1.25 17.1705 1.25 16.25V4.58333C1.25 3.66286 1.99619 2.91667 2.91667 2.91667Z" stroke="#F3F3F3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Выберите период';
-    }
+    if (datePickerButton) datePickerButton.innerHTML = '<svg ...></svg>Выберите период';
     document.getElementById('reset-filter-btn').style.display = 'none';
-
-    if (this.flatpickrInstance) {
-        this.flatpickrInstance.clear();
-    }
+    if (this.flatpickrInstance) this.flatpickrInstance.clear();
     this.updateDisplay();
   }
 
   groupTransactionsByDate(transactions) {
     if (!transactions || transactions.length === 0) return [];
-
     const groups = {};
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
 
     transactions.forEach(t => {
       const transactionDate = new Date(t.date);
       transactionDate.setHours(0, 0, 0, 0);
       let title = '';
+      if (transactionDate.getTime() === today.getTime()) title = 'Сегодня';
+      else if (transactionDate.getTime() === yesterday.getTime()) title = 'Вчера';
+      else title = transactionDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
 
-      if (transactionDate.getTime() === today.getTime()) {
-        title = 'Сегодня';
-      } else if (transactionDate.getTime() === yesterday.getTime()) {
-        title = 'Вчера';
-      } else {
-        title = transactionDate.toLocaleDateString('ru-RU', {
-          day: 'numeric',
-          month: 'long'
-        });
-      }
-
-      if (!groups[title]) {
-        groups[title] = [];
-      }
+      if (!groups[title]) groups[title] = [];
       groups[title].push(t);
     });
-
     return Object.entries(groups).map(([title, items]) => ({ title, items }));
   }
 }

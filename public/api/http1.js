@@ -1,8 +1,7 @@
-export const BASE = "http://localhost:8080/api"; 
+export const BASE = "https://adnet.website:8080"; 
 
 export async function request(path, init = {}) {
   const token = localStorage.getItem('token');
-  console.log(`🌐 Запрос ${path}, токен:`, token ? 'Есть' : 'Нет');
   
   const isFormData = init.body instanceof FormData;
   const headers = { ...init.headers };
@@ -13,20 +12,13 @@ export async function request(path, init = {}) {
   
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
-    console.log(`📤 Отправляю заголовок Authorization`);
-  } else {
-    console.warn(`⚠️ Запрос ${path} без токена!`);
   }
-  
-  console.log(`📝 Заголовки запроса:`, headers);
   
   const res = await fetch(BASE + path, {
     ...init,
     headers,
-    credentials: 'include',  // ← ВАЖНО!
+    credentials: 'include',
   });
-  
-  console.log(`📥 Ответ ${path}:`, res.status, res.statusText);
   
   const text = await res.text();
   let data = null;
@@ -37,11 +29,10 @@ export async function request(path, init = {}) {
   }
 
   if (!res.ok) {
-    console.error(`❌ Ошибка ${res.status} для ${path}:`, data);
+    console.error(`Ошибка ${res.status} для ${path}:`, data);
     throw { status: res.status, body: data };
   }
   
-  console.log(`✅ Успешный ответ от ${path}:`, data);
   return data;
 }
 

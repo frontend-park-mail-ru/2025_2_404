@@ -3,9 +3,9 @@ import balanceRepository from '../../public/repository/balanceRepository.js';
 import { router } from '../../main.js';
 import adsRepository from '../../public/repository/adsRepository.js';
 
-const POLLING_INTERVAL = 20 * 1000; // 20 секунд
-const NOTIFICATION_COOLDOWN = 10 * 60 * 1000; // 10 минут
-const THRESHOLD = 10; // 10 рублей
+const POLLING_INTERVAL = 20 * 1000;       // 20 секунд (частота проверки)
+const THRESHOLD = 10;                     // 10 рублей (порог баланса)
+const NOTIFICATION_COOLDOWN = 10 * 60 * 1000; // 10 минут (чтобы не спамить окнами)
 
 export default class LowBalanceNotification {
   constructor() {
@@ -18,7 +18,6 @@ export default class LowBalanceNotification {
   async loadTemplate() {
     if (this.template) return;
     try {
-      // Путь должен вести к файлу, который вы создали в шаге 1
       const response = await fetch('/pages/components/LowBalanceNotification.hbs');
       if (!response.ok) throw new Error('Failed to load notification template');
       this.template = Handlebars.compile(await response.text());
@@ -28,7 +27,6 @@ export default class LowBalanceNotification {
   }
 
   init() {
-    // Подписываемся на изменения авторизации
     AuthService.onAuthChange((user) => {
       if (user) {
         this.startPolling();
@@ -36,8 +34,6 @@ export default class LowBalanceNotification {
         this.stopPolling();
       }
     });
-
-    // Если пользователь уже вошел при старте
     if (AuthService.isAuthenticated()) {
       this.startPolling();
     }
@@ -45,13 +41,7 @@ export default class LowBalanceNotification {
 
   startPolling() {
     if (this.intervalId) return;
-    
-    console.log('🔔 Запущен мониторинг баланса');
-    
-    // Делаем первую проверку сразу
     this.checkBalance();
-
-    // Запускаем интервал
     this.intervalId = setInterval(() => {
       this.checkBalance();
     }, POLLING_INTERVAL);
@@ -61,13 +51,11 @@ export default class LowBalanceNotification {
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
-      console.log('🔕 Мониторинг баланса остановлен');
     }
-    this.closeModal(); // Закрываем, если пользователь вышел
+    this.closeModal();
   }
 
-async checkBalance() {
-    // Не спамим, если модалка уже открыта
+  async checkBalance() {
     if (this.isModalOpen) return;
 
     try {
@@ -75,25 +63,17 @@ async checkBalance() {
       const balance = data.balance;
 
       if (balance <= THRESHOLD) {
-        
-        // --- НОВАЯ ПРОВЕРКА: ЕСТЬ ЛИ ОБЪЯВЛЕНИЯ? ---
         try {
-            // Запрашиваем список всех объявлений
             const ads = await adsRepository.getAll();
-            
-            // Если массив пустой или null -> у пользователя нет рекламы -> выходим
             if (!ads || ads.length === 0) {
-                console.log('📉 Баланс низкий, но объявлений нет. Уведомление скрыто.');
                 return;
             }
         } catch (err) {
             console.warn("Не удалось проверить объявления, пропускаем уведомление", err);
             return;
         }
-        // -------------------------------------------
 
         const now = Date.now();
-        // Проверяем кулдаун (10 минут)
         if (now - this.lastNotificationTime > NOTIFICATION_COOLDOWN) {
           await this.showModal(balance);
           this.lastNotificationTime = now;
@@ -109,10 +89,7 @@ async checkBalance() {
     if (!this.template) return;
 
     const user = AuthService.getUser();
-    // Если по какой-то причине user еще не подгружен, пробуем username из кэша или generic
     const username = user ? user.username : 'Пользователь';
-
-    // Удаляем старое уведомление из DOM, если вдруг осталось
     const existing = document.getElementById('low-balance-overlay');
     if (existing) existing.remove();
 
@@ -120,11 +97,7 @@ async checkBalance() {
       username: username,
       balance: balance
     });
-
-    // Вставляем в body
     document.body.insertAdjacentHTML('beforeend', html);
-    
-    // Анимация появления (небольшой таймаут для CSS transition)
     setTimeout(() => {
         document.getElementById('low-balance-overlay')?.classList.add('show');
     }, 10);
@@ -133,31 +106,27 @@ async checkBalance() {
     this.attachEvents();
   }
 
-attachEvents() {
+  attachEvents() {
     const overlay = document.getElementById('low-balance-overlay');
     const closeBtn = document.getElementById('low-balance-close');
     const actionBtn = document.getElementById('low-balance-btn');
 
     const closeHandler = () => this.closeModal();
-
-    // Закрытие по крестику
+    
     if (closeBtn) closeBtn.addEventListener('click', closeHandler);
     
-    // Закрытие по клику на фон (overlay)
     if (overlay) {
       overlay.addEventListener('click', (e) => {
-        // Проверяем, что кликнули именно по фону, а не по контенту внутри
         if (e.target === overlay) {
           closeHandler();
         }
       });
     }
-
-    // Кнопка действия
+    
     if (actionBtn) {
       actionBtn.addEventListener('click', () => {
         this.closeModal();
-        router.navigate('/balance'); // Переход на страницу баланса
+        router.navigate('/balance'); 
       });
     }
   }
@@ -166,7 +135,6 @@ attachEvents() {
     const overlay = document.getElementById('low-balance-overlay');
     if (overlay) {
       overlay.classList.remove('show');
-      // Ждем окончания CSS анимации перед удалением
       setTimeout(() => {
           overlay.remove();
       }, 300);

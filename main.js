@@ -3,9 +3,8 @@ import Header from './pages/header/Header.js';
 import Footer from './pages/footer/Footer.js';
 import SupportWidget from './pages/components/SupportWidget.js';
 import AuthService from './services/ServiceAuthentification.js';
-import ConfirmationModal from './pages/components/ConfirmationModal.js'; // <--- Импорт модалки
+import ConfirmationModal from './pages/components/ConfirmationModal.js'; 
 
-// Импорт страниц
 import LowBalanceNotification from './pages/components/LowBalanceNotification.js';
 import MainPage from './pages/main/MainPage.js';
 import ProfilePage from './pages/profile/ProfilePage.js';
@@ -38,22 +37,17 @@ const routes = {
 
 export const header = new Header();
 const footer = new Footer();
-
-// --- ЛОГИКА ОТОБРАЖЕНИЯ ФУТЕРА ---
-// Рендерим футер один раз и сохраняем ссылку на элемент
-const footerElement = footer.render();
+let footerElement = null;
 
 function updateFooterVisibility(path) {
-  // Показываем футер только если путь точно равен '/'
+  if (!footerElement) return;
   if (path === '/' || path === '') {
-    footerElement.style.display = ''; // Показать
+    footerElement.style.display = '';
   } else {
-    footerElement.style.display = 'none'; // Скрыть
+    footerElement.style.display = 'none';
   }
 }
-// ---------------------------------
 
-// Инициализируем роутер, передавая callback для обновления футера
 export const router = new Router(routes, appContainer, (currentPath) => {
   updateFooterVisibility(currentPath);
 });
@@ -110,20 +104,16 @@ async function startApp() {
   ]);
   
   document.body.prepend(header.render());
-  document.body.appendChild(footerElement); // Добавляем футер
+  footerElement = footer.render();
+  document.body.appendChild(footerElement); 
   
   const supportWidget = new SupportWidget();
   supportWidget.init();
 
-  // Инициализация уведомления о низком балансе
   const lowBalanceNotification = new LowBalanceNotification();
   
-  // Подписываемся на изменения авторизации
   AuthService.onAuthChange((user) => {
-    // 1. Обновляем Header
     header.update(user);
-    
-    // 2. Запускаем или останавливаем проверку баланса
     if (user) {
         lowBalanceNotification.startPolling();
     } else {
@@ -145,8 +135,6 @@ async function startApp() {
       target.closest('#profile-logout')
     ) {
       e.preventDefault();
-      
-      // --- ЛОГИКА ВЫХОДА ЧЕРЕЗ МОДАЛЬНОЕ ОКНО ---
       const modal = new ConfirmationModal({
         message: 'Вы действительно хотите выйти из аккаунта?',
         confirmText: 'Да, выйти',
@@ -155,20 +143,14 @@ async function startApp() {
           AuthService.logout();
           router.navigate('/');
         },
-        onCancel: () => {
-           // Модалка просто закроется
-        }
+        onCancel: () => {}
       });
       modal.show();
-      // ------------------------------------------
     }
   });
   
   await AuthService.loadProfile();
-  
-  // Принудительно проверяем футер при первой загрузке
   updateFooterVisibility(window.location.pathname);
-
   if (AuthService.isAuthenticated() && window.location.pathname === '/') {
     router.navigate('/projects');
   } else {

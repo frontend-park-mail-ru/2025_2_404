@@ -19,70 +19,53 @@ class AuthService {
     return this.user;
   }
 
-async loadProfile() {
-  console.log('🔍 loadProfile: токен есть?', !!localStorage.getItem('token'));
-  
-  if (!this.isAuthenticated()) {
-    console.log('❌ Нет токена, выходим');
-    this.user = null;
-    if (this.onAuthChangeCallback) this.onAuthChangeCallback(null);
-    return null;
+  async loadProfile() {
+    if (!this.isAuthenticated()) {
+      this.user = null;
+      if (this.onAuthChangeCallback) this.onAuthChangeCallback(null);
+      return null;
+    }
+
+    try {
+      const res = await http.get('/profile');
+      const profileData = res.data || res || {};
+      
+      if (!profileData || Object.keys(profileData).length === 0) {
+        throw new Error("Данные профиля не получены");
+      }
+      
+      let avatarUrl = '/kit.jpg';
+      if (profileData.imageData && profileData.imageData.image_data) {
+        const type = profileData.imageData.content_type || 'image/jpeg';
+        avatarUrl = `data:${type};base64,${profileData.imageData.image_data}`;
+      } else if (profileData.avatar_path) {
+        avatarUrl = `https://adnet.website:8080/${profileData.avatar_path}`;
+      }
+
+      this.user = {
+        id: profileData.id || profileData.user_id || '',
+        username: profileData.user_name || profileData.username || '',
+        email: profileData.email || '',
+        firstName: profileData.first_name || profileData.firstName || '', 
+        lastName: profileData.last_name || profileData.lastName || '', 
+        company: profileData.company || '', 
+        phone: profileData.phone || profileData.phone_number || '', 
+        role: profileData.profile_type || profileData.role || 'advertiser',
+        avatar: avatarUrl,
+      };
+
+      if (this.onAuthChangeCallback) {
+        this.onAuthChangeCallback(this.user);
+      }
+
+      return this.user;
+      
+    } catch (err) {
+      console.error('Ошибка при загрузке профиля:', err);
+      return null;
+    }
   }
 
-  try {
-    console.log('➡️ Делаю запрос на /profile');
-    const res = await http.get('/profile');
-    console.log('✅ Ответ от /profile:', res);
-    
-    const profileData = res.data || res || {};  // Исправлено
-    
-    // Проверяем что данные есть
-    if (!profileData || Object.keys(profileData).length === 0) {
-      console.error('❌ Данные профиля пустые!');
-      throw new Error("Данные профиля не получены");
-    }
-    
-    console.log('📦 Данные профиля получены:', profileData);
-
-    // Обработка картинки
-    let avatarUrl = '/kit.jpg';
-    if (profileData.imageData && profileData.imageData.image_data) {
-      const type = profileData.imageData.content_type || 'image/jpeg';
-      avatarUrl = `data:${type};base64,${profileData.imageData.image_data}`;
-      console.log('🖼️ Аватар из base64');
-    } else if (profileData.avatar_path) {
-      avatarUrl = `http://localhost:8080/${profileData.avatar_path}`;
-      console.log('🖼️ Аватар из пути:', avatarUrl);
-    }
-
-    this.user = {
-      id: profileData.id || profileData.user_id || '',
-      username: profileData.user_name || profileData.username || '',
-      email: profileData.email || '',
-      firstName: profileData.first_name || profileData.firstName || '', 
-      lastName: profileData.last_name || profileData.lastName || '', 
-      company: profileData.company || '', 
-      phone: profileData.phone || profileData.phone_number || '', 
-      role: profileData.profile_type || profileData.role || 'advertiser',
-      avatar: avatarUrl,
-    };
-
-    console.log('👤 User object created:', this.user);
-
-    if (this.onAuthChangeCallback) {
-      console.log('🔄 Вызываю onAuthChangeCallback с user');
-      this.onAuthChangeCallback(this.user);
-    } else {
-      console.log('⚠️ onAuthChangeCallback не установлен!');
-    }
-
-    return this.user;  // ВАЖНО: возвращаем this.user
-    
-  } catch (err) {
-    console.error('💥 Ошибка при загрузке профиля:', err);
-    return null;
-  }
-}
   async updateProfile(formData) {
     if (!this.isAuthenticated()) {
       throw new Error("Пользователь не авторизован");
@@ -98,24 +81,16 @@ async loadProfile() {
     return await this.loadProfile();
   }
 
-async login(credentials) {
-  console.log('🔐 Начинаю login...');
-  
-  try {
-    const signinResult = await signin(credentials);
-    console.log('🔐 signin завершен:', signinResult);
-    
-    console.log('🔐 Токен в localStorage:', localStorage.getItem('token'));
-    
-    const profile = await this.loadProfile();
-    console.log('🔐 Профиль загружен:', profile);
-    
-    return profile;
-  } catch (error) {
-    console.error('🔐 Ошибка в login:', error);
-    throw error;
+  async login(credentials) {
+    try {
+      await signin(credentials);
+      const profile = await this.loadProfile();
+      return profile;
+    } catch (error) {
+      console.error('Ошибка в login:', error);
+      throw error;
+    }
   }
-}
 
   async register(info) {
     await signup(info);
@@ -123,11 +98,9 @@ async login(credentials) {
   }
 
   logout() {
-    console.log('🚪 Выход из системы');
     localStorage.removeItem('token');
     this.user = null;
     if (this.onAuthChangeCallback) {
-      console.log('🔄 Вызываю onAuthChangeCallback с null');
       this.onAuthChangeCallback(null);
     }
     if (window.header?.resetCache) {
@@ -136,7 +109,6 @@ async login(credentials) {
   }
 
   onAuthChange(callback) {
-    console.log('🎯 Установлен onAuthChangeCallback');
     this.onAuthChangeCallback = callback;
   }
 
