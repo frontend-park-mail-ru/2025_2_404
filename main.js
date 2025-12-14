@@ -17,11 +17,11 @@ import BalancePage from './pages/balance/BalancePage.js';
 import LoginPage from './pages/login/LoginPage.js';
 import RegisterPage from './pages/register/Register.js';
 
-Handlebars.registerHelper('formatDate', function (dateString) {
+/* Handlebars.registerHelper('formatDate', function (dateString) {
   if (!dateString) return '';
   return new Date(dateString).toLocaleString('ru-RU');
 });
-
+ */
 const appContainer = document.getElementById('app');
 const routes = {
   '/': MainPage,
