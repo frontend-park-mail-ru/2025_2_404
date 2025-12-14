@@ -106,9 +106,6 @@ async function startApp() {
   document.body.prepend(header.render());
   footerElement = footer.render();
   document.body.appendChild(footerElement); 
-  
-  const supportWidget = new SupportWidget();
-  supportWidget.init();
 
   const lowBalanceNotification = new LowBalanceNotification();
   
