@@ -4,7 +4,6 @@ import type { AdStatistics, StatisticsFilters, SlotEvent, DailyStats } from '../
 
 const USE_MOCKS = false;
 
-// Интерфейсы для ответа бэкенда /api/slots/{slot_id}/statistics
 interface BackendDailyStat {
   slot_id: string;
   clicks: number;
@@ -68,7 +67,7 @@ export async function getAdStatistics(filters: StatisticsFilters): Promise<AdSta
   if (filters.date_to) params.append('date_to', filters.date_to);
   
   const queryString = params.toString();
-  const url = `/ads/${filters.ad_id}/statistics${queryString ? `?${queryString}` : ''}`;
+  const url = `/api/ads/${filters.ad_id}/statistics${queryString ? `?${queryString}` : ''}`;
   
   return http.get<AdStatistics>(url);
 }
@@ -84,7 +83,7 @@ export async function getSlotStatistics(slotId: string): Promise<AdStatistics> {
     return getMockStatistics(slotId);
   }
 
-  const response = await http.get<BackendStatisticsResponse>(`/slots/${slotId}/statistics`);
+  const response = await http.get<BackendStatisticsResponse>(`/api/slots/${slotId}/statistics`);
   
   // Проверяем, есть ли данные в ответе
   if (!response || !response.data) {
