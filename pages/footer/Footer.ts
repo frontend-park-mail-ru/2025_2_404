@@ -39,6 +39,12 @@ export default class Footer {
     if (firstColumn) {
       firstColumn.classList.add('is-open');
     }
+    const links = this.footer.querySelectorAll('.footer__links-item');
+    links.forEach((link) => {
+      link.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
   }
 
   private _handleTitleClick(event: Event): void {

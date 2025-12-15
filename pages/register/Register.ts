@@ -177,14 +177,21 @@ export default class RegisterPage {
         email: emailValue,
         password: passwordValue,
       });
+      await AuthService.login({
+        email: emailValue,
+        password: passwordValue
+      });
+      
       this.onSuccess();
     } catch (error) {
       console.error("Ошибка регистрации:", error);
       const httpError = error as HttpError;
       if (httpError && httpError.status === 409) {
         this.emailInput.showError('Пользователь с таким email уже существует.');
+      } else if (httpError && httpError.status === 401) {
+        this.loginInput.showError('Неверные учетные данные после регистрации.');
       } else {
-        const generalErrorMessage = (httpError.body as string) || 'Произошла непредвиденная ошибка. Попробуйте позже.';
+        const generalErrorMessage = (httpError?.body as string) || 'Произошла непредвиденная ошибка. Попробуйте позже.';
         this.loginInput.showError(generalErrorMessage);
       }
     }

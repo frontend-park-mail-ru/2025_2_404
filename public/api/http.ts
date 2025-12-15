@@ -1,9 +1,4 @@
-// В dev режиме Vite проксирует запросы на localhost:8080
-// В production можно указать полный URL бэкенда
-//
-// export const BASE = "";
-// export const BASE = "http://89.208.230.119:8080"; 
-export const BASE = "https://adnet.website/api";
+export const BASE = "";
 
 
 interface RequestInit {
@@ -27,6 +22,7 @@ export async function request<T = unknown>(path: string, init: RequestInit = {})
   const res = await fetch(BASE + path, {
     ...init,
     headers,
+    credentials: 'include',
   });
   
   const text = await res.text();

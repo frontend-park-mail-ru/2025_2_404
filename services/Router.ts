@@ -37,9 +37,17 @@ export default class Router {
   }
 
   navigate(path: string): void {
-    if (window.location.pathname === path) {
+    const [pathname, hash] = path.split('#');
+    const currentPathname = window.location.pathname;
+    
+    if (currentPathname === pathname) {
+      if (hash) {
+        history.pushState({}, '', path);
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+      }
       return;
     }
+    
     history.pushState({}, '', path);
     this.loadRoute();
   }
@@ -76,7 +84,7 @@ export default class Router {
         this.rootElement.innerHTML = '<h1>Произошла ошибка при загрузке страницы</h1>';
       }
     } else {
-      this.rootElement.innerHTML = '<div class="error-page"><h1>404: Страница не найдена</h1></div>';
+      this.rootElement.innerHTML = '<div class="error-page">404: Страница не найдена</div>';
     }
 
     if (this.onRouteChangeCallback) {

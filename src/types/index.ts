@@ -42,6 +42,7 @@ export interface Ad {
   id: number;
   title: string;
   description: string;
+  status: string;
   domain: string;
   image_url: string;
   budget?: number;
@@ -125,11 +126,16 @@ export interface ConfirmationModalProps {
   message: string;
   onConfirm?: () => void;
   onCancel?: () => void;
+  confirmText?: string,
+  cancelText?: string,
 }
 
 export interface AddFundsModalProps {
   onConfirm: (amount: number) => void;
   onCancel?: () => void;
+  title?: string;
+  subtitle?: string;
+  buttonText?: string;
 }
 
 export interface WithdrawModalProps {
@@ -155,7 +161,7 @@ export interface Transaction {
   date: string;
   description: string;
   time: string;
-  amount: string;
+  amount: string | number;
   type: 'positive' | 'negative';
 }
 
@@ -177,6 +183,38 @@ export interface ProfileRecord {
 export interface HttpError {
   status: number;
   body: unknown;
+}
+
+export interface SlotEvent {
+  slot_id: string;       
+  ad_detail_id: string; 
+  event_type: 'impression' | 'click';
+  created_time: string;
+}
+
+export interface DailyStats {
+  date: string;
+  impressions: number;
+  clicks: number;
+  ctr: number; // конверсия (clicks / impressions * 100)
+  spent: number; // списания
+  earned: number; // заработок
+}
+
+export interface AdStatistics {
+  ad_id: string;  // UUID
+  total_impressions: number;
+  total_clicks: number;
+  total_ctr: number;
+  total_spent: number;
+  total_earned: number;
+  daily_stats: DailyStats[];
+}
+
+export interface StatisticsFilters {
+  ad_id: string;  // UUID
+  date_from?: string;
+  date_to?: string;
 }
 
 export interface ApiResponse<T = unknown> {

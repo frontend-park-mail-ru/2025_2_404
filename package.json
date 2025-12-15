@@ -2,6 +2,7 @@
   "name": "2025_2_404",
   "type": "module",
   "dependencies": {
+    "chart.js": "^4.4.1",
     "dotenv": "^17.2.2"
   },
   "scripts": {
@@ -33,10 +34,25 @@
     "livereload": "^0.10.3",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
+    "sass": "^1.94.0",
     "stylelint": "^16.24.0",
     "stylelint-config-standard": "^39.0.0",
     "typescript": "^5.9.3",
-    "vite": "^7.2.6",
+    "vite": "^7.2.7",
     "vite-plugin-handlebars": "^2.0.0"
-  }
+  },
+  "version": "1.0.0",
+  "description": "Состав команды: \r - Мохаммед Марьям WEB-22\r - Бородин Глеб WEB-21\r - Дорожкин Павел WEB-21\r - Кавериная Софья WEB-21",
+  "main": "service-worker.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frontend-park-mail-ru/2025_2_404.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/frontend-park-mail-ru/2025_2_404/issues"
+  },
+  "homepage": "https://github.com/frontend-park-mail-ru/2025_2_404#readme"
 }

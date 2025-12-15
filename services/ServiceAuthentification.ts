@@ -77,16 +77,12 @@ class AuthService {
     }
 
     try {
-      const res = await http.get<ProfileResponse>('/profile');
-      
-      // Универсальное чтение данных профиля
+      const res = await http.get<ProfileResponse>('/api/profile');
       const profileData = (res as any).data || res || {};
       
       if (!profileData || Object.keys(profileData).length === 0) {
         throw new Error("Данные профиля не получены");
       }
-
-      // Обработка картинки
       let avatarUrl = '/kit.jpg';
       if (profileData.imageData && profileData.imageData.image_data) {
         const type = profileData.imageData.content_type || 'image/jpeg';
@@ -122,7 +118,7 @@ class AuthService {
       throw new Error("Пользователь не авторизован");
     }
     
-    const res = await http.post<{ token?: string; data?: { token?: string } }>('/profile/update', formData);
+    const res = await http.post<{ token?: string; data?: { token?: string } }>('/api/profile/update', formData);
     
     const token = (res as any).token || (res as any).data?.token;
     if (token) {
@@ -161,7 +157,7 @@ class AuthService {
     if (!this.isAuthenticated()) {
       throw new Error("Пользователь не авторизован для удаления.");
     }
-    await http.delete('/profile');
+    await http.delete('/api/profile');
     this.logout();
   }
 }
