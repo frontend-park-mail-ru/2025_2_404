@@ -39,10 +39,7 @@
     "stylelint-config-standard": "^39.0.0",
     "typescript": "^5.9.3",
     "vite": "^7.2.7",
-    "vite-plugin-handlebars": "^2.0.0",
-    "vite-plugin-image-optimizer": "^1.1.8",
-    "sharp": "^0.33.5",
-    "svgo": "^3.3.2"
+    "vite-plugin-handlebars": "^2.0.0"
   },
   "version": "1.0.0",
   "description": "Состав команды: \r - Мохаммед Марьям WEB-22\r - Бородин Глеб WEB-21\r - Дорожкин Павел WEB-21\r - Кавериная Софья WEB-21",
