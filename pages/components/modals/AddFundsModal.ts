@@ -16,12 +16,11 @@ export default class AddFundsModal {
     this.amountInput = new Input({
       id: 'add-funds-amount',
       label: 'Сумма пополнения, ₽',
-      placeholder: 'Например, 5000',
-      type: 'text',
+      placeholder: 'Например, 1000',
+      type: 'number',
       validationFn: (value: string): string | null => {
-        value = value.trim();
+        value = String(value).trim();
         if (!value) return 'Введите сумму';
-        if (!/^\d+(\.\d+)?$/.test(value)) return 'Сумма должна быть числом';
         if (parseFloat(value) <= 0) return 'Сумма должна быть больше нуля';
         return null;
       },
@@ -29,7 +28,7 @@ export default class AddFundsModal {
 
     this.confirmButton = new Button({
       id: 'confirm-add-funds-btn',
-      text: 'Пополнить',
+      text: 'Перейти к оплате',
       variant: 'primary',
     });
   }
@@ -39,7 +38,7 @@ export default class AddFundsModal {
       <div class="confirmation-modal">
         <button class="close-btn" id="cancel-add-funds">&times;</button>
         <h2 class="confirmation-modal__title">Пополнение баланса</h2>
-        <p class="confirmation-modal__subtitle">Введите сумму для зачисления на ваш счет</p>
+        <p class="confirmation-modal__subtitle">Вы будете перенаправлены на страницу оплаты</p>
         
         <form id="add-funds-form">
           ${this.amountInput.render()}

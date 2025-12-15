@@ -10,6 +10,7 @@ export default class Input {
   placeholder: string;
   showPasswordToggle: boolean;
   validationFn?: (value: string) => string | null;
+  value: string;
 
   constructor({
     id,
@@ -18,6 +19,7 @@ export default class Input {
     placeholder,
     showPasswordToggle = false,
     validationFn,
+    value = '',
   }: InputProps) {
     this.id = id;
     this.type = showPasswordToggle ? 'password' : type;
@@ -25,6 +27,7 @@ export default class Input {
     this.placeholder = placeholder;
     this.showPasswordToggle = showPasswordToggle;
     this.validationFn = validationFn;
+    this.value = value;
   }
 
   render(): string {
@@ -32,7 +35,13 @@ export default class Input {
       <div class="form-group">
         <label class="form-group__label" for="${this.id}">${this.label}</label>
         <div class="input-wrapper">
-          <input class="form-group__input" type="${this.type}" id="${this.id}" placeholder="${this.placeholder}">
+          <input 
+            class="form-group__input" 
+            type="${this.type}" 
+            id="${this.id}" 
+            placeholder="${this.placeholder}"
+            value="${this.value}"
+          >
           ${this.showPasswordToggle ?
             `<span class="password-toggle" role="button" aria-controls="${this.id}">
               <img class="password-toggle__icon" src="${ICON_CLOSE}" alt="toggle password">

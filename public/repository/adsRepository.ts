@@ -6,24 +6,31 @@ const adsRepository = {
   async getAll(): Promise<Ad[]> {
     try {
       const freshAds = await listAds();
+      if (!Array.isArray(freshAds)) {
+        throw new Error("Ответ сервера не является массивом");
+      }
+
       await DBService.saveAllAds(freshAds.map(ad => ({ ...ad, timestamp: new Date().toISOString() })));
       return freshAds;
     } catch (error) {
-      console.warn("Сеть недоступна. Загружаем данные из локального хранилища.");
+      console.warn("Не удалось загрузить с сервера (или 504). Ищем в локальном хранилище.");
       
       const localData = await DBService.getAllAds();
 
       if (localData && localData.length > 0) {
         return localData;
       } else {
-        throw new Error("Вы в офлайн-режиме, и для этой страницы нет сохраненных данных.");
+        console.warn("Данных нет ни на сервере, ни в кэше.");
+        return [];
       }
     }
   },
 
-  async getById(id: number | string): Promise<Ad> {
+  async getById(id: number | string): Promise<Ad | null> {
     try {
       const freshAd = await getAdById(id);
+      if (!freshAd) throw new Error("Объявление не найдено на сервере");
+
       await DBService.saveAd({ ...freshAd, timestamp: new Date().toISOString() });
       return freshAd;
     } catch (error) {
@@ -34,7 +41,7 @@ const adsRepository = {
       if (localAd) {
         return localAd;
       } else {
-        throw new Error("Вы в офлайн-режиме, и для этого объявления нет сохраненных данных.");
+        return null;
       }
     }
   },

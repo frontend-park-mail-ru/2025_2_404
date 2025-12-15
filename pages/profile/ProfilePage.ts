@@ -57,6 +57,18 @@ export default class ProfilePage implements PageComponent {
         id: 'profile-login',
         label: 'Логин',
         placeholder: 'Введите логин',
+        value: this.user?.username || '',
+        validationFn: (value: string): string | null => {
+          value = value.trim();
+          if (!value) return 'Логин обязателен для заполнения';
+          if (value.length < 4) return 'Логин должен содержать минимум 4 символа';
+          if (value.length > 20) return 'Логин должен содержать максимум 20 символов';
+          if (!/^[a-zA-Z0-9_]+$/.test(value)) return 'Логин может содержать только латиницу, цифры и _';
+          const UpperCase = /[A-Z]/.test(value);
+          const LowerCase = /[a-z]/.test(value);
+          if (!UpperCase && !LowerCase) return 'Логин должен содержать хотя бы одну букву';
+          return null;
+        },
       });
 
       this.components.emailInput = new Input({
@@ -64,6 +76,15 @@ export default class ProfilePage implements PageComponent {
         type: 'email',
         label: 'Почта',
         placeholder: 'Введите почту',
+        value: this.user?.email || '',
+        validationFn: (value: string): string | null => {
+          value = value.trim();
+          if (!value) return 'Email обязателен для заполнения';
+          if (value.length > 100) return 'Почта слишком длинная, введите другую';
+          const emailRegex = /^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+          if (!emailRegex.test(value)) return 'Введите корректный email';
+          return null;
+        },
       });
 
       this.components.passwordInput = new Input({
@@ -77,18 +98,40 @@ export default class ProfilePage implements PageComponent {
         id: 'profile-firstname',
         label: 'Имя',
         placeholder: 'Введите ваше имя',
+        value: this.user?.firstName || '',
+        validationFn: (value: string): string | null => {
+          value = value.trim();
+          if (value && value.length < 2) return 'Имя должно содержать минимум 2 символа';
+          if (value && value.length > 50) return 'Имя слишком длинное';
+          if (value && !/^[a-zA-Zа-яА-ЯёЁ\s-]+$/.test(value)) return 'Имя может содержать только буквы и дефисы';
+          return null;
+        },
       });
 
       this.components.lastNameInput = new Input({
         id: 'profile-lastname',
         label: 'Фамилия',
         placeholder: 'Введите вашу фамилию',
+        value: this.user?.lastName || '',
+        validationFn: (value: string): string | null => {
+          value = value.trim();
+          if (value && value.length < 2) return 'Фамилия должна содержать минимум 2 символа';
+          if (value && value.length > 50) return 'Фамилия слишком длинная';
+          if (value && !/^[a-zA-Zа-яА-ЯёЁ\s-]+$/.test(value)) return 'Фамилия может содержать только буквы и дефисы';
+          return null;
+        },
       });
 
       this.components.companyInput = new Input({
         id: 'profile-company',
         label: 'Компания',
         placeholder: 'Введите название компании',
+        value: this.user?.company || '',
+        validationFn: (value: string): string | null => {
+          value = value.trim();
+          if (value && value.length > 100) return 'Название компании слишком длинное';
+          return null;
+        },
       });
 
       this.components.phoneInput = new Input({
@@ -96,6 +139,14 @@ export default class ProfilePage implements PageComponent {
         label: 'Номер телефона',
         placeholder: 'Введите ваш номер телефона',
         type: 'tel',
+        value: this.user?.phone || '',
+        validationFn: (value: string): string | null => {
+          value = value.trim();
+          if (value && !/^[\d\s\-\+\(\)]+$/.test(value)) return 'Номер телефона может содержать только цифры, пробелы и символы +-()';
+          if (value && value.replace(/\D/g, '').length < 10) return 'Номер телефона должен содержать минимум 10 цифр';
+          if (value && value.replace(/\D/g, '').length > 15) return 'Номер телефона слишком длинный';
+          return null;
+        },
       });
 
       this.components.roleSelect = new Select({
@@ -135,7 +186,15 @@ export default class ProfilePage implements PageComponent {
 
   async render(): Promise<string> {
     await this.loadTemplate();
-    this.user = await AuthService.loadProfile();
+    
+    this.user = AuthService.getUser();
+    if (!this.user) {
+      try {
+        this.user = await AuthService.loadProfile();
+      } catch (e) {
+        console.error("Не удалось загрузить профиль", e);
+      }
+    }
 
     if (!this.user) {
       routerInstance?.navigate('/');
@@ -146,6 +205,7 @@ export default class ProfilePage implements PageComponent {
     const roleText = this.user?.role === 'advertiser' ? 'Рекламодатель' : 'Рекламораспространитель';
     const context = {
       ...this.user,
+      avatar: this.user.avatar,
       roleText,
       loginInputHtml: this.components.loginInput?.render() || '',
       emailInputHtml: this.components.emailInput?.render() || '',
@@ -193,16 +253,12 @@ export default class ProfilePage implements PageComponent {
   }
 
   attachEvents(): void {
-    const componentKeys: (keyof ProfileComponents)[] = [
-      'loginInput', 'emailInput', 'passwordInput', 'firstNameInput',
-      'lastNameInput', 'companyInput', 'phoneInput', 'roleSelect',
-      'saveButton', 'deleteButton', 'logoutButton'
-    ];
-
-    componentKeys.forEach(key => {
-      const component = this.components[key];
+    Object.values(this.components).forEach(component => {
       if (component && 'attachEvents' in component && typeof component.attachEvents === 'function') {
         component.attachEvents();
+      }
+      if (component && 'attachValidationEvent' in component && typeof component.attachValidationEvent === 'function') {
+        component.attachValidationEvent();
       }
     });
 
@@ -223,27 +279,51 @@ export default class ProfilePage implements PageComponent {
   }
 
   async handleSave(): Promise<void> {
-    const formData = new FormData();
+    let isValidated = true;
     const loginEl = document.getElementById('profile-login') as HTMLInputElement | null;
     const emailEl = document.getElementById('profile-email') as HTMLInputElement | null;
-    const passwordEl = document.getElementById('profile-password') as HTMLInputElement | null;
+    const firstNameEl = document.getElementById('profile-firstname') as HTMLInputElement | null;
+    const lastNameEl = document.getElementById('profile-lastname') as HTMLInputElement | null;
+    const companyEl = document.getElementById('profile-company') as HTMLInputElement | null;
+    const phoneEl = document.getElementById('profile-phone') as HTMLInputElement | null;
 
-    formData.append('user_name', loginEl?.value || '');
-    formData.append('email', emailEl?.value || '');
+    const loginValue = loginEl?.value || '';
+    const emailValue = emailEl?.value || '';
+    const firstNameValue = firstNameEl?.value || '';
+    const lastNameValue = lastNameEl?.value || '';
+    const companyValue = companyEl?.value || '';
+    const phoneValue = phoneEl?.value || '';
 
-    const password = passwordEl?.value;
-    if (password) {
-      formData.append('password', password);
+    if (this.components.loginInput?.validate(loginValue)) isValidated = false;
+    if (this.components.emailInput?.validate(emailValue)) isValidated = false;
+    if (this.components.firstNameInput?.validate(firstNameValue)) isValidated = false;
+    if (this.components.lastNameInput?.validate(lastNameValue)) isValidated = false;
+    if (this.components.companyInput?.validate(companyValue)) isValidated = false;
+    if (this.components.phoneInput?.validate(phoneValue)) isValidated = false;
+
+    if (!isValidated) {
+      return;
     }
+
+    const formData = new FormData();
+    formData.append('user_name', loginValue);
+    formData.append('email', emailValue);
+    formData.append('first_name', firstNameValue);
+    formData.append('last_name', lastNameValue);
+    formData.append('phone', phoneValue);
+    formData.append('company', companyValue);
+
     if (this.selectedFile) {
-      formData.append('img', this.selectedFile);
+      formData.append('avatar', this.selectedFile);
     }
 
     try {
-      await AuthService.updateProfile(formData);
-      routerInstance?.loadRoute();
+      const updatedUser = await AuthService.updateProfile(formData);
+      this.user = updatedUser;
+      new ConfirmationModal({ message: "Данные сохранены!", onConfirm: () => {} }).show();
     } catch (error) {
       console.error('Ошибка при обновлении профиля:', error);
+      this.components.loginInput?.showError('Не удалось сохранить изменения. Попробуйте позже.');
     }
   }
 

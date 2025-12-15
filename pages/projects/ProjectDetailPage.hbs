@@ -50,98 +50,6 @@
     </div>
   </div>
 
-  <!-- Секция статистики -->
-  <div class="stats" id="stats-section">
-    <div class="stats__header">
-      <h2 class="stats__title">Статистика кампании</h2>
-      <div class="stats__period-filter">
-        <select id="stats-period" class="stats__select">
-          <option value="7">7 дней</option>
-          <option value="14">14 дней</option>
-          <option value="30" selected>30 дней</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Карточки с итогами -->
-    <div class="stats__summary">
-      <div class="stats__card stats__card--impressions">
-        <span class="stats__card-icon">👁️</span>
-        <div class="stats__card-content">
-          <span class="stats__card-value" id="total-impressions">—</span>
-          <span class="stats__card-label">Показы</span>
-        </div>
-      </div>
-      <div class="stats__card stats__card--clicks">
-        <span class="stats__card-icon">👆</span>
-        <div class="stats__card-content">
-          <span class="stats__card-value" id="total-clicks">—</span>
-          <span class="stats__card-label">Клики</span>
-        </div>
-      </div>
-      <div class="stats__card stats__card--ctr">
-        <span class="stats__card-icon">📊</span>
-        <div class="stats__card-content">
-          <span class="stats__card-value" id="total-ctr">—</span>
-          <span class="stats__card-label">CTR</span>
-        </div>
-      </div>
-      <div class="stats__card stats__card--spent">
-        <span class="stats__card-icon">💸</span>
-        <div class="stats__card-content">
-          <span class="stats__card-value" id="total-spent">—</span>
-          <span class="stats__card-label">Списано</span>
-        </div>
-      </div>
-      <div class="stats__card stats__card--earned">
-        <span class="stats__card-icon">💰</span>
-        <div class="stats__card-content">
-          <span class="stats__card-value" id="total-earned">—</span>
-          <span class="stats__card-label">Заработано</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Графики -->
-    <div class="stats__charts">
-      <div class="stats__chart-container">
-        <h3 class="stats__chart-title">Показы и клики</h3>
-        <canvas id="impressions-clicks-chart"></canvas>
-      </div>
-      <div class="stats__chart-container">
-        <h3 class="stats__chart-title">Конверсия (CTR)</h3>
-        <canvas id="ctr-chart"></canvas>
-      </div>
-      <div class="stats__chart-container stats__chart-container--wide">
-        <h3 class="stats__chart-title">Финансы</h3>
-        <canvas id="finance-chart"></canvas>
-      </div>
-    </div>
-
-    <!-- Таблица с данными -->
-    <div class="stats__table-container">
-      <h3 class="stats__table-title">Детальная статистика</h3>
-      <div class="stats__table-wrapper">
-        <table class="stats__table">
-          <thead>
-            <tr>
-              <th>Дата</th>
-              <th>Показы</th>
-              <th>Клики</th>
-              <th>CTR</th>
-              <th>Списано</th>
-              <th>Заработано</th>
-            </tr>
-          </thead>
-          <tbody id="stats-table-body">
-            <tr>
-              <td colspan="6" class="stats__table-loading">Загрузка данных...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
   {{/unless}}
 
   <div class="ads__form-card {{#if isNew}}is-create-mode{{/if}}" id="ads-edit-mode">
@@ -171,8 +79,28 @@
       <input class="ads__item" id="site-input" type="url" value="{{project.domain}}" placeholder="Введите ссылку на сайт">
 
       <label for="budget-input">Бюджет</label>
-      <input class="ads__item" id="budget-input" type="number" value="{{project.budget}}" placeholder="Введите сумму">
+      <input class="ads__item" id="budget-input" type="number" value="{{project.budget}}" placeholder="Введите сумму" min="0">
       <small>Не меньше 100₽</small>
+
+      {{#unless isNew}}
+        <div class="ads__status-wrapper">
+          <div class="ads__status-row">
+            <label class="ads__status-label">Статус объявления</label>
+            <div class="ads__switch-group">
+              <label class="switch">
+                <input type="checkbox" id="status-switch" {{#if isActive}}checked{{/if}} {{#if isLowBudget}}disabled{{/if}}>
+                <span class="slider round"></span>
+              </label>
+              <span id="status-text" style="font-weight: bold;">
+                {{#if isActive}}Активно{{else}}Приостановлено{{/if}}
+              </span>
+            </div>
+          </div>
+          <small id="status-lock-msg" class="ads__lock-msg" style="display: {{#if isLowBudget}}block{{else}}none{{/if}};">
+            (для активации введите бюджет не меньше 100₽)
+          </small>
+        </div>
+      {{/unless}}
 
       <div class="ads__img-upload">
         <label for="img-file" class="ads__upload-box" id="upload-box">

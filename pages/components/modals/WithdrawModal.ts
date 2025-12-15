@@ -45,7 +45,7 @@ export default class WithdrawModal {
       <div class="confirmation-modal">
         <button class="close-btn" id="cancel-withdraw">&times;</button>
         <h2 class="confirmation-modal__title">Вывод средств</h2>
-        <p confirmation-modal__title>Введите сумму для вывода с вашего счета</p>
+        <p class="confirmation-modal__subtitle">Введите сумму для вывода с вашего счета</p>
         
         <form id="withdraw-form">
           ${this.amountInput.render()}

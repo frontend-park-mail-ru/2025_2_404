@@ -1,9 +1,16 @@
+import AuthService from '../../services/ServiceAuthentification';
 import type { HandlebarsTemplateDelegate, PageComponent } from '../../src/types';
+import type Router from '../../services/Router';
 
 let showRegisterModalFn: (() => void) | null = null;
+let routerInstance: Router | null = null;
 
 export function setShowRegisterModal(fn: () => void): void {
   showRegisterModalFn = fn;
+}
+
+export function setMainPageRouter(r: Router): void {
+  routerInstance = r;
 }
 
 export default class MainPage implements PageComponent {
@@ -47,10 +54,15 @@ export default class MainPage implements PageComponent {
     });
 
     const tryBtn = document.getElementById('try-btn');
-    if (tryBtn && showRegisterModalFn) {
+    if (tryBtn) {
       tryBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        showRegisterModalFn!();
+        if (AuthService.isAuthenticated()) {
+          localStorage.setItem('projects_tab', 'ads');
+          routerInstance?.navigate('/projects');
+        } else if (showRegisterModalFn) {
+          showRegisterModalFn();
+        }
       });
     }
   }

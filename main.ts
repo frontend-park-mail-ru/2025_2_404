@@ -3,7 +3,7 @@ import Header from './pages/header/Header';
 import Footer from './pages/footer/Footer';
 import AuthService from './services/ServiceAuthentification';
 
-import MainPage, { setShowRegisterModal } from './pages/main/MainPage';
+import MainPage, { setShowRegisterModal, setMainPageRouter } from './pages/main/MainPage';
 import ProfilePage, { setRouter as setProfileRouter } from './pages/profile/ProfilePage';
 import ProjectsPage, { setProjectsRouter } from './pages/projects/ProjectsPage';
 import ProjectDetailPage, { setProjectDetailRouter } from './pages/projects/ProjectDetailPage';
@@ -11,6 +11,8 @@ import CreateProjectPage, { setCreateProjectRouter } from './pages/projects/Crea
 import BalancePage, { setBalanceRouter } from './pages/balance/BalancePage';
 import InfoPage from './pages/info/InfoPage';
 import SlotStatisticsPage, { setSlotStatisticsRouter } from './pages/slots/SlotStatisticsPage';
+import CreateSlotPage from './pages/slots/CreateSlotPage';
+import SlotDetailPage from './pages/slots/SlotDetailPage';
 import LoginPage from './pages/login/LoginPage';
 import RegisterPage from './pages/register/Register';
 
@@ -31,6 +33,8 @@ const routes: Routes = {
   '/projects/:id': ProjectDetailPage as unknown as PageConstructor,
   '/balance': BalancePage as unknown as PageConstructor,
   '/info': InfoPage as unknown as PageConstructor,
+  '/slots/create': CreateSlotPage as unknown as PageConstructor,
+  '/slots/:id': SlotDetailPage as unknown as PageConstructor,
   '/slots/:id/statistics': SlotStatisticsPage as unknown as PageConstructor,
 };
 
@@ -44,6 +48,7 @@ setProjectDetailRouter(router);
 setCreateProjectRouter(router);
 setBalanceRouter(router);
 setSlotStatisticsRouter(router);
+setMainPageRouter(router);
 
 function updateFooterVisibility(path: string): void {
   const footerElement = document.querySelector('.footer') as HTMLElement | null;
@@ -119,6 +124,21 @@ async function startApp(): Promise<void> {
 
   document.addEventListener('click', (e: MouseEvent) => {
     const target = e.target as HTMLElement;
+
+    // Обработка переключения вкладок в хедере
+    const dropdownItem = target.closest('.header__dropdown-item[data-tab]') as HTMLElement | null;
+    if (dropdownItem) {
+      const tab = dropdownItem.dataset.tab;
+      if (tab) {
+        localStorage.setItem('projects_tab', tab);
+        // Если уже на /projects, принудительно перезагружаем страницу
+        if (window.location.pathname === '/projects') {
+          e.preventDefault();
+          router.loadRoute();
+          return;
+        }
+      }
+    }
 
     if (target.closest('#login-btn-header')) {
       e.preventDefault();
