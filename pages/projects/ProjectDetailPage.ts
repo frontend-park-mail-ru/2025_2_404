@@ -188,7 +188,6 @@ export default class ProjectDetailPage implements PageComponent {
                         }
                     } catch (e) {
                         console.error(e);
-                        alert("Ошибка при пополнении. Возможно, недостаточно средств на основном счете.");
                     }
                 },
                 onCancel: () => {}
