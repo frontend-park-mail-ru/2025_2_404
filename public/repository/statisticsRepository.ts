@@ -10,8 +10,8 @@ const statisticsRepository = {
     return getAdStatistics({ ad_id: adId, date_from: dateFrom, date_to: dateTo });
   },
 
-  async getSlotStatistics(slotId: string): Promise<AdStatistics> {
-    return getSlotStatistics(slotId);
+  async getSlotStatistics(slotId: string, days?: number): Promise<AdStatistics> {
+    return getSlotStatistics(slotId, days);
   },
 };
 

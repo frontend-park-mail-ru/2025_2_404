@@ -106,7 +106,7 @@ export default class SlotStatisticsPage implements PageComponent {
 
   async loadStatistics(): Promise<void> {
     try {
-      this.statistics = await statisticsRepository.getSlotStatistics(this.slotId);
+      this.statistics = await statisticsRepository.getSlotStatistics(this.slotId, this.currentPeriod);
       const hasData = this.statistics && 
         (this.statistics.total_impressions > 0 || 
          this.statistics.total_clicks > 0 ||
