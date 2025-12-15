@@ -35,6 +35,5 @@ export default class Select {
     if (select && this.onChange) {
       select.addEventListener('change', this.onChange);
     }
-    // Не выводим предупреждение - элемент может отсутствовать в некоторых режимах просмотра
   }
 }

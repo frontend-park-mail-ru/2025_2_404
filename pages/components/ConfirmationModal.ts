@@ -74,7 +74,6 @@ export default class ConfirmationModal {
     if (this.cancelButton) {
       this.cancelButton.attachEvents();
     }
-    // Закрытие при клике на overlay (из новой ветки)
     if (this.modalElement) {
       this.modalElement.addEventListener('click', (e) => {
         if (e.target === this.modalElement) {

@@ -28,8 +28,6 @@ interface BalanceRepositoryType {
   subtractBalance: (amount: number) => Promise<void>;
 }
 
-// Импортируем balanceRepository (предполагается, что он будет на TS или совместим)
-// Если balanceRepository.js существует, можно использовать его напрямую
 async function getBalanceRepository(): Promise<BalanceRepositoryType> {
   const module = await import('../../public/repository/balanceRepository.js');
   return module.default as BalanceRepositoryType;

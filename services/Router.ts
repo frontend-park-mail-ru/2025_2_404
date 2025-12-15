@@ -41,7 +41,6 @@ export default class Router {
     const currentPathname = window.location.pathname;
     
     if (currentPathname === pathname) {
-      // Если мы уже на этой странице, просто обновляем хеш
       if (hash) {
         history.pushState({}, '', path);
         window.dispatchEvent(new HashChangeEvent('hashchange'));

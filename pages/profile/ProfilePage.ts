@@ -203,10 +203,20 @@ export default class ProfilePage implements PageComponent {
 
     this.initComponents();
     const roleText = this.user?.role === 'advertiser' ? 'Рекламодатель' : 'Рекламораспространитель';
+    const rawUser = this.user as any;
+    const adCount = rawUser.ads_count !== undefined ? rawUser.ads_count : 0;
+    let registrationDate = '—';
+    if (rawUser.created_at) {
+        registrationDate = new Date(rawUser.created_at).toLocaleDateString('ru-RU');
+    }
+
+
     const context = {
       ...this.user,
       avatar: this.user.avatar,
       roleText,
+      adCount,
+      registrationDate, 
       loginInputHtml: this.components.loginInput?.render() || '',
       emailInputHtml: this.components.emailInput?.render() || '',
       passwordInputHtml: this.components.passwordInput?.render() || '',

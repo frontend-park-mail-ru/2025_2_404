@@ -1,5 +1,4 @@
 <div class="ads">
-
   {{#unless isNew}}
   <div class="ads__view-mode" id="ads-view-mode">
     <div class="ads__view-card">
@@ -13,24 +12,25 @@
           <span class="ads__view-value">{{project.description}}</span>
         </div>
         {{/if}}
+        
         {{#if project.domain}}
         <div class="ads__view-row">
           <span class="ads__view-label">Сайт:</span>
           <span class="ads__view-value">{{project.domain}}</span>
         </div>
         {{/if}}
-        {{#if project.budget}}
         <div class="ads__view-row">
           <span class="ads__view-label">Бюджет:</span>
-          <span class="ads__view-value">{{project.budget}}₽</span>
+          <span class="ads__view-value" data-type="budget">{{project.budget}}₽</span>
         </div>
-        {{/if}}
+
         {{#if project.dateStart}}
         <div class="ads__view-row">
           <span class="ads__view-label">Начало:</span>
           <span class="ads__view-value">{{project.dateStart}}</span>
         </div>
         {{/if}}
+        
         {{#if project.dateEnd}}
         <div class="ads__view-row">
           <span class="ads__view-label">Окончание:</span>
@@ -49,9 +49,7 @@
       </div>
     </div>
   </div>
-
   {{/unless}}
-
   <div class="ads__form-card {{#if isNew}}is-create-mode{{/if}}" id="ads-edit-mode">
     
     {{#unless isNew}}
@@ -61,63 +59,78 @@
     {{/unless}}
 
     <h2 class="ads__title">
-      {{#if isNew}}
-        Создание кампании
-      {{else}}
-        Редактирование кампании
-      {{/if}}
+      {{#if isNew}}Создание кампании{{else}}Редактирование кампании{{/if}}
     </h2>
+    
     <div class="ads__form">
-    <form id="{{#if isNew}}create-form{{else}}edit-form{{/if}}">
-      <label for="title-input">Заголовок</label>
-      <input class="ads__item" id="title-input" type="text" value="{{project.title}}" placeholder="Введите заголовок">
+      <form id="{{#if isNew}}create-form{{else}}edit-form{{/if}}">
+        <label for="title-input">Заголовок</label>
+        <input class="ads__item" id="title-input" type="text" value="{{project.title}}" placeholder="Введите заголовок">
 
-      <label for="desc-input">Описание</label>
-      <textarea id="desc-input" class="ads__item ads__description" placeholder="Введите описание">{{project.description}}</textarea>
+        <label for="desc-input">Описание</label>
+        <textarea id="desc-input" class="ads__item ads__description" placeholder="Введите описание">{{project.description}}</textarea>
 
-      <label for="site-input">Ссылка на сайт</label>
-      <input class="ads__item" id="site-input" type="url" value="{{project.domain}}" placeholder="Введите ссылку на сайт">
-
-      <label for="budget-input">Бюджет</label>
-      <input class="ads__item" id="budget-input" type="number" value="{{project.budget}}" placeholder="Введите сумму" min="0">
-      <small>Не меньше 100₽</small>
-
-      {{#unless isNew}}
-        <div class="ads__status-wrapper">
-          <div class="ads__status-row">
-            <label class="ads__status-label">Статус объявления</label>
-            <div class="ads__switch-group">
-              <label class="switch">
-                <input type="checkbox" id="status-switch" {{#if isActive}}checked{{/if}} {{#if isLowBudget}}disabled{{/if}}>
-                <span class="slider round"></span>
-              </label>
-              <span id="status-text" style="font-weight: bold;">
-                {{#if isActive}}Активно{{else}}Приостановлено{{/if}}
-              </span>
-            </div>
-          </div>
-          <small id="status-lock-msg" class="ads__lock-msg" style="display: {{#if isLowBudget}}block{{else}}none{{/if}};">
-            (для активации введите бюджет не меньше 100₽)
-          </small>
+        <label for="site-input">Ссылка на сайт</label>
+        <input class="ads__item" id="site-input" type="url" value="{{project.domain}}" placeholder="Введите ссылку на сайт">
+        <label for="budget-input">Бюджет</label>
+        <div class="ads__input-group" style="display: flex; gap: 10px;">
+          <input 
+            class="ads__item" 
+            id="budget-input" 
+            type="number" 
+            value="{{project.budget}}" 
+            placeholder="Введите сумму" 
+            min="0"
+            style="flex-grow: 1; {{#unless isNew}}background-color: #f3f4f6; color: #666; cursor: not-allowed;{{/unless}}"
+            {{#unless isNew}}readonly{{/unless}}
+          >
+          {{#unless isNew}}
+            <button type="button" id="add-budget-btn" class="btn btn--secondary" style="font-weight: bold; font-size: 15px; padding: 0 13px;">
+             +
+            </button>
+          {{/unless}}
         </div>
-      {{/unless}}
+        {{#if isNew}}<small>Не меньше 100₽</small>{{/if}}
+        {{#unless isNew}}
+          <div class="ads__status-wrapper" style="margin-top: 20px;">
+            <div class="ads__status-row" style="display: flex; align-items: center; gap: 15px;">
+              <label class="ads__status-label" style="margin-bottom: 0;">Статус объявления</label>
+              <div class="ads__switch-group" style="display: flex; align-items: center;">
+                <label class="switch">
+                  <input type="checkbox" id="ad-status-toggle" 
+                    {{#if isActive}}checked{{/if}} 
+                    {{#if isLowBudget}}disabled{{/if}}
+                  >
+                  <span class="slider round"></span>
+                </label>
+                <span id="status-text" style="font-weight: bold; color: {{#if isActive}}#7C54E8{{else}}#A0AEC0{{/if}};">
+                  {{#if isActive}}Активно{{else}}Приостановлено{{/if}}
+                </span>
+              </div>
+            </div>
+            <small id="status-lock-msg" style="color: #E53E3E; margin-top: 5px; display: {{#if isLowBudget}}block{{else}}none{{/if}};">
+              Изменение статуса возможно только при бюджете больше 100₽
+            </small>
+          </div>
+        {{/unless}}
 
-      <div class="ads__img-upload">
-        <label for="img-file" class="ads__upload-box" id="upload-box">
-          <span class="ads__upload-icon">＋</span>
-          <span class="ads__upload-text">Загрузите изображение</span>
-          <input id="img-file" type="file" accept="image/jpeg, image/png" hidden />
-        </label>
-        <small class="ads__upload-hint">Поддерживаются JPG и PNG (до 10 МБ)</small>
-      </div>
+        <div class="ads__img-upload">
+          <label for="img-file" class="ads__upload-box" id="upload-box">
+            <span class="ads__upload-icon">＋</span>
+            <span class="ads__upload-text">Загрузите изображение</span>
+            <input id="img-file" type="file" accept="image/jpeg, image/png" hidden />
+          </label>
+          <small class="ads__upload-hint">Поддерживаются JPG и PNG (до 10 МБ)</small>
+        </div>
 
-
-      <label>Даты проведения</label>
-      <div class="ads__dates">
-        <input class="ads__item" type="date" value="{{project.dateStart}}">
-        <input class="ads__item"type="date" value="{{project.dateEnd}}">
-      </div>
+        <label>Даты проведения</label>
+        <div class="ads__dates">
+          <input class="ads__item" type="date" value="{{project.dateStart}}">
+          <input class="ads__item" type="date" value="{{project.dateEnd}}">
+        </div>
+      </form>
     </div>
+
     <div class="ads__actions">
       {{#if isNew}}
         <button id="edit-btn" type="button" class="btn btn--primary">Создать кампанию</button>
@@ -134,14 +147,11 @@
         <button id="delete-btn" type="button" class="btn btn--danger ads__delete-btn">Удалить</button>
       {{/unless}}
     </div>
-
-    </form>
   </div>
-
-
   <div class="ads__preview-card" id="ads-preview-card">
     <button id="preview-back-btn" type="button" class="ads__preview-back">
-      <span class="breadcrumbs__separator">‹</span> Назад к форме</button>
+      <span class="breadcrumbs__separator">‹</span> Назад к форме
+    </button>
     <h3>Предпросмотр</h3>
     <img class="ads__preview-image" src="{{project.image_url}}" />
 

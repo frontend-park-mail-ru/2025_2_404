@@ -10,10 +10,6 @@ const statisticsRepository = {
     return getAdStatistics({ ad_id: adId, date_from: dateFrom, date_to: dateTo });
   },
 
-  /**
-   * Получить статистику слота (использует реальный API бэкенда)
-   * GET /api/slots/{slot_id}/statistics
-   */
   async getSlotStatistics(slotId: string): Promise<AdStatistics> {
     return getSlotStatistics(slotId);
   },

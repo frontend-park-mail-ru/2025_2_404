@@ -45,8 +45,6 @@ export default class SlotStatisticsPage implements PageComponent {
 
   async render(): Promise<string> {
     await this.loadTemplate();
-    
-    // Мок данных слота (замени на реальный API когда будет готов)
     this.slot = {
       id: this.slotId,
       name: `Слот №${this.slotId.slice(-4) || '1'}`,
@@ -70,13 +68,9 @@ export default class SlotStatisticsPage implements PageComponent {
       this.currentPeriod = parseInt(periodSelect.value);
       this.loadStatistics();
     });
-
-    // Кнопка повторной попытки
     document.getElementById('stats-retry-btn')?.addEventListener('click', () => {
       this.loadStatistics();
     });
-
-    // Загружаем статистику сразу
     this.loadStatistics();
   }
 
@@ -112,12 +106,7 @@ export default class SlotStatisticsPage implements PageComponent {
 
   async loadStatistics(): Promise<void> {
     try {
-      // Используем реальный API бэкенда: GET /api/slots/{slot_id}/statistics
       this.statistics = await statisticsRepository.getSlotStatistics(this.slotId);
-      
-      console.log('Статистика слота загружена:', this.statistics);
-
-      // Проверяем, есть ли данные
       const hasData = this.statistics && 
         (this.statistics.total_impressions > 0 || 
          this.statistics.total_clicks > 0 ||
@@ -151,7 +140,6 @@ export default class SlotStatisticsPage implements PageComponent {
       clicksEl.textContent = this.statistics.total_clicks.toLocaleString('ru-RU');
     }
     if (spentEl) {
-      // Траты = (клики + показы) * 3
       const spent = (this.statistics.total_clicks + this.statistics.total_impressions) * 3;
       spentEl.textContent = spent.toLocaleString('ru-RU') + ' ₽';
     }
@@ -163,7 +151,6 @@ export default class SlotStatisticsPage implements PageComponent {
     const canvas = document.getElementById('main-chart') as HTMLCanvasElement;
     if (!canvas) return;
 
-    // Уничтожаем старый график
     if (this.chart) {
       this.chart.destroy();
       this.chart = null;
@@ -171,8 +158,6 @@ export default class SlotStatisticsPage implements PageComponent {
 
     const { daily_stats } = this.statistics;
     const labels = daily_stats.map((d, i) => i.toString());
-    
-    // Метрики соответствуют бэкенду: slot_event хранит только impression и click
     const dataMap: Record<string, { data: number[]; label: string; color: string }> = {
       impressions: {
         data: daily_stats.map(d => d.impressions),

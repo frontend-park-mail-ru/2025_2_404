@@ -2,20 +2,31 @@ import Input from '../Input';
 import Button from '../Button';
 import type { AddFundsModalProps } from '../../../src/types';
 
+interface ExtendedProps extends AddFundsModalProps {
+  title?: string;
+  subtitle?: string;
+  buttonText?: string;
+}
+
 export default class AddFundsModal {
   onConfirm: (amount: number) => void;
   onCancel?: () => void;
   modalElement: HTMLElement | null = null;
   amountInput: Input;
   confirmButton: Button;
-
-  constructor({ onConfirm, onCancel }: AddFundsModalProps) {
+  title: string;
+  subtitle: string;
+  buttonText: string;
+  constructor({ onConfirm, onCancel, title, subtitle, buttonText }: ExtendedProps) {
     this.onConfirm = onConfirm;
     this.onCancel = onCancel;
+    this.title = title || 'Пополнение баланса';
+    this.subtitle = subtitle || 'Вы будете перенаправлены на страницу оплаты';
+    this.buttonText = buttonText || 'Перейти к оплате';
 
     this.amountInput = new Input({
       id: 'add-funds-amount',
-      label: 'Сумма пополнения, ₽',
+      label: 'Сумма, ₽',
       placeholder: 'Например, 1000',
       type: 'number',
       validationFn: (value: string): string | null => {
@@ -28,7 +39,7 @@ export default class AddFundsModal {
 
     this.confirmButton = new Button({
       id: 'confirm-add-funds-btn',
-      text: 'Перейти к оплате',
+      text: this.buttonText,
       variant: 'primary',
     });
   }
@@ -37,8 +48,10 @@ export default class AddFundsModal {
     return `
       <div class="confirmation-modal">
         <button class="close-btn" id="cancel-add-funds">&times;</button>
-        <h2 class="confirmation-modal__title">Пополнение баланса</h2>
-        <p class="confirmation-modal__subtitle">Вы будете перенаправлены на страницу оплаты</p>
+        
+        <!-- Вставляем динамические переменные -->
+        <h2 class="confirmation-modal__title">${this.title}</h2>
+        <p class="confirmation-modal__subtitle">${this.subtitle}</p>
         
         <form id="add-funds-form">
           ${this.amountInput.render()}
@@ -72,6 +85,13 @@ export default class AddFundsModal {
     this.modalElement?.querySelector('#cancel-add-funds')?.addEventListener('click', () => {
       if (this.onCancel) this.onCancel();
       this.hide();
+    });
+    
+    this.modalElement?.addEventListener('click', (e) => {
+        if (e.target === this.modalElement) {
+            if (this.onCancel) this.onCancel();
+            this.hide();
+        }
     });
     
     this.modalElement?.querySelector('#add-funds-form')?.addEventListener('submit', (e) => {
