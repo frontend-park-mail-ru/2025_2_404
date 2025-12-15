@@ -1,7 +1,7 @@
-import AuthService from '../../services/ServiceAuthentification.js';
+import AuthService from '../../services/ServiceAuthentification.ts';
 import balanceRepository from '../../public/repository/balanceRepository.js';
-import { router } from '../../main.js';
-import adsRepository from '../../public/repository/adsRepository.js';
+import { router } from '../../main.ts';
+import adsRepository from '../../public/repository/adsRepository.ts';
 
 const POLLING_INTERVAL = 20 * 1000;       // 20 секунд (частота проверки)
 const THRESHOLD = 10;                     // 10 рублей (порог баланса)

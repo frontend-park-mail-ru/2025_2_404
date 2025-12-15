@@ -1,5 +1,5 @@
-import { router } from '../../main.js';
-import ConfirmationModal from '../components/ConfirmationModal.js';
+import { router } from '../../main.ts';
+import ConfirmationModal from '../components/ConfirmationModal.ts';
 import { slotsRepository } from '../../public/repository/slotsRepository.js';
 
 export default class CreateSlotPage {

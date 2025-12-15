@@ -1,5 +1,5 @@
-import MainPage from '../pages/main/MainPage.js';
-import { listAds } from '../public/api/ads.js';
+import MainPage from '../pages/main/MainPage.ts';
+import { listAds } from '../public/api/ads.ts';
 
 export default class MainAdvertisementView {
   constructor() {

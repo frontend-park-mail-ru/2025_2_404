@@ -1,4 +1,4 @@
-import { http } from '../api/http.js';
+import { http } from '../api/http.ts';
 
 class BalanceRepository {
   async getBalanceAndTransactions() {

@@ -1,4 +1,4 @@
-import { http } from '../api/http.js'; 
+import { http } from '../api/http.ts'; 
 const BASE = "https://adnet.website/api"; 
 
 class SlotsRepository {

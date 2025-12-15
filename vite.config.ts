@@ -20,6 +20,7 @@ export default defineConfig({
       '@services': resolve(__dirname, './services'),
       '@public': resolve(__dirname, './public'),
     },
+    extensions: ['.ts', '.js', '.tsx', '.jsx', '.json'],
   },
   build: {
     outDir: 'dist',
