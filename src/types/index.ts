@@ -185,13 +185,11 @@ export interface HttpError {
   body: unknown;
 }
 
-// Статистика рекламных кампаний
-// Соответствует структуре бэкенда: таблица slot_event
 export interface SlotEvent {
-  slot_id: string;       // UUID слота
-  ad_detail_id: string;  // UUID рекламы (ad_detail)
+  slot_id: string;       
+  ad_detail_id: string; 
   event_type: 'impression' | 'click';
-  created_time: string;  // ISO timestamp
+  created_time: string;
 }
 
 export interface DailyStats {

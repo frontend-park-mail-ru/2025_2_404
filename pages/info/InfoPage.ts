@@ -106,8 +106,6 @@ export default class InfoPage implements PageComponent {
         }
       });
     });
-
-    // Обработка клика на ссылки внутри секций (например "Связаться" в тарифах)
     document.querySelectorAll('[data-nav]').forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -118,8 +116,6 @@ export default class InfoPage implements PageComponent {
         }
       });
     });
-
-    // Обработка формы обратной связи
     const contactForm = document.getElementById('contact-form');
     const nameInput = document.getElementById('contact-name') as HTMLInputElement | null;
     const emailInput = document.getElementById('contact-email') as HTMLInputElement | null;
@@ -180,16 +176,12 @@ export default class InfoPage implements PageComponent {
         }).show();
       });
     }
-
-    // Слушаем изменение хеша
     window.addEventListener('hashchange', () => {
       const newHash = window.location.hash.replace('#', '');
       if (newHash) {
         switchSection(newHash);
       }
     });
-
-    // Проверяем хеш в URL при загрузке
     const hash = window.location.hash.replace('#', '');
     if (hash) {
       switchSection(hash);

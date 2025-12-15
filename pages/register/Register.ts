@@ -177,8 +177,6 @@ export default class RegisterPage {
         email: emailValue,
         password: passwordValue,
       });
-      
-      // После регистрации автоматически логинимся (из новой ветки)
       await AuthService.login({
         email: emailValue,
         password: passwordValue

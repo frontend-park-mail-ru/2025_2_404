@@ -5,7 +5,6 @@ import { validateAdForm } from '../../public/utils/ValidateAdForm';
 import type { HandlebarsTemplateDelegate, PageComponent, Ad, AddFundsModalProps } from '../../src/types';
 import type Router from '../../services/Router';
 
-// Расширяем интерфейс пропсов для модалки, чтобы TS не ругался на новые текстовые поля
 interface ExtendedAddFundsModalProps extends AddFundsModalProps {
     title?: string;
     subtitle?: string;
@@ -77,12 +76,7 @@ export default class ProjectDetailPage implements PageComponent {
   async render(): Promise<string> {
     await this.loadTemplate();
     try {
-      // 1. Получаем сырой ответ от репозитория
       const response = await adsRepository.getById(this.projectId) as any;
-      
-      console.log('🔥 RAW RESPONSE:', response); 
-
-      // 2. Ищем объект объявления внутри ответа (защита от разной вложенности)
       let adData: any = {};
 
       if (response?.data?.ad) {
@@ -92,13 +86,7 @@ export default class ProjectDetailPage implements PageComponent {
       } else {
           adData = response || {};
       }
-
-      // 3. Достаем бюджет. Number(...) защищает от null/undefined
       const rawBudget = Number(adData.budget ?? adData.amount ?? adData.amount_for_ad ?? 0);
-      
-      console.log(`🔥 BUDGET FOUND: ${rawBudget}`);
-
-      // 4. Обработка картинки
       const DEFAULT_IMG = '/public/assets/default.jpg';
       let imageUrl = adData.image_url || '';
       
@@ -115,15 +103,11 @@ export default class ProjectDetailPage implements PageComponent {
       ) {
         imageUrl = `data:image/jpeg;base64,${imageUrl}`;
       }
-
-      // 5. Собираем итоговый объект
       this.project = { 
           ...adData, 
           budget: rawBudget, 
           image_url: imageUrl 
       } as Ad;
-
-      // Рассчитываем флаги для шаблона
       const isActive = this.project.status === 'active';
       const isLowBudget = rawBudget < 100;
 
@@ -142,27 +126,18 @@ export default class ProjectDetailPage implements PageComponent {
   }
 
   attachEvents(): void {
-    // Элементы управления статусом и бюджетом
     const statusToggle = document.getElementById('ad-status-toggle') as HTMLInputElement | null;
     const statusText = document.getElementById('status-text');
     const lockMsg = document.getElementById('status-lock-msg'); 
     const budgetInput = document.getElementById('budget-input') as HTMLInputElement | null;
-
-    // --- ФУНКЦИЯ: Проверка бюджета и блокировка статуса ---
     const checkBudgetAndLockStatus = () => {
         if (!statusToggle || !lockMsg || !budgetInput) return;
-
-        // Берем актуальное значение из инпута
         const currentBudget = parseFloat(budgetInput.value) || 0;
 
         if (currentBudget < 100) {
-            // Бюджет мал: блокируем переключатель
             statusToggle.disabled = true;
-            // Если он был включен, визуально выключаем (но не меняем на сервере пока не нажмет сохранить, 
-            // хотя логичнее запретить активацию)
             if (statusToggle.checked) {
                  statusToggle.checked = false; 
-                 // Обновляем текст
                  if (statusText) {
                     statusText.textContent = "Приостановлено";
                     statusText.style.color = "#A0AEC0";
@@ -170,16 +145,11 @@ export default class ProjectDetailPage implements PageComponent {
             }
             lockMsg.style.display = 'block';
         } else {
-            // Бюджет ок: разблокируем
             statusToggle.disabled = false;
             lockMsg.style.display = 'none';
         }
     };
-
-    // Запускаем проверку при инициализации
     checkBudgetAndLockStatus();
-
-    // Обработчик переключения тумблера (меняет цвет и текст)
     if (statusToggle && statusText) {
       statusToggle.addEventListener('change', () => {
         if (statusToggle.checked) {
@@ -191,33 +161,24 @@ export default class ProjectDetailPage implements PageComponent {
         }
       });
     }
-
-    // --- ЛОГИКА ПОПОЛНЕНИЯ БЮДЖЕТА ---
     const addBudgetBtn = document.getElementById('add-budget-btn');
     if (addBudgetBtn) {
         addBudgetBtn.addEventListener('click', () => {
-            // Настройка модалки с кастомными текстами
             const modalProps: any = {
                 title: 'Пополнение бюджета',
                 subtitle: 'Введите сумму, на которую хотите увеличить бюджет',
                 buttonText: 'Пополнить',
                 onConfirm: async (amount: number) => {
                     try {
-                        // 1. Отправляем запрос
                         await adsRepository.addBudget(this.projectId, amount);
                         
                         if (this.project) {
-                            // 2. Считаем новый бюджет
                             const currentBudget = Number(this.project.budget) || 0;
                             const newBudget = currentBudget + amount;
-                            
-                            // 3. Обновляем модель и UI
                             this.project.budget = newBudget; 
                             if (budgetInput) {
                                 budgetInput.value = String(newBudget);
                             }
-
-                            // 4. ВАЖНО: Проверяем, можно ли разблокировать статус
                             checkBudgetAndLockStatus();
 
                             new ConfirmationModal({ 
@@ -237,8 +198,6 @@ export default class ProjectDetailPage implements PageComponent {
             modal.show();
         });
     }
-
-    // --- НАВИГАЦИЯ И УПРАВЛЕНИЕ ---
     document.querySelector('#back-btn')?.addEventListener('click', (e) => {
       e.preventDefault();
       routerInstance?.navigate('/projects');
@@ -273,8 +232,6 @@ export default class ProjectDetailPage implements PageComponent {
       e.preventDefault();
       this.togglePreview(false);
     });
-
-    // --- СОХРАНЕНИЕ ФОРМЫ ---
     const editBtn = document.querySelector('#edit-btn');
     if (editBtn) {
       editBtn.addEventListener('click', async (e) => {
@@ -284,21 +241,15 @@ export default class ProjectDetailPage implements PageComponent {
         const descEl = document.getElementById('desc-input') as HTMLTextAreaElement | null;
         const siteEl = document.getElementById('site-input') as HTMLInputElement | null;
         const budgetEl = document.getElementById('budget-input') as HTMLInputElement | null;
-        
-        // Статус берем из чекбокса
         const statusEl = document.getElementById('ad-status-toggle') as HTMLInputElement | null;
 
         const title = titleEl?.value.trim() || '';
         const desc = descEl?.value.trim() || '';
         const site = siteEl?.value.trim() || '';
         const budget = budgetEl?.value.trim() || '';
-        
-        // Определяем статус. Если чекбокс заблокирован (бюджет < 100), он скорее всего false.
         const status = statusEl?.checked ? 'active' : 'non-active';
         
         const imgFile = this.selectedFile;
-
-        // Валидация
         document.querySelectorAll('.error-message').forEach((el) => el.remove());
         document.querySelectorAll('.input--error').forEach((el) =>
           el.classList.remove('input--error')
@@ -356,8 +307,6 @@ export default class ProjectDetailPage implements PageComponent {
         }
       });
     }
-
-    // --- ПРЕВЬЮ ---
     const titleInput = document.querySelector('#title-input') as HTMLInputElement | null;
     const descInput = document.querySelector('#desc-input') as HTMLTextAreaElement | null;
     const imgInput = document.getElementById('img-file') as HTMLInputElement | null;
