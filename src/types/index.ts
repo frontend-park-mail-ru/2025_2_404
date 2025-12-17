@@ -52,6 +52,8 @@ export interface Ad {
   start_at?: string;  
   createdAt?: string; 
   end_at?: string;
+  clicks?: number;
+  impressions?: number;
 }
 
 export interface AdFormData {

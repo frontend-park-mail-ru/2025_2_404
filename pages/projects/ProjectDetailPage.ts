@@ -122,7 +122,9 @@ export default class ProjectDetailPage implements PageComponent {
 
           status: adData.Status || adData.status || 'non-active',
           budget: rawBudget,
-          image_url: imageUrl 
+          image_url: imageUrl,
+          clicks: adData.Clicks ?? adData.clicks ?? 0,
+          impressions: adData.Impressions ?? adData.impressions ?? 0
       } as Ad;
 
       console.log('Project Data mapped:', this.project);

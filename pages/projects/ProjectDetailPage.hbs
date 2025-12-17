@@ -24,6 +24,16 @@
           <span class="ads__view-value" data-type="budget">{{project.budget}}₽</span>
         </div>
 
+        <div class="ads__view-row">
+          <span class="ads__view-label">Просмотры:</span>
+          <span class="ads__view-value" data-type="impressions">{{project.impressions}}</span>
+        </div>
+
+        <div class="ads__view-row">
+          <span class="ads__view-label">Клики:</span>
+          <span class="ads__view-value" data-type="clicks">{{project.clicks}}</span>
+        </div>
+
         {{#if project.start_at}}
         <div class="ads__view-row">
           <span class="ads__view-label">Начало:</span>
@@ -111,6 +121,20 @@
             <small id="status-lock-msg" style="color: #E53E3E; margin-top: 5px; display: {{#if isLowBudget}}block{{else}}none{{/if}};">
               Изменение статуса возможно только при бюджете больше 100₽
             </small>
+          </div>
+
+          <div class="ads__stats" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+            <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #666;">Статистика</h4>
+            <div style="display: flex; gap: 30px;">
+              <div>
+                <span style="color: #888; font-size: 12px;">Просмотры</span>
+                <div style="font-size: 18px; font-weight: bold; color: #333;">{{project.impressions}}</div>
+              </div>
+              <div>
+                <span style="color: #888; font-size: 12px;">Клики</span>
+                <div style="font-size: 18px; font-weight: bold; color: #7C54E8;">{{project.clicks}}</div>
+              </div>
+            </div>
           </div>
         {{/unless}}
 
