@@ -45,7 +45,7 @@
             <span class="status-badge {{#if (eq this.status 'active')}}status-active{{else}}status-stopped{{/if}}">
               {{#if (eq this.status 'active')}}Активно{{else}}Приостановлено{{/if}}
             </span>
-            <span class="project-card__date">Создано {{#if this.createdAt}}{{formatDate this.createdAt}}{{else}}—{{/if}}</span>
+            {{!-- <span class="project-card__date">Создано {{#if this.createdAt}}{{formatDate this.createdAt}}{{else}}—{{/if}}</span> --}}
           </div>
 
         </div>

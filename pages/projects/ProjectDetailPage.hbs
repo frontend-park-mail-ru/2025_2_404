@@ -24,17 +24,17 @@
           <span class="ads__view-value" data-type="budget">{{project.budget}}₽</span>
         </div>
 
-        {{#if project.dateStart}}
+        {{#if project.start_at}}
         <div class="ads__view-row">
           <span class="ads__view-label">Начало:</span>
-          <span class="ads__view-value">{{project.dateStart}}</span>
+          <span class="ads__view-value">{{formatDate project.start_at 'DD.MM.YYYY HH:mm'}}</span>
         </div>
         {{/if}}
         
-        {{#if project.dateEnd}}
+        {{#if project.end_at}}
         <div class="ads__view-row">
           <span class="ads__view-label">Окончание:</span>
-          <span class="ads__view-value">{{project.dateEnd}}</span>
+          <span class="ads__view-value">{{formatDate project.end_at 'DD.MM.YYYY HH:mm'}}</span>
         </div>
         {{/if}}
       </div>
@@ -123,11 +123,21 @@
           <small class="ads__upload-hint">Поддерживаются JPG и PNG (до 10 МБ)</small>
         </div>
 
-        <label>Даты проведения</label>
-        <div class="ads__dates">
-          <input class="ads__item" type="date" value="{{project.dateStart}}">
-          <input class="ads__item" type="date" value="{{project.dateEnd}}">
-        </div>
+        {{!-- <label>Даты проведения</label>
+<div class="ads__dates">
+  <input 
+    class="ads__item" 
+    id="start-date-input" 
+    type="datetime-local" 
+    value="{{formatDate project.start_at 'YYYY-MM-DDTHH:mm'}}"
+  >
+  <input 
+    class="ads__item" 
+    id="end-date-input" 
+    type="datetime-local" 
+    value="{{formatDate project.end_at 'YYYY-MM-DDTHH:mm'}}"
+  >
+</div> --}}
       </form>
     </div>
 

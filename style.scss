@@ -4622,3 +4622,44 @@ input:disabled + .slider {
   height: 24px;
   flex-shrink: 0;
 }
+
+/* Добавьте эти стили в ваш CSS файл */
+.copy-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #7C54E8;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    font-weight: 500;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    animation: slideIn 0.3s ease-out;
+}
+
+.copy-notification.show {
+    display: flex;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.copy-notification.success {
+    background-color: #7C54E8;
+}
+
+.copy-notification.error {
+    background-color: #E53E3E;
+}

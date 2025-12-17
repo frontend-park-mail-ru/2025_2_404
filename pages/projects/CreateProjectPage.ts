@@ -1,6 +1,8 @@
 import ConfirmationModal from '../components/ConfirmationModal';
 import { validateAdForm } from '../../public/utils/ValidateAdForm';
 import adsRepository from '../../public/repository/adsRepository';
+// 1. Импортируем репозиторий баланса
+import balanceRepository from '../../public/repository/balanceRepository'; 
 import type { HandlebarsTemplateDelegate, PageComponent } from '../../src/types';
 import type Router from '../../services/Router';
 
@@ -35,6 +37,10 @@ export default class CreateProjectPage implements PageComponent {
 
   async loadTemplate(): Promise<void> {
     if (this.template) return;
+    
+    // Регистрируем пустой хелпер, чтобы шаблон не падал, если он общий
+    Handlebars.registerHelper('formatDate', () => '');
+
     try {
       const response = await fetch('/pages/projects/ProjectDetailPage.hbs');
       if (!response.ok) throw new Error('Не удалось загрузить шаблон');
@@ -63,6 +69,11 @@ export default class CreateProjectPage implements PageComponent {
     const siteInput = document.querySelector('#site-input') as HTMLInputElement | null;
     const budgetInput = document.querySelector('#budget-input') as HTMLInputElement | null;
     const imgInput = document.querySelector('#img-file') as HTMLInputElement | null;
+    
+    // 2. Восстанавливаем селекторы дат
+    const startDateInput = document.querySelector('#start-date-input') as HTMLInputElement | null;
+    const endDateInput = document.querySelector('#end-date-input') as HTMLInputElement | null;
+    
     const previewTitle = document.querySelector('.ads__preview-card h4');
     const previewDesc = document.querySelector('.ads__preview-card p');
     const previewImg = document.querySelector('.ads__preview-card img') as HTMLImageElement | null;
@@ -111,12 +122,26 @@ export default class CreateProjectPage implements PageComponent {
       const desc = descInput?.value.trim() || '';
       const site = siteInput?.value.trim() || '';
       const budget = budgetInput?.value.trim() || '';
+      
+      // 3. Получаем значения дат
+      const startDate = startDateInput?.value || '';
+      const endDate = endDateInput?.value || '';
+      
       const imgFile = imgInput?.files?.[0] || null;
 
       document.querySelectorAll('.error-message').forEach((el) => el.remove());
       document.querySelectorAll('.input--error').forEach((el) => el.classList.remove('input--error'));
       
-      const errors = validateAdForm({ title, description: desc, domain: site, budget, file: imgFile });
+      // 4. Валидация формы
+      const errors = validateAdForm({ 
+        title, 
+        description: desc, 
+        domain: site, 
+        budget, 
+        file: imgFile,
+        start_at: startDate,
+        end_at: endDate
+      });
       
       const fieldMap: Record<string, string> = {
         title: 'title-input',
@@ -124,8 +149,31 @@ export default class CreateProjectPage implements PageComponent {
         domain: 'site-input',
         budget: 'budget-input',
         image: 'img-file',
+        start_at: 'start-date-input',
+        end_at: 'end-date-input',
       };
       
+      // === 5. НОВАЯ ЛОГИКА: ПРОВЕРКА БАЛАНСА ===
+      if (!errors.budget && budget) {
+        try {
+          const budgetValue = parseFloat(budget);
+          if (!isNaN(budgetValue) && budgetValue > 0) {
+            // Запрашиваем актуальный баланс
+            const balanceData = await balanceRepository.getBalanceAndTransactions();
+            const currentBalance = balanceData.balance;
+
+            if (budgetValue > currentBalance) {
+              errors.budget = `Недостаточно средств. Ваш баланс: ${currentBalance.toLocaleString('ru-RU')} ₽`;
+            }
+          }
+        } catch (err) {
+          console.error('Ошибка проверки баланса:', err);
+          // Можно решить, блокировать ли создание при ошибке сети, или нет.
+          // Пока просто логируем.
+        }
+      }
+      // ==========================================
+
       if (Object.keys(errors).length > 0) {
         console.warn('Ошибки валидации:', errors);
         for (const [key, msg] of Object.entries(errors)) {
@@ -146,6 +194,15 @@ export default class CreateProjectPage implements PageComponent {
       formData.append('content', desc);
       formData.append('target_url', site);
       formData.append('budget', budget);
+
+      // 6. Отправка дат (восстановлено)
+      if (startDate) {
+        formData.append('start_at', new Date(startDate).toISOString());
+      }
+      if (endDate) {
+        formData.append('end_at', new Date(endDate).toISOString());
+      }
+      
       if (imgFile) {
         formData.append('image', imgFile);
       }

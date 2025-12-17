@@ -1,6 +1,8 @@
 import ConfirmationModal from '../components/ConfirmationModal';
 import AddFundsModal from '../components/modals/AddFundsModal'; 
 import adsRepository from '../../public/repository/adsRepository';
+// Импортируем репозиторий баланса
+import balanceRepository from '../../public/repository/balanceRepository'; 
 import { validateAdForm } from '../../public/utils/ValidateAdForm';
 import type { HandlebarsTemplateDelegate, PageComponent, Ad, AddFundsModalProps } from '../../src/types';
 import type Router from '../../services/Router';
@@ -63,6 +65,10 @@ export default class ProjectDetailPage implements PageComponent {
 
   async loadTemplate(): Promise<void> {
     if (this.template) return;
+
+    // [DATE LOGIC OFF] Отключено, ставим заглушку
+    Handlebars.registerHelper('formatDate', () => '');
+
     try {
       const response = await fetch('/pages/projects/ProjectDetailPage.hbs');
       if (!response.ok) throw new Error('Не удалось загрузить шаблон ProjectDetailPage');
@@ -76,7 +82,7 @@ export default class ProjectDetailPage implements PageComponent {
   async render(): Promise<string> {
     await this.loadTemplate();
     try {
-      const response = await adsRepository.getById(this.projectId) as any;
+      const response: any = await adsRepository.getById(this.projectId);
       let adData: any = {};
 
       if (response?.data?.ad) {
@@ -86,37 +92,50 @@ export default class ProjectDetailPage implements PageComponent {
       } else {
           adData = response || {};
       }
-      const rawBudget = Number(adData.budget ?? adData.amount ?? adData.amount_for_ad ?? 0);
+
+      const rawBudget = Number(adData.Budget ?? adData.budget ?? 0);
+      
+      // Логика картинки "от обратного" (заглушка по умолчанию)
       const DEFAULT_IMG = '/public/assets/default.jpg';
-      let imageUrl = adData.image_url || '';
-      
+      let imageUrl = DEFAULT_IMG;
+
+      const rawImg = adData.ImgPath || adData.img_path || adData.image_url || '';
       const imageData = response?.data?.imageData || response?.imageData;
-      
-      if (!imageUrl && imageData && imageData.image_data) {
-          imageUrl = `data:${imageData.image_type || 'image/jpeg'};base64,${imageData.image_data}`;
-      } else if (!imageUrl) {
-          imageUrl = DEFAULT_IMG;
-      } else if (
-        !imageUrl.startsWith('data:image') &&
-        !imageUrl.startsWith('http') &&
-        !imageUrl.startsWith('/')
-      ) {
-        imageUrl = `data:image/jpeg;base64,${imageUrl}`;
+
+      if (imageData && imageData.image_data) {
+          imageUrl = `data:${imageData.content_type || 'image/jpeg'};base64,${imageData.image_data}`;
+      } else if (rawImg && (rawImg.startsWith('http') || rawImg.startsWith('/') || rawImg.startsWith('data:'))) {
+          imageUrl = rawImg;
+      } else if (rawImg) {
+          imageUrl = `data:image/jpeg;base64,${rawImg}`;
       }
+
       this.project = { 
-          ...adData, 
-          budget: rawBudget, 
+          id: adData.ID || adData.id || adData.add_id,
+          title: adData.Title || adData.title,
+          description: adData.Content || adData.content || adData.description,
+          domain: adData.TargetUrl || adData.target_url || adData.domain,
+          
+          // [DATE LOGIC OFF] 
+          // start_at: adData.StartAt || adData.start_at,
+          // end_at: adData.EndAt || adData.end_at,
+
+          status: adData.Status || adData.status || 'non-active',
+          budget: rawBudget,
           image_url: imageUrl 
       } as Ad;
+
+      console.log('Project Data mapped:', this.project);
+
       const isActive = this.project.status === 'active';
       const isLowBudget = rawBudget < 100;
 
       return this.template ? this.template({
         project: this.project,
-        isNew: !adData.id, 
+        isNew: !this.project.id, 
         isActive: isActive,
         isLowBudget: isLowBudget,
-        lastUpdated: !navigator.onLine && (this.project as any)?.timestamp ? (this.project as any).timestamp : null,
+        lastUpdated: null 
       }) : '';
 
     } catch (err) {
@@ -130,6 +149,11 @@ export default class ProjectDetailPage implements PageComponent {
     const statusText = document.getElementById('status-text');
     const lockMsg = document.getElementById('status-lock-msg'); 
     const budgetInput = document.getElementById('budget-input') as HTMLInputElement | null;
+    
+    // [DATE LOGIC OFF]
+    // const startDateInput = document.getElementById('start-date-input') as HTMLInputElement | null;
+    // const endDateInput = document.getElementById('end-date-input') as HTMLInputElement | null;
+
     const checkBudgetAndLockStatus = () => {
         if (!statusToggle || !lockMsg || !budgetInput) return;
         const currentBudget = parseFloat(budgetInput.value) || 0;
@@ -150,6 +174,7 @@ export default class ProjectDetailPage implements PageComponent {
         }
     };
     checkBudgetAndLockStatus();
+
     if (statusToggle && statusText) {
       statusToggle.addEventListener('change', () => {
         if (statusToggle.checked) {
@@ -161,6 +186,7 @@ export default class ProjectDetailPage implements PageComponent {
         }
       });
     }
+
     const addBudgetBtn = document.getElementById('add-budget-btn');
     if (addBudgetBtn) {
         addBudgetBtn.addEventListener('click', () => {
@@ -168,8 +194,26 @@ export default class ProjectDetailPage implements PageComponent {
                 title: 'Пополнение бюджета',
                 subtitle: 'Введите сумму, на которую хотите увеличить бюджет',
                 buttonText: 'Пополнить',
+                // === ПРОВЕРКА БАЛАНСА В МОДАЛКЕ ===
                 onConfirm: async (amount: number) => {
                     try {
+                        // 1. Получаем данные баланса
+                        const balanceData = await balanceRepository.getBalanceAndTransactions();
+                        const currentBalance = balanceData.balance;
+
+                        // 2. Если хотим пополнить больше, чем есть на счете
+                        if (amount > currentBalance) {
+                            new ConfirmationModal({ 
+                                message: `Недостаточно средств на счете.\nВаш баланс: ${currentBalance} ₽\nПополните счет в разделе "Баланс".`, 
+                                confirmText: 'ОК',
+                                cancelText: 'Закрыть',
+                                onConfirm: () => {} 
+                            }).show();
+                            // Прерываем выполнение, чтобы не отправлять запрос
+                            return;
+                        }
+
+                        // 3. Если денег хватает — пополняем
                         await adsRepository.addBudget(this.projectId, amount);
                         
                         if (this.project) {
@@ -187,7 +231,7 @@ export default class ProjectDetailPage implements PageComponent {
                             }).show();
                         }
                     } catch (e) {
-                        console.error(e);
+                        console.error('Ошибка пополнения:', e);
                     }
                 },
                 onCancel: () => {}
@@ -197,6 +241,7 @@ export default class ProjectDetailPage implements PageComponent {
             modal.show();
         });
     }
+
     document.querySelector('#back-btn')?.addEventListener('click', (e) => {
       e.preventDefault();
       routerInstance?.navigate('/projects');
@@ -231,6 +276,8 @@ export default class ProjectDetailPage implements PageComponent {
       e.preventDefault();
       this.togglePreview(false);
     });
+
+    // === Логика сохранения (Edit) ===
     const editBtn = document.querySelector('#edit-btn');
     if (editBtn) {
       editBtn.addEventListener('click', async (e) => {
@@ -248,13 +295,28 @@ export default class ProjectDetailPage implements PageComponent {
         const budget = budgetEl?.value.trim() || '';
         const status = statusEl?.checked ? 'active' : 'non-active';
         
+        // [DATE LOGIC OFF]
+        // const startDate = startDateInput?.value || '';
+        // const endDate = endDateInput?.value || '';
+        const startDate = '';
+        const endDate = '';
+
         const imgFile = this.selectedFile;
+
         document.querySelectorAll('.error-message').forEach((el) => el.remove());
         document.querySelectorAll('.input--error').forEach((el) =>
           el.classList.remove('input--error')
         );
 
-        const errors = validateAdForm({ title, description: desc, domain: site, budget, file: imgFile });
+        const errors = validateAdForm({ 
+            title, 
+            description: desc, 
+            domain: site, 
+            budget, 
+            file: imgFile,
+            start_at: startDate,
+            end_at: endDate
+        });
 
         const fieldMap: Record<string, string> = {
           title: 'title-input',
@@ -262,6 +324,8 @@ export default class ProjectDetailPage implements PageComponent {
           domain: 'site-input',
           budget: 'budget-input',
           image: 'img-file',
+          start_at: 'start-date-input',
+          end_at: 'end-date-input'
         };
 
         if (Object.keys(errors).length > 0) {
@@ -281,11 +345,20 @@ export default class ProjectDetailPage implements PageComponent {
 
         const formData = new FormData();
         formData.append('title', title);
-        formData.append('content', desc);
-        formData.append('target_url', site);
-        formData.append('budget', budget); 
+        formData.append('content', desc); 
+        formData.append('target_url', site); 
         formData.append('status', status); 
         
+        // [DATE LOGIC OFF]
+        /*
+        if (startDate) {
+            formData.append('start_at', new Date(startDate).toISOString());
+        }
+        if (endDate) {
+            formData.append('end_at', new Date(endDate).toISOString());
+        }
+        */
+
         if (imgFile) {
           formData.append('image', imgFile);
         }
@@ -306,6 +379,7 @@ export default class ProjectDetailPage implements PageComponent {
         }
       });
     }
+
     const titleInput = document.querySelector('#title-input') as HTMLInputElement | null;
     const descInput = document.querySelector('#desc-input') as HTMLTextAreaElement | null;
     const imgInput = document.getElementById('img-file') as HTMLInputElement | null;

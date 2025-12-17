@@ -8,6 +8,8 @@ export interface User {
   phone?: string;
   role?: 'advertiser' | 'publisher';
   avatar?: string;
+  ads_count?: number;
+  created_at?: string;
 }
 
 export interface LoginCredentials {
@@ -47,6 +49,9 @@ export interface Ad {
   image_url: string;
   budget?: number;
   timestamp?: string;
+  start_at?: string;  
+  createdAt?: string; 
+  end_at?: string;
 }
 
 export interface AdFormData {
@@ -55,6 +60,8 @@ export interface AdFormData {
   domain: string;
   budget: string | number;
   file?: File | null;
+  start_at?: string;
+  end_at?: string;
 }
 
 export interface AdValidationErrors {
@@ -63,6 +70,8 @@ export interface AdValidationErrors {
   domain?: string;
   budget?: string;
   image?: string;
+  start_at?: string;
+  end_at?: string;
 }
 
 export interface PageComponent {

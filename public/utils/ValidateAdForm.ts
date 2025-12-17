@@ -17,8 +17,8 @@ export function validateAdForm(formData: AdFormData): AdValidationErrors {
   }
 
   const budgetNum = Number(formData.budget);
-  if (!formData.budget || isNaN(budgetNum) || budgetNum <= 0) {
-    errors.budget = 'Бюджет должен быть числом больше 0₽';
+  if (!formData.budget || isNaN(budgetNum) || budgetNum < 0) {
+    errors.budget = 'Бюджет должен быть не отрицательным числом';
   }
 
   if (formData.file) {

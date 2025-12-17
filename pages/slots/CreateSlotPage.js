@@ -170,13 +170,112 @@ export default class CreateSlotPage {
             }
         });
     }
+    const showCopyNotification = (message, type = 'success') => {
+        // Удаляем старое уведомление, если есть
+        const oldNotification = document.querySelector('.copy-notification');
+        if (oldNotification) {
+            oldNotification.remove();
+        }
+
+        // Создаем новое уведомление
+        const notification = document.createElement('div');
+        notification.className = `copy-notification ${type}`;
+        
+        // Добавляем иконку в зависимости от типа
+        if (type === 'success') {
+            notification.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>${message}</span>
+            `;
+        } else {
+            notification.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>${message}</span>
+            `;
+        }
+
+        document.body.appendChild(notification);
+        
+        // Показываем уведомление
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+
+        // Автоматически скрываем через 3 секунды
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 3000);
+    };
+
+    // Обработчик копирования кода
     const copyBtn = document.querySelector('#copy-code-btn');
     if (copyBtn) {
-        copyBtn.addEventListener('click', () => {
-            const codeText = document.getElementById('embed-code').innerText;
-            if (!codeText) return;
+        // Удаляем старое событие (если оно было добавлено ранее)
+        copyBtn.replaceWith(copyBtn.cloneNode(true));
+        
+        // Получаем новую кнопку
+        const newCopyBtn = document.querySelector('#copy-code-btn');
+        
+        newCopyBtn.addEventListener('click', () => {
+            const codeElement = document.getElementById('embed-code');
+            const codeText = codeElement?.innerText || codeElement?.textContent;
+            
+            // Проверяем, что код не является заглушкой
+            if (!codeText || codeText.includes('ad-slot-...')) {
+                showCopyNotification('Сначала сгенерируйте код', 'error');
+                return;
+            }
+            
+            // Используем современный Clipboard API
             navigator.clipboard.writeText(codeText)
-                .catch(err => console.error(err));
+                .then(() => {
+                    // Показываем уведомление об успехе
+                    showCopyNotification('Код скопирован!');
+                    
+                    // Меняем иконку кнопки на время
+                    const originalHTML = newCopyBtn.innerHTML;
+                    newCopyBtn.innerHTML = `
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 6L9 17L4 12" stroke="#38A169" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    `;
+                    
+                    // Возвращаем исходную иконку через 2 секунды
+                    setTimeout(() => {
+                        newCopyBtn.innerHTML = originalHTML;
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Ошибка при копировании:', err);
+                    
+                    // Fallback для старых браузеров
+                    const textArea = document.createElement('textarea');
+                    textArea.value = codeText;
+                    textArea.style.position = 'fixed';
+                    textArea.style.opacity = '0';
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    
+                    try {
+                        const success = document.execCommand('copy');
+                        if (success) {
+                            showCopyNotification('Код скопирован!');
+                        } else {
+                            showCopyNotification('Не удалось скопировать код', 'error');
+                        }
+                    } catch (err) {
+                        showCopyNotification('Ошибка копирования', 'error');
+                    } finally {
+                        document.body.removeChild(textArea);
+                    }
+                });
         });
     }
     document.querySelector('#back-btn')?.addEventListener('click', (e) => {
@@ -202,5 +301,6 @@ export default class CreateSlotPage {
              } catch(e) { console.error(e); }
         });
     }
+    
   }
 }
