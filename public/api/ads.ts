@@ -75,9 +75,10 @@ export async function getAdById(ad_id: number | string): Promise<Ad> {
     description: ad.content,
     domain: ad.targeturl || ad.target_url || '',
     budget: ad.budget ?? ad.amount ?? ad.amount_for_ad ?? 0,
-
     image_url: normalizeImageUrl(ad, imageBase64, imageType),
     status: ad.status,
+    start_at: ad.start_at,
+    end_at: ad.end_at,
     timestamp: ad.start_at
   } as Ad;
 }

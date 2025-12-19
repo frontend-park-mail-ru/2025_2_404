@@ -1,5 +1,6 @@
 import { signin, signup } from '../public/api/auth';
 import { http } from '../public/api/http';
+import { getCookie, setCookie, removeCookie } from '../public/utils/cookie';
 import type { User, LoginCredentials, RegisterInfo } from '../src/types';
 
 interface ProfileResponse {
@@ -58,7 +59,7 @@ class AuthService {
   private onAuthChangeCallback: ((user: User | null) => void) | null = null;
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    return getCookie('token');
   }
 
   isAuthenticated(): boolean {
@@ -123,7 +124,7 @@ async loadProfile(): Promise<User | null> {
     
     const token = (res as any).token || (res as any).data?.token;
     if (token) {
-      localStorage.setItem('token', token);
+      setCookie('token', token);
     }
     
     return await this.loadProfile();
@@ -140,7 +141,7 @@ async loadProfile(): Promise<User | null> {
   }
 
   logout(): void {
-    localStorage.removeItem('token');
+    removeCookie('token');
     this.user = null;
 
     if (this.onAuthChangeCallback) this.onAuthChangeCallback(null);

@@ -34,19 +34,21 @@
           <span class="ads__view-value" data-type="clicks">{{project.clicks}}</span>
         </div>
 
+        {{!-- Временно скрыто пока бэкенд не исправит сохранение дат
         {{#if project.start_at}}
         <div class="ads__view-row">
           <span class="ads__view-label">Начало:</span>
-          <span class="ads__view-value">{{formatDate project.start_at 'DD.MM.YYYY HH:mm'}}</span>
+          <span class="ads__view-value">{{formatDate project.start_at 'DD.MM.YYYY'}}</span>
         </div>
         {{/if}}
         
         {{#if project.end_at}}
         <div class="ads__view-row">
           <span class="ads__view-label">Окончание:</span>
-          <span class="ads__view-value">{{formatDate project.end_at 'DD.MM.YYYY HH:mm'}}</span>
+          <span class="ads__view-value">{{formatDate project.end_at 'DD.MM.YYYY'}}</span>
         </div>
         {{/if}}
+        --}}
       </div>
 
       <button class="btn btn--primary ads__view-edit-btn" id="ads-edit-btn">
@@ -101,6 +103,25 @@
           {{/unless}}
         </div>
         
+        
+        {{!-- Временно скрыто пока бэкенд не исправит сохранение дат
+        <label>Даты проведения</label>
+        <div class="ads__dates">
+          <input 
+            class="ads__item" 
+            id="start-date-input" 
+            type="date" 
+            value="{{formatDate project.start_at 'YYYY-MM-DD'}}"
+          >
+          <input 
+            class="ads__item" 
+            id="end-date-input" 
+            type="date" 
+            value="{{formatDate project.end_at 'YYYY-MM-DD'}}"
+          >
+        </div>
+        --}}
+        
         {{#unless isNew}}
           <div class="ads__status-wrapper" style="margin-top: 20px;">
             <div class="ads__status-row" style="display: flex; align-items: center; gap: 15px;">
@@ -148,22 +169,6 @@
           <small class="ads__upload-hint">Реклама может содержать только одно изображение</small>
 
         </div>
-
-        {{!-- <label>Даты проведения</label>
-<div class="ads__dates">
-  <input 
-    class="ads__item" 
-    id="start-date-input" 
-    type="datetime-local" 
-    value="{{formatDate project.start_at 'YYYY-MM-DDTHH:mm'}}"
-  >
-  <input 
-    class="ads__item" 
-    id="end-date-input" 
-    type="datetime-local" 
-    value="{{formatDate project.end_at 'YYYY-MM-DDTHH:mm'}}"
-  >
-</div> --}}
       </form>
     </div>
 

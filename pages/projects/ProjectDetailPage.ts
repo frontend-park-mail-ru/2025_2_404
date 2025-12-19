@@ -66,8 +66,30 @@ export default class ProjectDetailPage implements PageComponent {
   async loadTemplate(): Promise<void> {
     if (this.template) return;
 
-    // [DATE LOGIC OFF] Отключено, ставим заглушку
-    Handlebars.registerHelper('formatDate', () => '');
+    // Хелпер для форматирования даты
+    Handlebars.registerHelper('formatDate', (dateStr: string, format: string) => {
+      if (!dateStr) return '';
+      // Игнорируем "нулевую" дату Go (0001-01-01)
+      if (dateStr.startsWith('0001-01-01')) return '';
+      try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return '';
+        // Дополнительная проверка на нулевой год
+        if (date.getFullYear() < 1970) return '';
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        
+        if (format === 'YYYY-MM-DD') {
+          // Формат для date input
+          return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+        } else if (format === 'DD.MM.YYYY') {
+          // Формат для отображения (без времени)
+          return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()}`;
+        }
+        return dateStr;
+      } catch {
+        return '';
+      }
+    });
 
     try {
       const response = await fetch('/pages/projects/ProjectDetailPage.hbs');
@@ -116,9 +138,8 @@ export default class ProjectDetailPage implements PageComponent {
           description: adData.Content || adData.content || adData.description,
           domain: adData.TargetUrl || adData.target_url || adData.domain,
           
-          // [DATE LOGIC OFF] 
-          // start_at: adData.StartAt || adData.start_at,
-          // end_at: adData.EndAt || adData.end_at,
+          start_at: adData.StartAt || adData.start_at,
+          end_at: adData.EndAt || adData.end_at,
 
           status: adData.Status || adData.status || 'non-active',
           budget: rawBudget,
@@ -152,9 +173,8 @@ export default class ProjectDetailPage implements PageComponent {
     const lockMsg = document.getElementById('status-lock-msg'); 
     const budgetInput = document.getElementById('budget-input') as HTMLInputElement | null;
     
-    // [DATE LOGIC OFF]
-    // const startDateInput = document.getElementById('start-date-input') as HTMLInputElement | null;
-    // const endDateInput = document.getElementById('end-date-input') as HTMLInputElement | null;
+    const startDateInput = document.getElementById('start-date-input') as HTMLInputElement | null;
+    const endDateInput = document.getElementById('end-date-input') as HTMLInputElement | null;
 
     const checkBudgetAndLockStatus = () => {
         if (!statusToggle || !lockMsg || !budgetInput) return;
@@ -297,11 +317,8 @@ export default class ProjectDetailPage implements PageComponent {
         const budget = budgetEl?.value.trim() || '';
         const status = statusEl?.checked ? 'active' : 'non-active';
         
-        // [DATE LOGIC OFF]
-        // const startDate = startDateInput?.value || '';
-        // const endDate = endDateInput?.value || '';
-        const startDate = '';
-        const endDate = '';
+        const startDate = startDateInput?.value || '';
+        const endDate = endDateInput?.value || '';
 
         const imgFile = this.selectedFile;
 
@@ -351,15 +368,12 @@ export default class ProjectDetailPage implements PageComponent {
         formData.append('target_url', site); 
         formData.append('status', status); 
         
-        // [DATE LOGIC OFF]
-        /*
         if (startDate) {
-            formData.append('start_at', new Date(startDate).toISOString());
+            formData.append('start_at', new Date(startDate).toISOString().replace('.000Z', 'Z'));
         }
         if (endDate) {
-            formData.append('end_at', new Date(endDate).toISOString());
+            formData.append('end_at', new Date(endDate).toISOString().replace('.000Z', 'Z'));
         }
-        */
 
         if (imgFile) {
           formData.append('image', imgFile);

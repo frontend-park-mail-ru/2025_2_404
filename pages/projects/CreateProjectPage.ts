@@ -38,8 +38,24 @@ export default class CreateProjectPage implements PageComponent {
   async loadTemplate(): Promise<void> {
     if (this.template) return;
     
-    // Регистрируем пустой хелпер, чтобы шаблон не падал, если он общий
-    Handlebars.registerHelper('formatDate', () => '');
+    // Хелпер для форматирования даты
+    Handlebars.registerHelper('formatDate', (dateStr: string, format: string) => {
+      if (!dateStr) return '';
+      try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return '';
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        
+        if (format === 'YYYY-MM-DD') {
+          return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+        } else if (format === 'DD.MM.YYYY') {
+          return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()}`;
+        }
+        return dateStr;
+      } catch {
+        return '';
+      }
+    });
 
     try {
       const response = await fetch('/pages/projects/ProjectDetailPage.hbs');
@@ -197,10 +213,11 @@ export default class CreateProjectPage implements PageComponent {
 
       // 6. Отправка дат (восстановлено)
       if (startDate) {
-        formData.append('start_at', new Date(startDate).toISOString());
+        // Формат без миллисекунд: 2025-12-20T00:00:00Z
+        formData.append('start_at', new Date(startDate).toISOString().replace('.000Z', 'Z'));
       }
       if (endDate) {
-        formData.append('end_at', new Date(endDate).toISOString());
+        formData.append('end_at', new Date(endDate).toISOString().replace('.000Z', 'Z'));
       }
       
       if (imgFile) {

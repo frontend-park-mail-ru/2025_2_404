@@ -1,3 +1,5 @@
+import { getCookie } from '../utils/cookie';
+
 export const BASE = "";
 
 
@@ -8,7 +10,7 @@ interface RequestInit {
 }
 
 export async function request<T = unknown>(path: string, init: RequestInit = {}): Promise<T> {
-  const token = localStorage.getItem('token');
+  const token = getCookie('token');
   const isFormData = init.body instanceof FormData;
   const headers: Record<string, string> = { ...init.headers };
   

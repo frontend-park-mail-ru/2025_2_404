@@ -28,5 +28,33 @@ export function validateAdForm(formData: AdFormData): AdValidationErrors {
     }
   }
 
+  // Валидация дат
+  const now = new Date();
+  now.setHours(0, 0, 0, 0); // Начало текущего дня
+  
+  const startDate = formData.start_at ? new Date(formData.start_at) : null;
+  const endDate = formData.end_at ? new Date(formData.end_at) : null;
+  
+  if (startDate) {
+    if (startDate < now) {
+      errors.start_at = 'Дата начала не может быть в прошлом';
+    }
+  }
+  
+  if (endDate) {
+    if (startDate && endDate < startDate) {
+      errors.end_at = 'Дата окончания должна быть позже даты начала';
+    }
+    
+    if (startDate) {
+      const oneYearLater = new Date(startDate);
+      oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+      
+      if (endDate > oneYearLater) {
+        errors.end_at = 'Длительность рекламы не может превышать 1 год';
+      }
+    }
+  }
+
   return errors;
 }
