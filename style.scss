@@ -231,7 +231,7 @@ body {
 
   &__avatar {
     width: 40px;
-    height: auto;
+    height: 40px;
     border-radius: 50%;
     border: 2px solid var(--primary-purple);
     object-fit: cover;
@@ -247,6 +247,7 @@ body {
 
     &__avatar {
       width: 35px;
+      height: 35px;
     }
   }
 }

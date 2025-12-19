@@ -54,6 +54,11 @@ export const http = {
     body: body instanceof FormData ? body : JSON.stringify(body ?? {}),
   }),
 
+  patch: <T = unknown>(path: string, body?: unknown): Promise<T> => request<T>(path, {
+    method: 'PATCH',
+    body: body instanceof FormData ? body : JSON.stringify(body ?? {}),
+  }),
+
   delete: <T = unknown>(path: string): Promise<T> => request<T>(path, { method: 'DELETE' }),
   
   putFormData: <T = unknown>(path: string, formData: FormData): Promise<T> => request<T>(path, {

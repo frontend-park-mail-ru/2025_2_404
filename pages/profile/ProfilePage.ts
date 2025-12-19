@@ -56,7 +56,7 @@ export default class ProfilePage implements PageComponent {
       this.components.loginInput = new Input({
         id: 'profile-login',
         label: 'Логин',
-        placeholder: 'Введите логин',
+        placeholder: 'ivan.petrov',
         value: this.user?.username || '',
         validationFn: (value: string): string | null => {
           value = value.trim();
@@ -75,7 +75,7 @@ export default class ProfilePage implements PageComponent {
         id: 'profile-email',
         type: 'email',
         label: 'Почта',
-        placeholder: 'Введите почту',
+        placeholder: 'ivan.petrov@example.com',
         value: this.user?.email || '',
         validationFn: (value: string): string | null => {
           value = value.trim();
@@ -92,18 +92,38 @@ export default class ProfilePage implements PageComponent {
         label: 'Новый пароль',
         placeholder: 'Оставьте пустым, если не меняете',
         type: 'password',
+        showPasswordToggle: true,
+        validationFn: (value: string): string | null => {
+          value = value.trim();
+          // Пароль опционален при редактировании профиля
+          if (!value) return null;
+          if (value.length < 8) return 'Пароль должен содержать минимум 8 символов';
+          if (value.length > 100) return 'Пароль слишком длинный';
+          const hasUpperCase = /[A-Z]/.test(value);
+          const hasLowerCase = /[a-z]/.test(value);
+          if (!hasUpperCase || !hasLowerCase) return 'Пароль должен содержать буквы разного регистра';
+          const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value);
+          if (!hasSpecialChar) return 'Пароль должен содержать хотя бы один спецсимвол';
+          return null;
+        },
       });
 
       this.components.firstNameInput = new Input({
         id: 'profile-firstname',
         label: 'Имя',
-        placeholder: 'Введите ваше имя',
+        placeholder: 'Иван',
         value: this.user?.firstName || '',
         validationFn: (value: string): string | null => {
           value = value.trim();
-          if (value && value.length < 2) return 'Имя должно содержать минимум 2 символа';
-          if (value && value.length > 50) return 'Имя слишком длинное';
-          if (value && !/^[a-zA-Zа-яА-ЯёЁ\s-]+$/.test(value)) return 'Имя может содержать только буквы и дефисы';
+          if (!value) return null;
+          if (value.length < 2) return 'Имя должно содержать минимум 2 символа';
+          if (value.length > 50) return 'Имя слишком длинное';
+          // Должна быть хотя бы одна буква
+          if (!/[a-zA-Zа-яА-ЯёЁ]/.test(value)) return 'Имя должно содержать хотя бы одну букву';
+          // Разрешены только буквы, пробелы и дефисы
+          if (!/^[a-zA-Zа-яА-ЯёЁ\s-]+$/.test(value)) return 'Имя может содержать только буквы и дефисы';
+          // Дефис не в начале/конце и не несколько подряд
+          if (/^-|-$|--/.test(value)) return 'Некорректное использование дефиса';
           return null;
         },
       });
@@ -111,13 +131,19 @@ export default class ProfilePage implements PageComponent {
       this.components.lastNameInput = new Input({
         id: 'profile-lastname',
         label: 'Фамилия',
-        placeholder: 'Введите вашу фамилию',
+        placeholder: 'Петров',
         value: this.user?.lastName || '',
         validationFn: (value: string): string | null => {
           value = value.trim();
-          if (value && value.length < 2) return 'Фамилия должна содержать минимум 2 символа';
-          if (value && value.length > 50) return 'Фамилия слишком длинная';
-          if (value && !/^[a-zA-Zа-яА-ЯёЁ\s-]+$/.test(value)) return 'Фамилия может содержать только буквы и дефисы';
+          if (!value) return null;
+          if (value.length < 2) return 'Фамилия должна содержать минимум 2 символа';
+          if (value.length > 50) return 'Фамилия слишком длинная';
+          // Должна быть хотя бы одна буква
+          if (!/[a-zA-Zа-яА-ЯёЁ]/.test(value)) return 'Фамилия должна содержать хотя бы одну букву';
+          // Разрешены только буквы, пробелы и дефисы
+          if (!/^[a-zA-Zа-яА-ЯёЁ\s-]+$/.test(value)) return 'Фамилия может содержать только буквы и дефисы';
+          // Дефис не в начале/конце и не несколько подряд
+          if (/^-|-$|--/.test(value)) return 'Некорректное использование дефиса';
           return null;
         },
       });
@@ -125,7 +151,7 @@ export default class ProfilePage implements PageComponent {
       this.components.companyInput = new Input({
         id: 'profile-company',
         label: 'Компания',
-        placeholder: 'Введите название компании',
+        placeholder: 'ООО «Ромашка»',
         value: this.user?.company || '',
         validationFn: (value: string): string | null => {
           value = value.trim();
@@ -137,14 +163,17 @@ export default class ProfilePage implements PageComponent {
       this.components.phoneInput = new Input({
         id: 'profile-phone',
         label: 'Номер телефона',
-        placeholder: 'Введите ваш номер телефона',
+        placeholder: '+7-900-123-45-67',
         type: 'tel',
         value: this.user?.phone || '',
         validationFn: (value: string): string | null => {
           value = value.trim();
-          if (value && !/^[\d\s\-\+\(\)]+$/.test(value)) return 'Номер телефона может содержать только цифры, пробелы и символы +-()';
-          if (value && value.replace(/\D/g, '').length < 10) return 'Номер телефона должен содержать минимум 10 цифр';
-          if (value && value.replace(/\D/g, '').length > 15) return 'Номер телефона слишком длинный';
+          if (!value) return null;
+          // Формат: (+7 или 8)-XXX-XXX-XX-XX (тире обязательны)
+          const phoneRegex = /^(\+7|8)-\d{3}-\d{3}-\d{2}-\d{2}$/;
+          if (!phoneRegex.test(value)) {
+            return 'Формат: +7-XXX-XXX-XX-XX или 8-XXX-XXX-XX-XX';
+          }
           return null;
         },
       });
@@ -235,7 +264,26 @@ export default class ProfilePage implements PageComponent {
   private _handleFileChange(event: Event): void {
     const target = event.target as HTMLInputElement;
     if (target.files && target.files[0]) {
-      this.selectedFile = target.files[0];
+      const file = target.files[0];
+      
+      // Валидация типа файла
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        this.showAvatarError('Поддерживаются только JPG, PNG или GIF');
+        target.value = '';
+        return;
+      }
+      
+      // Валидация размера файла (максимум 5 МБ)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        this.showAvatarError('Файл слишком большой. Максимум 5 МБ');
+        target.value = '';
+        return;
+      }
+      
+      this.clearAvatarError();
+      this.selectedFile = file;
       const reader = new FileReader();
       reader.onload = (e) => {
         const previewElement = document.getElementById('profile-avatar-preview') as HTMLImageElement | null;
@@ -244,6 +292,28 @@ export default class ProfilePage implements PageComponent {
         }
       };
       reader.readAsDataURL(this.selectedFile);
+    }
+  }
+
+  private showAvatarError(message: string): void {
+    let errorEl = document.getElementById('avatar-error');
+    if (!errorEl) {
+      errorEl = document.createElement('div');
+      errorEl.id = 'avatar-error';
+      errorEl.className = 'error-message';
+      errorEl.style.color = 'red';
+      const uploadLabel = document.querySelector('.profile__button-upload');
+      if (uploadLabel) {
+        uploadLabel.parentNode?.insertBefore(errorEl, uploadLabel.nextSibling);
+      }
+    }
+    errorEl.textContent = message;
+  }
+
+  private clearAvatarError(): void {
+    const errorEl = document.getElementById('avatar-error');
+    if (errorEl) {
+      errorEl.textContent = '';
     }
   }
 
@@ -292,6 +362,7 @@ export default class ProfilePage implements PageComponent {
     let isValidated = true;
     const loginEl = document.getElementById('profile-login') as HTMLInputElement | null;
     const emailEl = document.getElementById('profile-email') as HTMLInputElement | null;
+    const passwordEl = document.getElementById('profile-password') as HTMLInputElement | null;
     const firstNameEl = document.getElementById('profile-firstname') as HTMLInputElement | null;
     const lastNameEl = document.getElementById('profile-lastname') as HTMLInputElement | null;
     const companyEl = document.getElementById('profile-company') as HTMLInputElement | null;
@@ -299,6 +370,7 @@ export default class ProfilePage implements PageComponent {
 
     const loginValue = loginEl?.value || '';
     const emailValue = emailEl?.value || '';
+    const passwordValue = passwordEl?.value || '';
     const firstNameValue = firstNameEl?.value || '';
     const lastNameValue = lastNameEl?.value || '';
     const companyValue = companyEl?.value || '';
@@ -306,6 +378,7 @@ export default class ProfilePage implements PageComponent {
 
     if (this.components.loginInput?.validate(loginValue)) isValidated = false;
     if (this.components.emailInput?.validate(emailValue)) isValidated = false;
+    if (this.components.passwordInput?.validate(passwordValue)) isValidated = false;
     if (this.components.firstNameInput?.validate(firstNameValue)) isValidated = false;
     if (this.components.lastNameInput?.validate(lastNameValue)) isValidated = false;
     if (this.components.companyInput?.validate(companyValue)) isValidated = false;
@@ -322,6 +395,11 @@ export default class ProfilePage implements PageComponent {
     formData.append('last_name', lastNameValue);
     formData.append('phone', phoneValue);
     formData.append('company', companyValue);
+
+    // Отправляем пароль только если он был введён
+    if (passwordValue.trim()) {
+      formData.append('password', passwordValue);
+    }
 
     if (this.selectedFile) {
       formData.append('avatar', this.selectedFile);

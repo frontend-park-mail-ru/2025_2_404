@@ -397,17 +397,65 @@ export default class ProjectDetailPage implements PageComponent {
       if (previewDesc) previewDesc.textContent = descInput.value || 'Без описания';
     });
 
+    // imgInput?.addEventListener('change', (e) => {
+    //   const target = e.target as HTMLInputElement;
+    //   const file = target.files?.[0];
+    //   if (file) {
+    //     this.selectedFile = file;
+    //     const reader = new FileReader();
+    //     reader.onload = (event) => {
+    //       if (previewImg && event.target?.result) previewImg.src = event.target.result as string;
+    //     };
+    //     reader.readAsDataURL(file);
+    //   }
+    // });
+
+    const uploadBox = document.getElementById('upload-box');
+    const DEFAULT_IMG = '/public/assets/default.jpg';
+    let skipModalCheck = false; // Флаг для пропуска проверки после подтверждения
+
+    // Перехватываем клик на область загрузки
+    uploadBox?.addEventListener('click', (e) => {
+      // Если клик программный (после подтверждения в модалке) — пропускаем
+      if (skipModalCheck) {
+        skipModalCheck = false;
+        return;
+      }
+
+      const hasExistingImage = this.project?.image_url && this.project.image_url !== DEFAULT_IMG;
+      
+      if (hasExistingImage) {
+        e.preventDefault(); // Блокируем открытие диалога выбора файла
+        
+        new ConfirmationModal({
+          message: 'У объявления уже есть изображение, хотите заменить текущее?',
+          confirmText: 'Заменить',
+          cancelText: 'Оставить текущее',
+          onConfirm: () => {
+            // Устанавливаем флаг и программно открываем диалог
+            skipModalCheck = true;
+            imgInput?.click();
+          },
+          onCancel: () => {}
+        }).show();
+      }
+      // Если изображения нет — клик проходит как обычно и открывает диалог
+    });
+
+    // Обработчик выбора файла — просто применяем изображение
     imgInput?.addEventListener('change', (e) => {
       const target = e.target as HTMLInputElement;
       const file = target.files?.[0];
-      if (file) {
-        this.selectedFile = file;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          if (previewImg && event.target?.result) previewImg.src = event.target.result as string;
-        };
-        reader.readAsDataURL(file);
-      }
+      if (!file) return;
+    
+      this.selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (previewImg && event.target?.result) {
+          previewImg.src = event.target.result as string;
+        }
+      };
+      reader.readAsDataURL(file);
     });
   }
 

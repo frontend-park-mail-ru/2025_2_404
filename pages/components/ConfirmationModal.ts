@@ -9,14 +9,17 @@ export default class ConfirmationModal {
   confirmButton: Button;
   cancelButton: Button | null;
 
-  constructor({ message, onConfirm, onCancel }: ConfirmationModalProps) {
+  constructor({ message, onConfirm, onCancel, confirmText, cancelText }: ConfirmationModalProps) {
     this.message = message;
     this.onConfirm = onConfirm;
     this.onCancel = onCancel;
 
+    const defaultConfirmText = this.onCancel ? 'Да, выйти' : 'Ок';
+    const defaultCancelText = 'Нет, остаться';
+
     this.confirmButton = new Button({
       id: 'confirm-btn',
-      text: this.onCancel ? 'Да, выйти' : 'Ок',
+      text: confirmText ?? defaultConfirmText,
       variant: 'secondary',
       onClick: () => {
         if (this.onConfirm) this.onConfirm();
@@ -27,7 +30,7 @@ export default class ConfirmationModal {
     if (this.onCancel) {
       this.cancelButton = new Button({
         id: 'cancel-btn',
-        text: 'Нет, остаться',
+        text: cancelText ?? defaultCancelText,
         variant: 'primary',
         onClick: () => {
           this.onCancel!();
