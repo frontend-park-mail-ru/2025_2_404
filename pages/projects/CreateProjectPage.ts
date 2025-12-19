@@ -143,6 +143,14 @@ export default class CreateProjectPage implements PageComponent {
     
     document.querySelector('#back-btn')?.addEventListener('click', (e) => {
       e.preventDefault();
+      localStorage.setItem('projects_tab', 'ads');
+      routerInstance?.navigate('/projects');
+    });
+
+    // Обработчик хлебных крошек
+    document.querySelector('#breadcrumb-ads')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.setItem('projects_tab', 'ads');
       routerInstance?.navigate('/projects');
     });
 
@@ -257,7 +265,10 @@ export default class CreateProjectPage implements PageComponent {
         await adsRepository.create(formData);
         new ConfirmationModal({
           message: 'Проект успешно создан',
-          onConfirm: () => routerInstance?.navigate('/projects'),
+          onConfirm: () => {
+            localStorage.setItem('projects_tab', 'ads');
+            routerInstance?.navigate('/projects');
+          },
         }).show();
       } catch (err) {
         console.error('Ошибка при создании:', err);

@@ -1,14 +1,32 @@
 import type { Routes, RouteMatch, PageComponent, PageConstructor } from '../src/types';
+import { getCookie } from '../public/utils/cookie';
 
 export default class Router {
   routes: Routes;
   rootElement: HTMLElement;
   private onRouteChangeCallback: ((path: string) => void) | null = null;
+  
+  // Публичные маршруты, доступные без авторизации
+  private publicRoutes: string[] = ['/', '/info'];
 
   constructor(routes: Routes, rootElement: HTMLElement) {
     this.routes = routes;
     this.rootElement = rootElement;
     this.initEventListeners();
+  }
+  
+  /**
+   * Проверяет, авторизован ли пользователь
+   */
+  private isAuthenticated(): boolean {
+    return !!getCookie('token');
+  }
+  
+  /**
+   * Проверяет, является ли маршрут публичным
+   */
+  private isPublicRoute(path: string): boolean {
+    return this.publicRoutes.includes(path);
   }
 
   onRouteChange(callback: (path: string) => void): void {
@@ -40,6 +58,13 @@ export default class Router {
     const [pathname, hash] = path.split('#');
     const currentPathname = window.location.pathname;
     
+    // Проверка авторизации перед навигацией на защищённый маршрут
+    if (!this.isPublicRoute(pathname) && !this.isAuthenticated()) {
+      history.pushState({}, '', '/');
+      this.loadRoute();
+      return;
+    }
+    
     if (currentPathname === pathname) {
       if (hash) {
         history.pushState({}, '', path);
@@ -54,6 +79,13 @@ export default class Router {
 
   async loadRoute(): Promise<void> {
     const currentPath = window.location.pathname;
+    
+    // Проверка авторизации для защищённых маршрутов
+    if (!this.isPublicRoute(currentPath) && !this.isAuthenticated()) {
+      this.navigate('/');
+      return;
+    }
+    
     let routeFound: RouteMatch | null = null;
     
     for (const routePath in this.routes) {

@@ -1,16 +1,16 @@
 <div class="slot-stats">
   <!-- Хлебные крошки -->
   <nav class="slot-stats__breadcrumbs">
-    <a href="/slots" class="slot-stats__breadcrumb-link">Мои слоты</a>
+    <a href="/projects" class="slot-stats__breadcrumb-link" id="breadcrumb-slots">Мои слоты</a>
     <span class="slot-stats__breadcrumb-sep">›</span>
     <a href="/slots/{{slot.id}}" class="slot-stats__breadcrumb-link">{{slot.name}}</a>
     <span class="slot-stats__breadcrumb-sep">›</span>
-    <span class="slot-stats__breadcrumb-current">Статистика по {{slot.name}}</span>
+    <span class="slot-stats__breadcrumb-current">Статистика</span>
   </nav>
 
   <!-- Заголовок -->
   <div class="slot-stats__header">
-    <h1 class="slot-stats__title">Статистика по {{slot.name}}</h1>
+    <h1 class="slot-stats__title">Статистика: {{slot.name}}</h1>
     <span class="slot-stats__status slot-stats__status--{{slot.statusClass}}">{{slot.status}}</span>
   </div>
 

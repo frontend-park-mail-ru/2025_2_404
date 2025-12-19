@@ -1,4 +1,10 @@
 <div class="ads">
+  <div class="breadcrumbs" style="margin-bottom: 20px; grid-column: 1 / -1;">
+    <a href="/projects" id="breadcrumb-ads" class="breadcrumbs__link">Мои кампании</a>
+    <span class="breadcrumbs__separator">›</span>
+    <span class="breadcrumbs__current">{{#if isNew}}Новая кампания{{else}}{{project.title}}{{/if}}</span>
+  </div>
+
   {{#unless isNew}}
   <div class="ads__view-mode" id="ads-view-mode">
     <div class="ads__view-card">

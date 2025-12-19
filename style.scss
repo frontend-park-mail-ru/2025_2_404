@@ -518,8 +518,12 @@ body {
     max-width: 800px;
     padding: 30px;
 
+    .breadcrumbs {
+      order: -2; // Хлебные крошки всегда сверху
+    }
+
     &__preview-card {
-      order: -1; // Preview сверху
+      order: -1; // Preview под хлебными крошками
     }
 
     &__preview-image {
@@ -535,6 +539,14 @@ body {
     flex-direction: column;
     gap: 16px;
     padding: 16px;
+
+    .breadcrumbs {
+      order: -2; // Хлебные крошки всегда сверху
+    }
+
+    &__preview-card {
+      order: -1; // Preview под хлебными крошками
+    }
 
     // === Режим просмотра ===
     &__view-mode {
@@ -2235,15 +2247,17 @@ body {
     }
 
     &-item {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       background-color: #f3f4f6;
       border-radius: 16px;
       margin-bottom: 15px;
       padding: 20px;
 
-
       &.active {
         .landing__faq-answer {
-          max-height: 200px;
+          grid-template-rows: 1fr;
           margin-top: 15px;
         }
 
@@ -2265,13 +2279,20 @@ body {
     &-toggle {
       font-size: 28px;
       font-weight: bold;
+      transition: transform 0.4s ease;
     }
 
     &-answer {
-      max-height: 0;
+      display: grid;
+      grid-template-rows: 0fr;
       overflow: hidden;
-      transition: max-height 0.3s ease-out;
+      transition: grid-template-rows 0.4s ease, margin-top 0.4s ease;
       margin-top: 0;
+
+      > * {
+        overflow: hidden;
+        min-height: 0;
+      }
     }
 
   }
@@ -3848,11 +3869,12 @@ body {
   overflow: hidden;
 
   &__header {
-    padding: 40px 50px 30px 50px;
+    padding: 32px 40px;
     border-bottom: 1px solid #E2E8F0;
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
+    gap: 20px;
   }
 
   &__body {
@@ -3878,38 +3900,60 @@ body {
 .slot-title-group {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  gap: 0; // Предотвращаем скачки UI
+  width: auto;
+  gap: 0;
+  position: relative;
+
+  .error-message--reserved {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-height: 0;
+    margin-block: 0;
+    white-space: nowrap;
+    
+    &.is-visible {
+      min-height: 16px;
+    }
+  }
 }
 
 .slot-title-wrapper {
-  display: flex;
+  display: inline-flex;
+  flex-direction: row;
   align-items: center;
-  gap: 10px;
-  width: fit-content;
+  gap: 8px;
+  width: auto;
   max-width: 100%;
 }
 
 .slot-title-input {
-  font-size: 32px;
+  font-size: 28px;
   font-family: "Manrope", sans-serif;
-  font-weight: 600;
+  font-weight: 700;
   color: #2D3748;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  padding: 4px 10px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 8px 16px;
   background: transparent;
   outline: none;
   width: auto;
-  min-width: 150px;
+  min-width: 100px;
   max-width: 100%;
-  transition: border 0.2s, color 0.2s;
-  margin-left: -10px;
+  transition: all 0.25s ease;
+  margin-left: -16px;
+  margin-top: -4px;
+  letter-spacing: -0.5px;
+
+  &:hover {
+    background-color: rgba(124, 84, 232, 0.04);
+  }
 
   &:focus {
     color: #7C54E8;
-    border-color: #D6BCFA;
-    background-color: #F8F5FF;
+    border-color: #7C54E8;
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(124, 84, 232, 0.15);
   }
 }
 
@@ -3917,19 +3961,26 @@ body {
   cursor: pointer;
   display: flex;
   align-items: center;
-  padding: 8px;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 4px;
   border-radius: 8px;
-  transition: background 0.2s;
+  transition: background 0.2s, box-shadow 0.2s;
+  background: rgba(124, 84, 232, 0.08);
+  flex-shrink: 0;
 
   &:hover {
-    background-color: #F3F0FF;
+    background-color: rgba(124, 84, 232, 0.15);
+    box-shadow: 0 2px 8px rgba(124, 84, 232, 0.2);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
   }
 
   svg path {
-    stroke: #A0AEC0;
-  }
-
-  &:hover svg path {
     stroke: #7C54E8;
   }
 }
@@ -4319,29 +4370,32 @@ body {
 // Options Menu
 .card-options-wrapper {
   position: relative;
+  flex-shrink: 0;
 }
 
 .options-btn {
-  background: #F3F0FF;
+  background: rgba(124, 84, 232, 0.08);
   border: none;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: 12px;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
 
   &:hover {
-    background: #E0D7FE;
+    background: rgba(124, 84, 232, 0.15);
+    box-shadow: 0 2px 8px rgba(124, 84, 232, 0.2);
   }
 }
 
 .dots {
   color: #7C54E8;
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 2px;
   line-height: 0;
 }
 
@@ -4443,40 +4497,62 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    min-height: 32px;
+    box-sizing: border-box;
   }
 
   .slot-view-title-wrapper {
-    display: flex;
+    display: inline-flex;
+    flex-direction: row;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    flex-shrink: 1;
+    min-width: 0;
+    min-height: 32px;
   }
 
   .slot-view-title {
-    font-size: 24px;
+    font-size: 16px;
     font-weight: 600;
     color: #2D3748;
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 32px;
   }
 
   .slot-view-edit-icon {
     cursor: pointer;
     display: flex;
     align-items: center;
-    padding: 8px;
-    border-radius: 8px;
-    transition: background 0.2s;
-    background: none;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 4px;
+    border-radius: 6px;
+    transition: background 0.2s, box-shadow 0.2s;
+    background: rgba(124, 84, 232, 0.08);
     border: none;
+    flex-shrink: 0;
+    box-sizing: border-box;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
 
     &:hover {
-      background-color: #F3F0FF;
+      background-color: rgba(124, 84, 232, 0.15);
+      box-shadow: 0 2px 8px rgba(124, 84, 232, 0.2);
+    }
+
+    svg {
+      width: 18px;
+      height: 18px;
     }
 
     svg path {
-      stroke: #A0AEC0;
-    }
-
-    &:hover svg path {
       stroke: #7C54E8;
     }
   }
@@ -4592,10 +4668,12 @@ body {
 
     &__header {
       flex-direction: row;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      padding: 20px;
+      gap: 16px;
+      padding: 16px;
+      min-height: 48px;
+      box-sizing: border-box;
     }
 
     &__body {
@@ -4619,7 +4697,18 @@ body {
   }
 
   .card-options-wrapper {
-    padding-top: 8px; // Выравниваем с названием слота
+    padding-top: 0;
+  }
+
+  .options-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+
+  .dots {
+    font-size: 14px;
+    letter-spacing: 1px;
   }
 
   .header-left {
@@ -4628,28 +4717,56 @@ body {
   }
 
   .slot-title-wrapper {
-    flex-wrap: nowrap;
-    width: 100%;
-    justify-content: space-between;
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    width: auto;
+    max-width: 100%;
+    gap: 8px;
   }
 
-.slot-title-input {
-    font-size: 20px;
-    min-width: 80px;
-    max-width: calc(100% - 50px);
-    flex: 1;
-    // Фиксированная высота чтобы не было скачков
-    height: 40px;
+  .slot-title-input {
+    font-size: 16px;
+    font-weight: 600;
+    min-width: 60px;
+    max-width: 100%;
+    height: 32px;
+    padding: 4px 8px;
+    margin-left: 0;
+    margin-top: 0;
+    border: 2px solid transparent;
+    border-radius: 8px;
     box-sizing: border-box;
+    letter-spacing: -0.2px;
+    line-height: 1.2;
 
-    // Предотвращаем скачок UI при фокусе
     &:focus {
-      border-color: #D6BCFA;
+      border-color: #7C54E8;
+      background-color: white;
+      box-shadow: 0 4px 12px rgba(124, 84, 232, 0.15);
     }
   }
 
   .edit-icon {
     flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    padding: 4px;
+    border-radius: 6px;
+    background: rgba(124, 84, 232, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    svg path {
+      stroke: #7C54E8;
+    }
   }
 
   .slot-form-column {

@@ -266,6 +266,14 @@ export default class ProjectDetailPage implements PageComponent {
 
     document.querySelector('#back-btn')?.addEventListener('click', (e) => {
       e.preventDefault();
+      localStorage.setItem('projects_tab', 'ads');
+      routerInstance?.navigate('/projects');
+    });
+
+    // Обработчик хлебных крошек
+    document.querySelector('#breadcrumb-ads')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.setItem('projects_tab', 'ads');
       routerInstance?.navigate('/projects');
     });
 
@@ -278,6 +286,7 @@ export default class ProjectDetailPage implements PageComponent {
     });
 
     document.querySelector('#view-back-btn')?.addEventListener('click', () => {
+      localStorage.setItem('projects_tab', 'ads');
       routerInstance?.navigate('/projects');
     });
 
@@ -392,7 +401,10 @@ export default class ProjectDetailPage implements PageComponent {
           
           new ConfirmationModal({
             message: 'Изменения сохранены!',
-            onConfirm: () => routerInstance?.navigate('/projects'),
+            onConfirm: () => {
+              localStorage.setItem('projects_tab', 'ads');
+              routerInstance?.navigate('/projects');
+            },
           }).show();
         } catch (err) {
           console.error('Ошибка при сохранении:', err);
@@ -507,6 +519,7 @@ export default class ProjectDetailPage implements PageComponent {
       onConfirm: async () => {
         try {
           await adsRepository.delete(this.projectId);
+          localStorage.setItem('projects_tab', 'ads');
           routerInstance?.navigate('/projects');
         } catch (err) {
           console.error('Ошибка при удалении:', err);

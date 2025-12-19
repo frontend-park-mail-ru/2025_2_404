@@ -18,6 +18,8 @@ interface AdApiResponse {
   status?: string;
   start_at?: string;
   end_at?: string;
+  clicks?: number;
+  impressions?: number;
 }
 
 interface GetAdResponse {
@@ -64,10 +66,14 @@ export async function listAds(): Promise<Ad[]> {
 
 export async function getAdById(ad_id: number | string): Promise<Ad> {
   const res = await http.get<GetAdResponse>(`/api/ads/${ad_id}`);
-  const ad = res.data?.ad || (res as any).data || (res as any) || {} as AdApiResponse;
   
-  const imageBase64 = res.data?.imageData?.image_data || null;
-  const imageType = res.data?.imageData?.image_type || 'image/jpeg';
+  // Поддержка разных структур ответа: res.ad, res.data.ad, или прямо res
+  const ad = (res as any).ad || res.data?.ad || (res as any).data || (res as any) || {} as AdApiResponse;
+  
+  // Поддержка разных структур imageData: res.imageData или res.data.imageData
+  const imageDataObj = (res as any).imageData || res.data?.imageData;
+  const imageBase64 = imageDataObj?.image_data || null;
+  const imageType = imageDataObj?.content_type || imageDataObj?.image_type || 'image/jpeg';
 
   return {
     id: ad.id || ad.add_id || 0,
@@ -79,6 +85,8 @@ export async function getAdById(ad_id: number | string): Promise<Ad> {
     status: ad.status,
     start_at: ad.start_at,
     end_at: ad.end_at,
+    clicks: ad.clicks ?? 0,
+    impressions: ad.impressions ?? 0,
     timestamp: ad.start_at
   } as Ad;
 }

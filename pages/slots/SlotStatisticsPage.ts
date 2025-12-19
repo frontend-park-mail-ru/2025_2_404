@@ -1,4 +1,5 @@
 import statisticsRepository from '../../public/repository/statisticsRepository';
+import { slotsRepository } from '../../public/repository/slotsRepository';
 import type { HandlebarsTemplateDelegate, PageComponent, AdStatistics, DailyStats } from '../../src/types';
 import type Router from '../../services/Router';
 import { Chart, registerables } from 'chart.js';
@@ -45,11 +46,15 @@ export default class SlotStatisticsPage implements PageComponent {
 
   async render(): Promise<string> {
     await this.loadTemplate();
+    
+    // Загружаем реальные данные слота
+    const slotData = await slotsRepository.getById(this.slotId);
+    
     this.slot = {
       id: this.slotId,
-      name: `Слот №${this.slotId.slice(-4) || '1'}`,
-      status: 'Активен',
-      statusClass: 'active',
+      name: slotData?.title || `Слот №${this.slotId.slice(-4) || '1'}`,
+      status: slotData?.status === 'active' ? 'Активен' : 'Приостановлен',
+      statusClass: slotData?.status === 'active' ? 'active' : 'paused',
     };
 
     return this.template ? this.template({ slot: this.slot }) : '';
@@ -66,12 +71,22 @@ export default class SlotStatisticsPage implements PageComponent {
 
     periodSelect?.addEventListener('change', () => {
       this.currentPeriod = parseInt(periodSelect.value);
-      this.updateTotals();
-      this.updateChart();
+      // Перезагружаем данные с бэкенда при смене периода
+      this.loadStatistics();
     });
     document.getElementById('stats-retry-btn')?.addEventListener('click', () => {
       this.loadStatistics();
     });
+    
+    // Обработчик для хлебных крошек "Мои слоты"
+    document.getElementById('breadcrumb-slots')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.setItem('projects_tab', 'slots');
+      if (routerInstance) {
+        routerInstance.navigate('/projects');
+      }
+    });
+    
     this.loadStatistics();
   }
 
@@ -107,7 +122,19 @@ export default class SlotStatisticsPage implements PageComponent {
 
   async loadStatistics(): Promise<void> {
     try {
-      this.statistics = await statisticsRepository.getSlotStatistics(this.slotId);
+      // Вычисляем даты для выбранного периода
+      const now = new Date();
+      const dateFrom = new Date();
+      dateFrom.setDate(now.getDate() - this.currentPeriod);
+      
+      const formatDate = (d: Date) => d.toISOString().split('T')[0];
+      
+      this.statistics = await statisticsRepository.getSlotStatistics(
+        this.slotId,
+        formatDate(dateFrom),
+        formatDate(now)
+      );
+      
       const hasData = this.statistics && 
         (this.statistics.total_impressions > 0 || 
          this.statistics.total_clicks > 0 ||
@@ -127,32 +154,16 @@ export default class SlotStatisticsPage implements PageComponent {
     }
   }
 
-  private getFilteredStats(): DailyStats[] {
-    if (!this.statistics) return [];
-    
-    const { daily_stats } = this.statistics;
-    if (!daily_stats || daily_stats.length === 0) return [];
-    
-    // Фильтруем по выбранному периоду
-    const now = new Date();
-    const cutoffDate = new Date();
-    cutoffDate.setDate(now.getDate() - this.currentPeriod);
-    
-    return daily_stats.filter(stat => {
-      const statDate = new Date(stat.date);
-      return statDate >= cutoffDate;
-    });
-  }
-
   private updateTotals(): void {
     if (!this.statistics) return;
 
-    const filteredStats = this.getFilteredStats();
+    // Используем данные напрямую (фильтрация на бэкенде)
+    const stats = this.statistics.daily_stats || [];
     
-    // Считаем итоги по отфильтрованным данным
-    const totalImpressions = filteredStats.reduce((sum, d) => sum + d.impressions, 0);
-    const totalClicks = filteredStats.reduce((sum, d) => sum + d.clicks, 0);
-    const totalEarned = (totalClicks + totalImpressions) * 3;
+    // Считаем итоги
+    const totalImpressions = stats.reduce((sum, d) => sum + d.impressions, 0);
+    const totalClicks = stats.reduce((sum, d) => sum + d.clicks, 0);
+    const totalEarned = stats.reduce((sum, d) => sum + d.earned, 0);
 
     const impressionsEl = document.getElementById('total-impressions');
     const clicksEl = document.getElementById('total-clicks');
@@ -180,32 +191,33 @@ export default class SlotStatisticsPage implements PageComponent {
       this.chart = null;
     }
 
-    const filteredStats = this.getFilteredStats();
+    // Используем данные напрямую (фильтрация на бэкенде)
+    const stats = this.statistics.daily_stats || [];
     
     // Форматируем даты для отображения
-    const labels = filteredStats.map(d => {
+    const labels = stats.map(d => {
       const date = new Date(d.date);
       return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
     });
     
     const dataMap: Record<string, { data: number[]; label: string; color: string }> = {
       impressions: {
-        data: filteredStats.map(d => d.impressions),
+        data: stats.map(d => d.impressions),
         label: 'Показы',
         color: '#7C54E8',
       },
       clicks: {
-        data: filteredStats.map(d => d.clicks),
+        data: stats.map(d => d.clicks),
         label: 'Клики',
         color: '#FF73AF',
       },
       ctr: {
-        data: filteredStats.map(d => d.ctr),
+        data: stats.map(d => d.ctr),
         label: 'CTR (%)',
         color: '#4CAF50',
       },
       earned: {
-        data: filteredStats.map(d => (d.clicks + d.impressions) * 3),
+        data: stats.map(d => d.earned),
         label: 'Заработок (₽)',
         color: '#10B981',
       },

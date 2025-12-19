@@ -76,14 +76,22 @@ export async function getAdStatistics(filters: StatisticsFilters): Promise<AdSta
  * Получить статистику для слота
  * GET /api/slots/{slot_id}/statistics
  */
-export async function getSlotStatistics(slotId: string): Promise<AdStatistics> {
+export async function getSlotStatistics(slotId: string, dateFrom?: string, dateTo?: string): Promise<AdStatistics> {
   if (USE_MOCKS) {
     // Используем моки пока бэкенд не задеплоит ручку
     await new Promise(resolve => setTimeout(resolve, 300));
-    return getMockStatistics(slotId);
+    return getMockStatistics(slotId, dateFrom, dateTo);
   }
 
-  const response = await http.get<BackendStatisticsResponse>(`/api/slots/${slotId}/statistics`);
+  // Формируем параметры запроса с датами
+  const params = new URLSearchParams();
+  if (dateFrom) params.append('date_from', dateFrom);
+  if (dateTo) params.append('date_to', dateTo);
+  
+  const queryString = params.toString();
+  const url = `/api/slots/${slotId}/statistics${queryString ? `?${queryString}` : ''}`;
+
+  const response = await http.get<BackendStatisticsResponse>(url);
   
   // Проверяем, есть ли данные в ответе
   if (!response || !response.data) {
@@ -106,8 +114,6 @@ export async function getSlotStatistics(slotId: string): Promise<AdStatistics> {
  * Преобразование ответа бэкенда в формат фронтенда
  */
 function transformBackendStatistics(backend: BackendSlotStatistics): AdStatistics {
-  const costPerClick = 5; // Стоимость клика для расчётов
-  
   // Парсинг даты из Go формата: "time.Date(2025, time.December, 13, 0, 0, 0, 0, time.UTC)"
   const parseGoDate = (dateStr: string): string => {
     const match = dateStr.match(/time\.Date\((\d+),\s*time\.(\w+),\s*(\d+)/);
@@ -132,17 +138,16 @@ function transformBackendStatistics(backend: BackendSlotStatistics): AdStatistic
   // Преобразуем daily_stats (может быть null)
   const dailyStats: DailyStats[] = (backend.daily_stats || []).map((stat) => {
     const ctr = stat.impressions > 0 ? (stat.clicks / stat.impressions) * 100 : 0;
-    // Траты рекламодателя = (клики + показы) * 3
-    const spent = (stat.clicks + stat.impressions) * 3;
-    const earned = stat.clicks * (costPerClick * 0.7);
+    // Заработок = (клики + показы) * 3
+    const earned = (stat.clicks + stat.impressions) * 3;
 
     return {
       date: parseGoDate(stat.date),
       impressions: stat.impressions,
       clicks: stat.clicks,
       ctr: Math.round(ctr * 100) / 100,
-      spent,
-      earned: Math.round(earned * 100) / 100,
+      spent: 0,
+      earned,
     };
   });
 
@@ -151,16 +156,16 @@ function transformBackendStatistics(backend: BackendSlotStatistics): AdStatistic
     ? (backend.total_clicks / backend.total_impressions) * 100 
     : 0;
 
-  // Траты рекламодателя = (клики + показы) * 3
-  const totalSpent = (backend.total_clicks + backend.total_impressions) * 3;
+  // Заработок = (клики + показы) * 3
+  const totalEarned = (backend.total_clicks + backend.total_impressions) * 3;
 
   return {
     ad_id: backend.slot_id,
     total_impressions: backend.total_impressions,
     total_clicks: backend.total_clicks,
     total_ctr: Math.round(totalCtr * 100) / 100,
-    total_spent: totalSpent,
-    total_earned: Math.round(backend.total_clicks * costPerClick * 0.7 * 100) / 100,
+    total_spent: 0,
+    total_earned: totalEarned,
     daily_stats: dailyStats,
   };
 }

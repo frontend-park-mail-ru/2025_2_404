@@ -280,6 +280,7 @@ export default class CreateSlotPage {
     }
     document.querySelector('#back-btn')?.addEventListener('click', (e) => {
       e.preventDefault();
+      localStorage.setItem('projects_tab', 'slots');
       router.navigate('/projects');
     });
 
@@ -287,6 +288,7 @@ export default class CreateSlotPage {
         createBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             if (this.createdSlotId) {
+                localStorage.setItem('projects_tab', 'slots');
                 router.navigate('/projects');
                 return;
             }
@@ -296,7 +298,10 @@ export default class CreateSlotPage {
                 await slotsRepository.create(slotData);
                 new ConfirmationModal({
                     message: 'Слот успешно создан',
-                    onConfirm: () => router.navigate('/projects'),
+                    onConfirm: () => {
+                        localStorage.setItem('projects_tab', 'slots');
+                        router.navigate('/projects');
+                    },
                 }).show();
              } catch(e) { console.error(e); }
         });

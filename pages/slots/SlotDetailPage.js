@@ -337,7 +337,10 @@ async render() {
             await slotsRepository.update(this.slotId, updatedData);
             new ConfirmationModal({
                 message: 'Изменения успешно сохранены!',
-                onConfirm: () => router.navigate('/projects')
+                onConfirm: () => {
+                    localStorage.setItem('projects_tab', 'slots');
+                    router.navigate('/projects');
+                }
             }).show();
         } catch (e) {
             console.error(e);
@@ -523,6 +526,7 @@ async render() {
                 message: 'Удалить этот слот? Это действие нельзя отменить.',
                 onConfirm: async () => {
                     await slotsRepository.delete(this.slotId);
+                    localStorage.setItem('projects_tab', 'slots');
                     router.navigate('/projects');
                 }
              }).show();
@@ -538,7 +542,11 @@ async render() {
         });
     }
     
-    const goBack = (e) => { e.preventDefault(); router.navigate('/projects'); };
+    const goBack = (e) => { 
+        e.preventDefault(); 
+        localStorage.setItem('projects_tab', 'slots');
+        router.navigate('/projects'); 
+    };
     document.getElementById('back-link-top')?.addEventListener('click', goBack);
     document.getElementById('back-btn-bottom')?.addEventListener('click', goBack);
 
@@ -556,9 +564,21 @@ async render() {
     const viewEditBtn = document.getElementById('slot-view-edit-btn');
     
     // Функция переключения в режим редактирования
-    const showEditMode = () => {
+    const showEditMode = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      // Сохраняем текущую позицию скролла
+      const scrollY = window.scrollY;
+      
       if (viewMode) viewMode.classList.add('is-hidden');
       if (editMode) editMode.classList.add('is-active');
+      
+      // Восстанавливаем позицию скролла чтобы не было скачков
+      requestAnimationFrame(() => {
+        window.scrollTo(0, scrollY);
+      });
     };
     
     editBtn?.addEventListener('click', showEditMode);
@@ -593,6 +613,7 @@ async render() {
           message: 'Удалить этот слот? Это действие нельзя отменить.',
           onConfirm: async () => {
             await slotsRepository.delete(this.slotId);
+            localStorage.setItem('projects_tab', 'slots');
             router.navigate('/projects');
           }
         }).show();
