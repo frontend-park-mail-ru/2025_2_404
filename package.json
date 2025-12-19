@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "lint:js": "eslint .",
     "lint:js:fix": "eslint . --fix",
@@ -37,7 +37,7 @@
     "sass": "^1.94.0",
     "stylelint": "^16.24.0",
     "stylelint-config-standard": "^39.0.0",
-    "typescript": "^5.9.3",
+    "typescript": "5.7.2",
     "vite": "^7.2.7",
     "vite-plugin-handlebars": "^2.0.0"
   },

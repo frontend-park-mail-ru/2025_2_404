@@ -33,6 +33,7 @@ export default class AddFundsModal {
         value = String(value).trim();
         if (!value) return 'Введите сумму';
         if (parseFloat(value) <= 0) return 'Сумма должна быть больше нуля';
+        if (parseFloat(value) > 100000) return 'На данный момент пополнение возможно только до 100.000₽';
         return null;
       },
     });

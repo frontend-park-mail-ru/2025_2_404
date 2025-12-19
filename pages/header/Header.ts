@@ -83,7 +83,12 @@ export default class Header {
 
       if (isAuthenticated) {
         try {
-          const profile = await AuthService.loadProfile();
+          // Сначала пробуем получить уже загруженного пользователя из кэша
+          let profile = AuthService.getUser();
+          // Загружаем профиль только если он ещё не был загружен
+          if (!profile) {
+            profile = await AuthService.loadProfile();
+          }
           if (profile) {
             user = {
               username: profile.username ?? '',

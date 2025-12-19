@@ -17,7 +17,7 @@
              </svg>
            </div>
         </div>
-        <div class="slot-date">Создано {{formatDate slot.createdAt}}</div>
+        {{!-- <div class="slot-date">Создано {{formatDate slot.createdAt}}</div> --}}
       </div>
       <div class="card-options-wrapper">
           <button class="options-btn" id="options-trigger">
@@ -96,7 +96,7 @@
             <label class="slot-label">Скопируйте этот код и вставьте к себе на страницу</label>
             <div class="code-area">
                 <pre class="code-content" id="embed-code">{{#if integrationCode}}{{integrationCode}}{{else}}&lt;div id="ad-slot..."&gt;&lt;/div&gt;{{/if}}</pre>
-                <button class="icon-copy" id="copy-code-btn" title="Скопировать">
+                <button class="icon-copy" id="copy-code-btn-1" title="Скопировать">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect x="9" y="9" width="13" height="13" rx="2" stroke="#7B61FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <path d="M5 15H4C2.89543 15 2 14.1046 2 13V4C2 2.89543 2.89543 2 4 2H13C14.1046 2 15 2.89543 15 4V5" stroke="#7B61FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -128,8 +128,8 @@
     <div class="slot-card__footer">
         <button class="btn btn--secondary btn-footer" id="back-btn-bottom">Назад</button>
         <div class="right-buttons">
-            <button class="btn btn--outline btn-footer" id="show-stats-btn">Показать статистику</button>
-            <button class="btn btn--secondary btn-footer" id="save-draft-btn">Сохранить черновик</button>
+            <button class="btn btn--secondary btn-footer" id="show-stats-btn">Показать статистику</button>
+            {{!-- <button class="btn btn--secondary btn-footer" id="save-draft-btn">Сохранить черновик</button> --}}
             <button class="btn btn--primary btn-footer" id="save-btn">Отредактировать</button>
         </div>
     </div>

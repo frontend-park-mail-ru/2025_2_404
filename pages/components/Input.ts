@@ -30,7 +30,18 @@ export default class Input {
     this.value = value;
   }
 
+  private escapeHtml(text: string): string {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
   render(): string {
+    const escapedValue = this.escapeHtml(this.value);
+    const escapedPlaceholder = this.escapeHtml(this.placeholder);
     return `
       <div class="form-group">
         <label class="form-group__label" for="${this.id}">${this.label}</label>
@@ -39,8 +50,8 @@ export default class Input {
             class="form-group__input" 
             type="${this.type}" 
             id="${this.id}" 
-            placeholder="${this.placeholder}"
-            value="${this.value}"
+            placeholder="${escapedPlaceholder}"
+            value="${escapedValue}"
           >
           ${this.showPasswordToggle ?
             `<span class="password-toggle" role="button" aria-controls="${this.id}">

@@ -24,19 +24,31 @@
           <span class="ads__view-value" data-type="budget">{{project.budget}}₽</span>
         </div>
 
-        {{#if project.dateStart}}
+        <div class="ads__view-row">
+          <span class="ads__view-label">Просмотры:</span>
+          <span class="ads__view-value" data-type="impressions">{{project.impressions}}</span>
+        </div>
+
+        <div class="ads__view-row">
+          <span class="ads__view-label">Клики:</span>
+          <span class="ads__view-value" data-type="clicks">{{project.clicks}}</span>
+        </div>
+
+        {{!-- Временно скрыто пока бэкенд не исправит сохранение дат
+        {{#if project.start_at}}
         <div class="ads__view-row">
           <span class="ads__view-label">Начало:</span>
-          <span class="ads__view-value">{{project.dateStart}}</span>
+          <span class="ads__view-value">{{formatDate project.start_at 'DD.MM.YYYY'}}</span>
         </div>
         {{/if}}
         
-        {{#if project.dateEnd}}
+        {{#if project.end_at}}
         <div class="ads__view-row">
           <span class="ads__view-label">Окончание:</span>
-          <span class="ads__view-value">{{project.dateEnd}}</span>
+          <span class="ads__view-value">{{formatDate project.end_at 'DD.MM.YYYY'}}</span>
         </div>
         {{/if}}
+        --}}
       </div>
 
       <button class="btn btn--primary ads__view-edit-btn" id="ads-edit-btn">
@@ -66,12 +78,15 @@
       <form id="{{#if isNew}}create-form{{else}}edit-form{{/if}}">
         <label for="title-input">Заголовок</label>
         <input class="ads__item" id="title-input" type="text" value="{{project.title}}" placeholder="Введите заголовок">
+        <div class="error-message" id="error-title-input"></div>
 
         <label for="desc-input">Описание</label>
         <textarea id="desc-input" class="ads__item ads__description" placeholder="Введите описание">{{project.description}}</textarea>
+        <div class="error-message" id="error-desc-input"></div>
 
         <label for="site-input">Ссылка на сайт</label>
         <input class="ads__item" id="site-input" type="url" value="{{project.domain}}" placeholder="Введите ссылку на сайт">
+        <div class="error-message" id="error-site-input"></div>
         <label for="budget-input">Бюджет</label>
         <div class="ads__input-group" style="display: flex; gap: 10px;">
           <input 
@@ -90,7 +105,32 @@
             </button>
           {{/unless}}
         </div>
-        {{#if isNew}}<small>Не меньше 100₽</small>{{/if}}
+        <div class="error-message" id="error-budget-input"></div>
+        
+        
+        <label>Даты проведения</label>
+        <div class="ads__dates">
+          <div class="ads__date-field">
+            <input 
+              class="ads__item" 
+              id="start-date-input" 
+              type="date" 
+              value="{{formatDate project.start_at 'YYYY-MM-DD'}}"
+            >
+            <div class="error-message" id="error-start-date-input"></div>
+          </div>
+          <div class="ads__date-field">
+            <input 
+              class="ads__item" 
+              id="end-date-input" 
+              type="date" 
+              value="{{formatDate project.end_at 'YYYY-MM-DD'}}"
+            >
+            <div class="error-message" id="error-end-date-input"></div>
+          </div>
+        </div>
+       
+        
         {{#unless isNew}}
           <div class="ads__status-wrapper" style="margin-top: 20px;">
             <div class="ads__status-row" style="display: flex; align-items: center; gap: 15px;">
@@ -112,6 +152,20 @@
               Изменение статуса возможно только при бюджете больше 100₽
             </small>
           </div>
+
+          <div class="ads__stats" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+            <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #666;">Статистика</h4>
+            <div style="display: flex; gap: 30px;">
+              <div>
+                <span style="color: #888; font-size: 12px;">Просмотры</span>
+                <div style="font-size: 18px; font-weight: bold; color: #333;">{{project.impressions}}</div>
+              </div>
+              <div>
+                <span style="color: #888; font-size: 12px;">Клики</span>
+                <div style="font-size: 18px; font-weight: bold; color: #7C54E8;">{{project.clicks}}</div>
+              </div>
+            </div>
+          </div>
         {{/unless}}
 
         <div class="ads__img-upload">
@@ -120,13 +174,10 @@
             <span class="ads__upload-text">Загрузите изображение</span>
             <input id="img-file" type="file" accept="image/jpeg, image/png" hidden />
           </label>
+          <div class="error-message" id="error-img-file"></div>
           <small class="ads__upload-hint">Поддерживаются JPG и PNG (до 10 МБ)</small>
-        </div>
+          <small class="ads__upload-hint">Реклама может содержать только одно изображение</small>
 
-        <label>Даты проведения</label>
-        <div class="ads__dates">
-          <input class="ads__item" type="date" value="{{project.dateStart}}">
-          <input class="ads__item" type="date" value="{{project.dateEnd}}">
         </div>
       </form>
     </div>

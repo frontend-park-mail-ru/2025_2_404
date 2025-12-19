@@ -1,5 +1,6 @@
 import { signin, signup } from '../public/api/auth';
 import { http } from '../public/api/http';
+import { getCookie, setCookie, removeCookie } from '../public/utils/cookie';
 import type { User, LoginCredentials, RegisterInfo } from '../src/types';
 
 interface ProfileResponse {
@@ -58,7 +59,7 @@ class AuthService {
   private onAuthChangeCallback: ((user: User | null) => void) | null = null;
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    return getCookie('token');
   }
 
   isAuthenticated(): boolean {
@@ -69,50 +70,51 @@ class AuthService {
     return this.user;
   }
 
-  async loadProfile(): Promise<User | null> {
-    if (!this.isAuthenticated()) {
-      this.user = null;
-      if (this.onAuthChangeCallback) this.onAuthChangeCallback(null);
-      return null;
-    }
-
-    try {
-      const res = await http.get<ProfileResponse>('/api/profile');
-      const profileData = (res as any).data || res || {};
-      
-      if (!profileData || Object.keys(profileData).length === 0) {
-        throw new Error("Данные профиля не получены");
-      }
-      let avatarUrl = '/kit.jpg';
-      if (profileData.imageData && profileData.imageData.image_data) {
-        const type = profileData.imageData.content_type || 'image/jpeg';
-        avatarUrl = `data:${type};base64,${profileData.imageData.image_data}`;
-      } else if (profileData.avatar_path) {
-        avatarUrl = `https://adnet.website/api/${profileData.avatar_path}`;
-      }
-
-      this.user = {
-        id: profileData.id || profileData.user_id || 0,
-        username: profileData.user_name || profileData.username || '',
-        email: profileData.email || '',
-        firstName: profileData.first_name || profileData.firstName || '',
-        lastName: profileData.last_name || profileData.lastName || '',
-        company: profileData.company || '',
-        phone: profileData.phone || profileData.phone_number || '',
-        role: (profileData.profile_type || profileData.role || 'advertiser') as 'advertiser' | 'publisher',
-        avatar: avatarUrl,
-      };
-
-      if (this.onAuthChangeCallback) {
-        this.onAuthChangeCallback(this.user);
-      }
-
-      return this.user;
-    } catch (err) {
-      return null;
-    }
+async loadProfile(): Promise<User | null> {
+  if (!this.isAuthenticated()) {
+    this.user = null;
+    if (this.onAuthChangeCallback) this.onAuthChangeCallback(null);
+    return null;
   }
 
+  try {
+    const res = await http.get<ProfileResponse>('/api/profile');
+    const profileData = (res as any).data || res || {};
+    
+    if (!profileData || Object.keys(profileData).length === 0) {
+      throw new Error("Данные профиля не получены");
+    }
+
+    let avatarUrl = '/kit.jpg';
+    if (profileData.imageData && profileData.imageData.image_data) {
+      const type = profileData.imageData.content_type || 'image/jpeg';
+      avatarUrl = `data:${type};base64,${profileData.imageData.image_data}`;
+    } else if (profileData.avatar_path) {
+      avatarUrl = `https://adnet.website/api/${profileData.avatar_path}`;
+    }
+    this.user = {
+      id: profileData.id || profileData.user_id || 0,
+      username: profileData.user_name || profileData.username || '',
+      email: profileData.email || '',
+      firstName: profileData.first_name || profileData.firstName || '',
+      lastName: profileData.last_name || profileData.lastName || '',
+      company: profileData.company || '',
+      phone: profileData.phone || profileData.phone_number || '',
+      role: (profileData.profile_type || profileData.role || 'advertiser') as 'advertiser' | 'publisher',
+      avatar: avatarUrl,
+      ads_count: profileData.ads_count || 0,
+      created_at: profileData.created_at || ''
+    };
+
+    if (this.onAuthChangeCallback) {
+      this.onAuthChangeCallback(this.user);
+    }
+
+    return this.user;
+  } catch (err) {
+    return null;
+  }
+}
   async updateProfile(formData: FormData): Promise<User | null> {
     if (!this.isAuthenticated()) {
       throw new Error("Пользователь не авторизован");
@@ -122,7 +124,7 @@ class AuthService {
     
     const token = (res as any).token || (res as any).data?.token;
     if (token) {
-      localStorage.setItem('token', token);
+      setCookie('token', token);
     }
     
     return await this.loadProfile();
@@ -139,7 +141,7 @@ class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('token');
+    removeCookie('token');
     this.user = null;
 
     if (this.onAuthChangeCallback) this.onAuthChangeCallback(null);

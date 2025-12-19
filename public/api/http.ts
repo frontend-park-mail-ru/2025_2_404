@@ -1,3 +1,5 @@
+import { getCookie } from '../utils/cookie';
+
 export const BASE = "";
 
 
@@ -8,7 +10,7 @@ interface RequestInit {
 }
 
 export async function request<T = unknown>(path: string, init: RequestInit = {}): Promise<T> {
-  const token = localStorage.getItem('token');
+  const token = getCookie('token');
   const isFormData = init.body instanceof FormData;
   const headers: Record<string, string> = { ...init.headers };
   
@@ -51,6 +53,11 @@ export const http = {
   
   put: <T = unknown>(path: string, body?: unknown): Promise<T> => request<T>(path, {
     method: 'PUT',
+    body: body instanceof FormData ? body : JSON.stringify(body ?? {}),
+  }),
+
+  patch: <T = unknown>(path: string, body?: unknown): Promise<T> => request<T>(path, {
+    method: 'PATCH',
     body: body instanceof FormData ? body : JSON.stringify(body ?? {}),
   }),
 

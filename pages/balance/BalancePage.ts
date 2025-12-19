@@ -134,10 +134,8 @@ export default class BalancePage implements PageComponent {
             if (paymentUrl) {
               window.location.href = paymentUrl;
             } else {
-              alert("Ошибка: сервер не вернул ссылку на оплату");
             }
           } catch (error) {
-            alert("Ошибка при создании платежа");
             console.error(error);
           }
         },
@@ -153,9 +151,7 @@ export default class BalancePage implements PageComponent {
             const balanceRepository = await getBalanceRepository();
             await balanceRepository.subtractBalance(amount);
             await this.refreshData();
-            alert(`Заявка на вывод ${amount} ₽ принята.`);
           } catch (error) {
-            alert("Ошибка при выводе средств. Проверьте баланс.");
             console.error(error);
           }
         },
