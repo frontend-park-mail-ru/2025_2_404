@@ -87,26 +87,26 @@ export default class ProfilePage implements PageComponent {
         },
       });
 
-      this.components.passwordInput = new Input({
-        id: 'profile-password',
-        label: 'Новый пароль',
-        placeholder: 'Оставьте пустым, если не меняете',
-        type: 'password',
-        showPasswordToggle: true,
-        validationFn: (value: string): string | null => {
-          value = value.trim();
-          // Пароль опционален при редактировании профиля
-          if (!value) return null;
-          if (value.length < 8) return 'Пароль должен содержать минимум 8 символов';
-          if (value.length > 100) return 'Пароль слишком длинный';
-          const hasUpperCase = /[A-Z]/.test(value);
-          const hasLowerCase = /[a-z]/.test(value);
-          if (!hasUpperCase || !hasLowerCase) return 'Пароль должен содержать буквы разного регистра';
-          const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value);
-          if (!hasSpecialChar) return 'Пароль должен содержать хотя бы один спецсимвол';
-          return null;
-        },
-      });
+      // this.components.passwordInput = new Input({
+      //   id: 'profile-password',
+      //   label: 'Новый пароль',
+      //   placeholder: 'Оставьте пустым, если не меняете',
+      //   type: 'password',
+      //   showPasswordToggle: true,
+      //   validationFn: (value: string): string | null => {
+      //     value = value.trim();
+      //     // Пароль опционален при редактировании профиля
+      //     if (!value) return null;
+      //     if (value.length < 8) return 'Пароль должен содержать минимум 8 символов';
+      //     if (value.length > 100) return 'Пароль слишком длинный';
+      //     const hasUpperCase = /[A-Z]/.test(value);
+      //     const hasLowerCase = /[a-z]/.test(value);
+      //     if (!hasUpperCase || !hasLowerCase) return 'Пароль должен содержать буквы разного регистра';
+      //     const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value);
+      //     if (!hasSpecialChar) return 'Пароль должен содержать хотя бы один спецсимвол';
+      //     return null;
+      //   },
+      // });
 
       this.components.firstNameInput = new Input({
         id: 'profile-firstname',

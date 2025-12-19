@@ -106,18 +106,22 @@
         
         <label>Даты проведения</label>
         <div class="ads__dates">
-          <input 
-            class="ads__item" 
-            id="start-date-input" 
-            type="date" 
-            value="{{formatDate project.start_at 'YYYY-MM-DD'}}"
-          >
-          <input 
-            class="ads__item" 
-            id="end-date-input" 
-            type="date" 
-            value="{{formatDate project.end_at 'YYYY-MM-DD'}}"
-          >
+          <div class="ads__date-field">
+            <input 
+              class="ads__item" 
+              id="start-date-input" 
+              type="date" 
+              value="{{formatDate project.start_at 'YYYY-MM-DD'}}"
+            >
+          </div>
+          <div class="ads__date-field">
+            <input 
+              class="ads__item" 
+              id="end-date-input" 
+              type="date" 
+              value="{{formatDate project.end_at 'YYYY-MM-DD'}}"
+            >
+          </div>
         </div>
        
         

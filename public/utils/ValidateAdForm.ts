@@ -51,7 +51,7 @@ export function validateAdForm(formData: AdFormData): AdValidationErrors {
       oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
       
       if (endDate > oneYearLater) {
-        errors.end_at = 'Длительность рекламы не может превышать 1 год';
+        errors.end_at = 'Длительность не может превышать 1 год';
       }
     }
   }

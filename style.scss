@@ -413,7 +413,15 @@ body {
 
   &__dates {
     display: flex;
-    gap: 8px;
+    gap: 16px;
+    margin-top: 8px;
+  }
+
+  &__date-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 60px; // input (~36px) + error-message (24px)
   }
 
   &__actions {
