@@ -105,7 +105,32 @@ export default class CreateProjectPage implements PageComponent {
     imgInput?.addEventListener('change', (e) => {
       const target = e.target as HTMLInputElement;
       const file = target.files?.[0];
+      const imageError = document.querySelector('#error-img-file');
+      
       if (file) {
+        const maxSizeBytes = 10 * 1024 * 1024; // 10 МБ
+        const allowedTypes = ['image/jpeg', 'image/png'];
+        
+        // Очистка предыдущей ошибки
+        if (imageError) imageError.textContent = '';
+        imgInput.classList.remove('input--error');
+        
+        if (!allowedTypes.includes(file.type)) {
+          if (imageError) imageError.textContent = 'Поддерживаются только JPG или PNG';
+          imgInput.classList.add('input--error');
+          target.value = '';
+          if (previewImg) previewImg.src = '/public/assets/default.jpg';
+          return;
+        }
+        
+        if (file.size > maxSizeBytes) {
+          if (imageError) imageError.textContent = 'Размер файла не должен превышать 10 МБ';
+          imgInput.classList.add('input--error');
+          target.value = '';
+          if (previewImg) previewImg.src = '/public/assets/default.jpg';
+          return;
+        }
+        
         const reader = new FileReader();
         reader.onload = (event) => {
           if (previewImg && event.target?.result) previewImg.src = event.target.result as string;

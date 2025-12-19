@@ -26,6 +26,11 @@ export function validateAdForm(formData: AdFormData): AdValidationErrors {
     if (!allowedTypes.includes(formData.file.type)) {
       errors.image = 'Поддерживаются только JPG или PNG';
     }
+    
+    const maxSizeBytes = 10 * 1024 * 1024; // 10 МБ
+    if (formData.file.size > maxSizeBytes) {
+      errors.image = 'Размер файла не должен превышать 10 МБ';
+    }
   }
 
   // Валидация дат

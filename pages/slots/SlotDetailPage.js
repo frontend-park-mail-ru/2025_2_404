@@ -58,6 +58,9 @@ async render() {
     const editTitleBtn = document.getElementById('edit-title-btn');
     const autoResizeInput = (input) => {
         if (!input) return;
+        // На мобильных не изменяем ширину динамически чтобы не было скачков UI
+        if (window.innerWidth <= 768) return;
+        
         const span = document.createElement('span');
         span.style.visibility = 'hidden';
         span.style.position = 'absolute';
@@ -69,10 +72,142 @@ async render() {
         document.body.removeChild(span);
     };
 
+    // Функция для экранирования HTML (защита от XSS)
+    const escapeHtml = (text) => {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    };
+    
+    // Функция для очистки ввода от опасных символов
+    const sanitizeInput = (text) => {
+        return text
+            .replace(/[<>]/g, '') // Удаляем < и >
+            .replace(/javascript:/gi, '') // Удаляем javascript:
+            .replace(/on\w+=/gi, '') // Удаляем обработчики событий
+            .trim();
+    };
+
     if (titleInput) {
+        // Ограничение в 10 символов
+        titleInput.setAttribute('maxlength', '10');
+        
+        // Элемент для ошибки названия
+        const titleError = document.getElementById('error-title-input');
+        
+        const showTitleError = (message) => {
+            if (titleError) {
+                titleError.textContent = message;
+                titleError.classList.add('is-visible');
+            }
+        };
+        
+        const hideTitleError = () => {
+            if (titleError) {
+                titleError.innerHTML = '&nbsp;';
+                titleError.classList.remove('is-visible');
+            }
+        };
+        
+        const validateTitle = () => {
+            const value = sanitizeInput(titleInput.value);
+            titleInput.value = value; // Применяем санитизацию
+            
+            if (value.length === 0) {
+                titleInput.style.borderColor = '#E53E3E';
+                showTitleError('Название слота не может быть пустым');
+                return false;
+            }
+            
+            titleInput.style.borderColor = '';
+            hideTitleError();
+            return true;
+        };
+        
         autoResizeInput(titleInput);
-        titleInput.addEventListener('input', () => autoResizeInput(titleInput));
-        editTitleBtn?.addEventListener('click', () => { titleInput.focus(); });
+        titleInput.addEventListener('input', () => {
+            // Санитизация и обрезка если больше 10 символов
+            let value = sanitizeInput(titleInput.value);
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+            titleInput.value = value;
+            validateTitle();
+            autoResizeInput(titleInput);
+        });
+        titleInput.addEventListener('blur', validateTitle);
+        editTitleBtn?.addEventListener('click', (e) => { 
+            e.preventDefault();
+            // Фокус без скролла чтобы не было скачков UI
+            titleInput.focus({ preventScroll: true }); 
+        });
+    }
+
+    // === Валидация минимальной стоимости ===
+    const minPriceInput = document.getElementById('min-price');
+    const minPriceError = document.getElementById('error-min-price');
+    
+    const showPriceError = (message, color = '#E53E3E') => {
+        if (minPriceError) {
+            minPriceError.textContent = message;
+            minPriceError.style.color = color;
+            minPriceError.classList.add('is-visible');
+        }
+    };
+    
+    const hidePriceError = () => {
+        if (minPriceError) {
+            minPriceError.innerHTML = '&nbsp;';
+            minPriceError.classList.remove('is-visible');
+        }
+    };
+    
+    if (minPriceInput) {
+        
+        const validateMinPrice = () => {
+            const value = parseFloat(minPriceInput.value);
+            
+            if (minPriceInput.value === '' || isNaN(value)) {
+                minPriceInput.style.borderColor = '';
+                hidePriceError();
+                return true;
+            }
+            
+            if (value < 0) {
+                minPriceInput.style.borderColor = '#E53E3E';
+                showPriceError('Стоимость не может быть отрицательной');
+                return false;
+            }
+            
+            if (value > 100) {
+                minPriceInput.style.borderColor = '#E53E3E';
+                showPriceError('Максимальная стоимость - 100');
+                return false;
+            }
+            
+            if (value === 0) {
+                minPriceInput.style.borderColor = '#ED8936';
+                showPriceError('Рекомендуется указать стоимость больше 0', '#ED8936');
+                return true;
+            }
+            
+            minPriceInput.style.borderColor = '#7C54E8';
+            hidePriceError();
+            return true;
+        };
+        
+        minPriceInput.addEventListener('input', validateMinPrice);
+        minPriceInput.addEventListener('blur', validateMinPrice);
+        
+        // Запрещаем ввод отрицательных значений
+        minPriceInput.addEventListener('keydown', (e) => {
+            if (e.key === '-' || e.key === 'e') {
+                e.preventDefault();
+            }
+        });
+        
+        // Устанавливаем минимальное значение
+        minPriceInput.setAttribute('min', '0');
     }
     
     const statusToggle = document.getElementById('slot-status-toggle');
@@ -93,7 +228,9 @@ async render() {
     
     const bgColorInput = document.getElementById('bg-color');
     const textColorInput = document.getElementById('text-color');
-    const previewContent = document.querySelector('.preview-content'); 
+    // Используем более точный селектор - preview-card в режиме редактирования
+    const previewCard = document.getElementById('preview-card');
+    const previewContent = previewCard?.querySelector('.preview-content'); 
     const previewTitle = document.getElementById('preview-title');
     const previewDesc = document.getElementById('preview-desc');
     const bgPreviewBox = document.getElementById('bg-color-preview');
@@ -101,22 +238,46 @@ async render() {
 
     const updatePreview = () => {
         if(bgColorInput) {
-             document.getElementById('bg-color-text').textContent = bgColorInput.value;
+             const bgText = document.getElementById('bg-color-text');
+             if (bgText) bgText.textContent = bgColorInput.value;
              if (bgPreviewBox) bgPreviewBox.style.backgroundColor = bgColorInput.value;
              if (previewContent) previewContent.style.backgroundColor = bgColorInput.value;
         }
         if(textColorInput) {
-             document.getElementById('text-color-text').textContent = textColorInput.value;
+             const textText = document.getElementById('text-color-text');
+             if (textText) textText.textContent = textColorInput.value;
              if (textPreviewBox) textPreviewBox.style.backgroundColor = textColorInput.value;
              if (previewTitle) previewTitle.style.color = textColorInput.value;
              if (previewDesc) previewDesc.style.color = textColorInput.value;
         }
     };
     bgColorInput?.addEventListener('input', updatePreview);
+    bgColorInput?.addEventListener('change', updatePreview);
     textColorInput?.addEventListener('input', updatePreview);
+    textColorInput?.addEventListener('change', updatePreview);
+    
+    // === Клик по color wrapper должен открывать color picker ===
+    const bgColorWrapper = bgPreviewBox?.closest('.color-input-wrapper');
+    const textColorWrapper = textPreviewBox?.closest('.color-input-wrapper');
+    
+    if (bgColorWrapper && bgColorInput) {
+        bgColorWrapper.addEventListener('click', (e) => {
+            // Не открываем если клик был по самому input
+            if (e.target !== bgColorInput) {
+                bgColorInput.click();
+            }
+        });
+    }
+    
+    if (textColorWrapper && textColorInput) {
+        textColorWrapper.addEventListener('click', (e) => {
+            if (e.target !== textColorInput) {
+                textColorInput.click();
+            }
+        });
+    }
     
     const formatSelect = document.getElementById('ad-format');
-    const previewCard = document.getElementById('preview-card');
     if (formatSelect && previewCard) {
         formatSelect.addEventListener('change', (e) => {
             const format = e.target.value;
@@ -129,9 +290,47 @@ async render() {
     
     const handleSave = async () => {
         const updatedData = getFormData();
-        if (!updatedData.minPrice) {
-            document.getElementById('min-price').style.borderColor = 'red';
+        
+        // === Валидация названия ===
+        const titleEl = document.getElementById('slot-title-input');
+        const titleErrorEl = document.getElementById('error-title-input');
+        const sanitizedTitle = sanitizeInput(updatedData.title || '');
+        
+        if (!sanitizedTitle || sanitizedTitle.length === 0) {
+            if (titleEl) titleEl.style.borderColor = '#E53E3E';
+            if (titleErrorEl) {
+                titleErrorEl.textContent = 'Название слота не может быть пустым';
+                titleErrorEl.classList.add('is-visible');
+            }
+            return;
+        }
+        
+        // Применяем экранированное название
+        updatedData.title = sanitizedTitle;
+        
+        // === Валидация цены ===
+        const minPriceValue = parseFloat(updatedData.minPrice);
+        const minPriceEl = document.getElementById('min-price');
+        
+        // Проверка на пустое значение
+        if (!updatedData.minPrice || updatedData.minPrice === '') {
+            if (minPriceEl) minPriceEl.style.borderColor = '#E53E3E';
+            showPriceError('Укажите минимальную стоимость');
             return; 
+        }
+        
+        // Проверка на отрицательное значение
+        if (minPriceValue < 0) {
+            if (minPriceEl) minPriceEl.style.borderColor = '#E53E3E';
+            showPriceError('Стоимость не может быть отрицательной');
+            return;
+        }
+        
+        // Проверка на максимальное значение
+        if (minPriceValue > 100) {
+            if (minPriceEl) minPriceEl.style.borderColor = '#E53E3E';
+            showPriceError('Максимальная стоимость - 100');
+            return;
         }
 
         try {
@@ -347,5 +546,119 @@ async render() {
     document.getElementById('show-stats-btn')?.addEventListener('click', () => {
       router.navigate(`/slots/${this.slotId}/statistics`);
     });
+
+    // === Мобильный режим просмотра/редактирования ===
+    const viewMode = document.getElementById('slot-view-mode');
+    const editMode = document.getElementById('slot-edit-mode');
+    
+    // Кнопки для переключения в режим редактирования
+    const editBtn = document.getElementById('slot-edit-btn');
+    const viewEditBtn = document.getElementById('slot-view-edit-btn');
+    
+    // Функция переключения в режим редактирования
+    const showEditMode = () => {
+      if (viewMode) viewMode.classList.add('is-hidden');
+      if (editMode) editMode.classList.add('is-active');
+    };
+    
+    editBtn?.addEventListener('click', showEditMode);
+    viewEditBtn?.addEventListener('click', showEditMode);
+    
+    // Кнопка "Назад" в мобильном режиме просмотра
+    document.getElementById('slot-view-back-btn')?.addEventListener('click', goBack);
+    
+    // Кнопка "Статистика" в мобильном режиме просмотра  
+    document.getElementById('slot-view-stats-btn')?.addEventListener('click', () => {
+      router.navigate(`/slots/${this.slotId}/statistics`);
+    });
+
+    // === Меню опций в мобильном режиме просмотра ===
+    const optionsBtnView = document.getElementById('options-trigger-view');
+    const optionsMenuView = document.getElementById('options-menu-view');
+    
+    if (optionsBtnView && optionsMenuView) {
+      optionsBtnView.addEventListener('click', (e) => {
+        e.stopPropagation();
+        optionsMenuView.classList.toggle('show');
+      });
+      
+      document.addEventListener('click', (e) => {
+        if (!optionsBtnView.contains(e.target) && !optionsMenuView.contains(e.target)) {
+          optionsMenuView.classList.remove('show');
+        }
+      });
+
+      document.getElementById('delete-slot-btn-view')?.addEventListener('click', () => {
+        new ConfirmationModal({
+          message: 'Удалить этот слот? Это действие нельзя отменить.',
+          onConfirm: async () => {
+            await slotsRepository.delete(this.slotId);
+            router.navigate('/projects');
+          }
+        }).show();
+      });
+      
+      document.getElementById('pause-slot-btn-view')?.addEventListener('click', () => {
+        const toggle = document.getElementById('slot-status-toggle');
+        if (toggle) {
+          toggle.checked = false;
+          toggle.dispatchEvent(new Event('change'));
+        }
+        optionsMenuView.classList.remove('show');
+        // Обновляем статус в режиме просмотра
+        this.updateViewModeData();
+      });
+    }
 }
+
+  // Метод для обновления данных в мобильном режиме просмотра
+  updateViewModeData() {
+    const minPrice = document.getElementById('min-price')?.value;
+    const format = document.getElementById('ad-format')?.value;
+    const status = document.getElementById('slot-status-toggle')?.checked ? 'active' : 'paused';
+    const bgColor = document.getElementById('bg-color')?.value;
+    const textColor = document.getElementById('text-color')?.value;
+    
+    // Обновляем значения в режиме просмотра
+    const viewPrice = document.getElementById('slot-view-price');
+    if (viewPrice) viewPrice.textContent = `${minPrice || 0} ₽`;
+    
+    const viewFormat = document.getElementById('slot-view-format');
+    if (viewFormat) {
+      viewFormat.textContent = format === 'horizontal' 
+        ? 'Горизонтальный - 320x100' 
+        : 'Вертикальный - 240x320';
+    }
+    
+    const viewStatus = document.getElementById('slot-view-status');
+    if (viewStatus) {
+      viewStatus.textContent = status === 'active' ? 'Активно' : 'Приостановлено';
+      viewStatus.className = 'slot-view-value ' + 
+        (status === 'active' ? 'slot-view-value--active' : 'slot-view-value--paused');
+    }
+    
+    const viewBgColor = document.getElementById('slot-view-bg-color');
+    if (viewBgColor && bgColor) viewBgColor.style.backgroundColor = bgColor;
+    
+    const viewTextColor = document.getElementById('slot-view-text-color');
+    if (viewTextColor && textColor) viewTextColor.style.backgroundColor = textColor;
+    
+    // Обновляем preview в режиме просмотра
+    const viewPreview = document.getElementById('slot-view-preview');
+    if (viewPreview) {
+      if (format === 'horizontal') {
+        viewPreview.classList.add('preview-card--horizontal');
+      } else {
+        viewPreview.classList.remove('preview-card--horizontal');
+      }
+      
+      const previewContent = viewPreview.querySelector('.preview-content');
+      if (previewContent && bgColor) previewContent.style.backgroundColor = bgColor;
+      
+      const previewTitle = viewPreview.querySelector('h4');
+      const previewDesc = viewPreview.querySelector('p');
+      if (previewTitle && textColor) previewTitle.style.color = textColor;
+      if (previewDesc && textColor) previewDesc.style.color = textColor;
+    }
+  }
 }

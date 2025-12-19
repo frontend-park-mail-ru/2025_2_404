@@ -5,19 +5,114 @@
      <span class="breadcrumbs__current">{{slot.title}}</span>
   </div>
 
-  <div class="slot-card">
+  <!-- Мобильный режим просмотра -->
+  <div class="slot-view-mode" id="slot-view-mode">
+    <div class="slot-view-card">
+      <div class="slot-view-header">
+        <div class="slot-view-title-wrapper">
+          <h1 class="slot-view-title">{{slot.title}}</h1>
+          <button class="slot-view-edit-icon" id="slot-view-edit-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="#A0AEC0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z" stroke="#A0AEC0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="card-options-wrapper">
+          <button class="options-btn" id="options-trigger-view">
+            <span class="dots">•••</span>
+          </button>
+          <div class="options-menu" id="options-menu-view">
+            <div class="options-item text-danger" id="delete-slot-btn-view">
+              <img src="/assets/trash.svg" width="26" height="26" alt="Удалить">Удалить слот
+            </div>
+            <div class="options-item" id="pause-slot-btn-view">
+              <img src="/assets/cancel.svg" width="26" height="26" alt="Приостановить">
+              Приостановить показ
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slot-view-preview-section">
+        <h3 class="slot-view-preview-title">Предпросмотр</h3>
+        <div class="slot-view-preview-card">
+          <div id="slot-view-preview" class="preview-card {{#if (eq slot.format 'horizontal')}}preview-card--horizontal{{/if}}">
+            <div class="preview-image-container">
+              <img src="/public/assets/cat_meme.png" alt="Preview" class="preview-img">
+              <button class="preview-close">✕</button>
+            </div>
+            <div class="preview-content" style="background-color: {{slot.bgColor}};">
+              <h4 style="color: {{slot.textColor}};">Лучшая реклама</h4>
+              <p style="color: {{slot.textColor}};">
+                Описание, много текста. Описание, много текста. 
+                Описание, много текста...
+              </p>
+              <span class="preview-link">luchshayareklama.ru</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slot-view-info">
+        <div class="slot-view-row">
+          <span class="slot-view-label">Минимальная стоимость показа</span>
+          <span class="slot-view-value slot-view-value--purple" id="slot-view-price">{{slot.minPrice}} ₽</span>
+        </div>
+        <div class="slot-view-row">
+          <span class="slot-view-label">Формат объявления</span>
+          <span class="slot-view-value" id="slot-view-format">
+            {{#if (eq slot.format 'horizontal')}}Горизонтальный - 320x100{{else}}Вертикальный - 240x320{{/if}}
+          </span>
+        </div>
+        <div class="slot-view-row">
+          <span class="slot-view-label">Статус</span>
+          <span class="slot-view-value {{#if (eq slot.status 'active')}}slot-view-value--active{{else}}slot-view-value--paused{{/if}}" id="slot-view-status">
+            {{#if (eq slot.status 'active')}}Активно{{else}}Приостановлено{{/if}}
+          </span>
+        </div>
+        <div class="slot-view-row">
+          <span class="slot-view-label">Цвета объявления</span>
+          <div class="slot-view-colors">
+            <div class="slot-view-color-item">
+              <div class="slot-view-color-box" id="slot-view-bg-color" style="background-color: {{slot.bgColor}};"></div>
+              <span>Фон</span>
+            </div>
+            <div class="slot-view-color-item">
+              <div class="slot-view-color-box" id="slot-view-text-color" style="background-color: {{slot.textColor}};"></div>
+              <span>Текст</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn--primary slot-view-edit-btn" id="slot-edit-btn">
+        Редактировать
+      </button>
+
+      <div class="slot-view-actions">
+        <button id="slot-view-back-btn" class="btn btn--secondary">Назад</button>
+        <button id="slot-view-stats-btn" class="btn btn--secondary">Статистика</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Режим редактирования (десктоп всегда, мобайл по клику) -->
+  <div class="slot-card" id="slot-edit-mode">
     <div class="slot-card__header">
       <div class="header-left">
-        <div class="slot-title-wrapper">
-           <input type="text" id="slot-title-input" class="slot-title-input" value="{{slot.title}}" placeholder="Название слота">
-           <div class="edit-icon" id="edit-title-btn">
-             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="#A0AEC0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z" stroke="#A0AEC0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-             </svg>
-           </div>
+        <div class="slot-title-group">
+          <div class="slot-title-wrapper">
+             <input type="text" id="slot-title-input" class="slot-title-input" value="{{slot.title}}" placeholder="Название слота" maxlength="10">
+             <div class="edit-icon" id="edit-title-btn">
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="#A0AEC0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z" stroke="#A0AEC0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+               </svg>
+             </div>
+          </div>
+          <div class="error-message error-message--reserved" id="error-title-input">&nbsp;</div>
         </div>
-        {{!-- <div class="slot-date">Создано {{formatDate slot.createdAt}}</div> --}}
       </div>
       <div class="card-options-wrapper">
           <button class="options-btn" id="options-trigger">
@@ -50,7 +145,8 @@
         <div class="form-group">
             <label class="slot-label">Минимальная стоимость показа объявления</label>
             <input type="number" id="min-price" class="slot-input {{#if slot.minPrice}}filled{{/if}}" 
-                   placeholder="Введите число" value="{{slot.minPrice}}">
+                   placeholder="Введите число" value="{{slot.minPrice}}" min="0" max="100">
+            <div class="error-message error-message--reserved" id="error-min-price">&nbsp;</div>
         </div>
         <div class="form-group">
             <label class="slot-label">Выберите формат рекламного объявления</label>

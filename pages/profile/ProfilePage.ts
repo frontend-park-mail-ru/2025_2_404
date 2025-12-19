@@ -411,7 +411,7 @@ export default class ProfilePage implements PageComponent {
       new ConfirmationModal({ message: "Данные сохранены!", onConfirm: () => {} }).show();
     } catch (error) {
       console.error('Ошибка при обновлении профиля:', error);
-      this.components.loginInput?.showError('Не удалось сохранить изменения. Попробуйте позже.');
+      this.components.loginInput?.showError('Не удалось сохранить изменения. Попробуйте позже');
     }
   }
 

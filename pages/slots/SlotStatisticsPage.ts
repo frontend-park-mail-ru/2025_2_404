@@ -66,7 +66,8 @@ export default class SlotStatisticsPage implements PageComponent {
 
     periodSelect?.addEventListener('change', () => {
       this.currentPeriod = parseInt(periodSelect.value);
-      this.loadStatistics();
+      this.updateTotals();
+      this.updateChart();
     });
     document.getElementById('stats-retry-btn')?.addEventListener('click', () => {
       this.loadStatistics();
@@ -113,7 +114,7 @@ export default class SlotStatisticsPage implements PageComponent {
          (this.statistics.daily_stats && this.statistics.daily_stats.length > 0));
 
       if (!hasData) {
-        this.showMessage('Данных для показа пока нет. Статистика появится после первых показов рекламы.', false);
+        this.showMessage('Данных для показа пока нет. Статистика появится после первых показов рекламы', false);
         return;
       }
 
@@ -122,26 +123,49 @@ export default class SlotStatisticsPage implements PageComponent {
       this.updateChart();
     } catch (err) {
       console.error('Ошибка при загрузке статистики:', err);
-      this.showMessage('Ошибка сервера. Пожалуйста, попробуйте зайти позже.', true);
+      this.showMessage('Ошибка сервера. Пожалуйста, попробуйте зайти позже', true);
     }
+  }
+
+  private getFilteredStats(): DailyStats[] {
+    if (!this.statistics) return [];
+    
+    const { daily_stats } = this.statistics;
+    if (!daily_stats || daily_stats.length === 0) return [];
+    
+    // Фильтруем по выбранному периоду
+    const now = new Date();
+    const cutoffDate = new Date();
+    cutoffDate.setDate(now.getDate() - this.currentPeriod);
+    
+    return daily_stats.filter(stat => {
+      const statDate = new Date(stat.date);
+      return statDate >= cutoffDate;
+    });
   }
 
   private updateTotals(): void {
     if (!this.statistics) return;
 
+    const filteredStats = this.getFilteredStats();
+    
+    // Считаем итоги по отфильтрованным данным
+    const totalImpressions = filteredStats.reduce((sum, d) => sum + d.impressions, 0);
+    const totalClicks = filteredStats.reduce((sum, d) => sum + d.clicks, 0);
+    const totalEarned = (totalClicks + totalImpressions) * 3;
+
     const impressionsEl = document.getElementById('total-impressions');
     const clicksEl = document.getElementById('total-clicks');
-    const spentEl = document.getElementById('total-spent');
+    const earnedEl = document.getElementById('total-earned');
 
     if (impressionsEl) {
-      impressionsEl.textContent = this.statistics.total_impressions.toLocaleString('ru-RU');
+      impressionsEl.textContent = totalImpressions.toLocaleString('ru-RU');
     }
     if (clicksEl) {
-      clicksEl.textContent = this.statistics.total_clicks.toLocaleString('ru-RU');
+      clicksEl.textContent = totalClicks.toLocaleString('ru-RU');
     }
-    if (spentEl) {
-      const spent = (this.statistics.total_clicks + this.statistics.total_impressions) * 3;
-      spentEl.textContent = spent.toLocaleString('ru-RU') + ' ₽';
+    if (earnedEl) {
+      earnedEl.textContent = totalEarned.toLocaleString('ru-RU') + ' ₽';
     }
   }
 
@@ -156,28 +180,34 @@ export default class SlotStatisticsPage implements PageComponent {
       this.chart = null;
     }
 
-    const { daily_stats } = this.statistics;
-    const labels = daily_stats.map((d, i) => i.toString());
+    const filteredStats = this.getFilteredStats();
+    
+    // Форматируем даты для отображения
+    const labels = filteredStats.map(d => {
+      const date = new Date(d.date);
+      return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+    });
+    
     const dataMap: Record<string, { data: number[]; label: string; color: string }> = {
       impressions: {
-        data: daily_stats.map(d => d.impressions),
+        data: filteredStats.map(d => d.impressions),
         label: 'Показы',
         color: '#7C54E8',
       },
       clicks: {
-        data: daily_stats.map(d => d.clicks),
+        data: filteredStats.map(d => d.clicks),
         label: 'Клики',
         color: '#FF73AF',
       },
       ctr: {
-        data: daily_stats.map(d => d.ctr),
+        data: filteredStats.map(d => d.ctr),
         label: 'CTR (%)',
         color: '#4CAF50',
       },
-      spent: {
-        data: daily_stats.map(d => d.spent),
-        label: 'Траты (₽)',
-        color: '#F59E0B',
+      earned: {
+        data: filteredStats.map(d => (d.clicks + d.impressions) * 3),
+        label: 'Заработок (₽)',
+        color: '#10B981',
       },
     };
 
@@ -205,7 +235,17 @@ export default class SlotStatisticsPage implements PageComponent {
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            display: false,
+            display: true,
+            position: 'top',
+            labels: {
+              color: '#333',
+              font: {
+                size: 14,
+                weight: 'bold',
+              },
+              usePointStyle: true,
+              padding: 20,
+            },
           },
         },
         scales: {

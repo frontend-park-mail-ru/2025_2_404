@@ -1204,6 +1204,10 @@ body {
 
   .input-wrapper {
     position: relative;
+
+    .form-group__input {
+      padding-right: 43px;
+    }
   }
 
 }
@@ -1227,6 +1231,10 @@ body {
 
   .input-wrapper {
     margin-top: 5px;
+
+    .form-group__input {
+      padding-right: 30px;
+    }
   }
 }
 
@@ -1856,15 +1864,29 @@ body {
   color: #e63946;
   font-size: 12px;
   margin-block: 4px;
-  height: 16px;
+  min-height: 16px;
   display: block;
+  
+  // Зарезервированное место для ошибок - не прыгает UI
+  &--reserved {
+    visibility: hidden;
+    min-height: 16px;
+    
+    &.is-visible {
+      visibility: visible;
+    }
+  }
 }
 
 @media (max-width: 768px) {
   .error-message {
     font-size: 11px;
     margin-block: 2px;
-    height: 12px;
+    min-height: 14px;
+    
+    &--reserved {
+      min-height: 14px;
+    }
   }
 }
 
@@ -3752,6 +3774,10 @@ body {
     &--purple {
       color: var(--primary-purple);
     }
+
+    &--green {
+      color: #10B981;
+    }
   }
 
   // График
@@ -3800,6 +3826,19 @@ body {
   color: #2D3748;
 }
 
+// Скрываем мобильные элементы на десктопе
+.slot-view-mode {
+  display: none;
+}
+
+.slot-preview-toggle {
+  display: none;
+}
+
+.slot-preview-card-mobile {
+  display: none;
+}
+
 .slot-card {
   background: #F8F5FF;
   border-radius: 24px;
@@ -3833,7 +3872,14 @@ body {
 .header-left {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0;
+}
+
+.slot-title-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 0; // Предотвращаем скачки UI
 }
 
 .slot-title-wrapper {
@@ -4375,16 +4421,185 @@ body {
     padding: 0 15px;
   }
 
+  // === Режим просмотра слота ===
+  .slot-view-mode {
+    display: block;
+    
+    &.is-hidden {
+      display: none;
+    }
+  }
+
+  .slot-view-card {
+    background: linear-gradient(135deg, #F8F5FF 0%, #fff 100%);
+    border-radius: 20px;
+    padding: 24px 20px;
+    box-shadow: 0 4px 20px rgba(124, 84, 232, 0.12);
+    margin-bottom: 20px;
+  }
+
+  .slot-view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .slot-view-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .slot-view-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #2D3748;
+    margin: 0;
+  }
+
+  .slot-view-edit-icon {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background 0.2s;
+    background: none;
+    border: none;
+
+    &:hover {
+      background-color: #F3F0FF;
+    }
+
+    svg path {
+      stroke: #A0AEC0;
+    }
+
+    &:hover svg path {
+      stroke: #7C54E8;
+    }
+  }
+
+  .slot-view-preview-section {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .slot-view-preview-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #2D3748;
+    margin-bottom: 16px;
+    text-align: left;
+  }
+
+  .slot-view-preview-card {
+    display: inline-block;
+    max-width: 280px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .slot-view-info {
+    background: white;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+  }
+
+  .slot-view-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 0;
+    font-size: 14px;
+    color: #2D3748;
+    border-bottom: 1px solid #f0f0f0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .slot-view-label {
+    color: #A0AEC0;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .slot-view-value {
+    word-break: break-word;
+    font-weight: 500;
+    
+    &--purple {
+      color: #7C54E8;
+    }
+
+    &--active {
+      color: #48BB78;
+    }
+
+    &--paused {
+      color: #A0AEC0;
+    }
+  }
+
+  .slot-view-colors {
+    display: flex;
+    gap: 12px;
+  }
+
+  .slot-view-color-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .slot-view-color-box {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: 1px solid #E2E8F0;
+  }
+
+  .slot-view-edit-btn {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+  .slot-view-actions {
+    display: flex;
+    gap: 10px;
+
+    .btn {
+      flex: 1;
+      font-size: 13px;
+      padding: 10px 12px;
+    }
+  }
+
+  // === Режим редактирования слота ===
   .slot-card {
+    display: none;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+
+    &.is-active {
+      display: block;
+    }
+
     &__header {
-      flex-direction: column;
+      flex-direction: row;
       align-items: flex-start;
-      gap: 16px;
+      justify-content: space-between;
+      gap: 12px;
       padding: 20px;
     }
 
     &__body {
-      padding: 20px;
+      flex-direction: column;
     }
 
     &__footer {
@@ -4403,13 +4618,67 @@ body {
     }
   }
 
-  .slot-form-column,
+  .card-options-wrapper {
+    padding-top: 8px; // Выравниваем с названием слота
+  }
+
+  .header-left {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .slot-title-wrapper {
+    flex-wrap: nowrap;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+.slot-title-input {
+    font-size: 20px;
+    min-width: 80px;
+    max-width: calc(100% - 50px);
+    flex: 1;
+    // Фиксированная высота чтобы не было скачков
+    height: 40px;
+    box-sizing: border-box;
+
+    // Предотвращаем скачок UI при фокусе
+    &:focus {
+      border-color: #D6BCFA;
+    }
+  }
+
+  .edit-icon {
+    flex-shrink: 0;
+  }
+
+  .slot-form-column {
+    padding: 20px;
+    border-right: none;
+    border-bottom: 1px solid #E2E8F0;
+  }
+
   .slot-preview-column {
     padding: 20px;
   }
 
-  .slot-title-input {
-    font-size: 24px;
+  // Уменьшаем select для мобильных
+  .slot-select {
+    font-size: 14px;
+    padding: 12px 14px;
+    
+    option {
+      font-size: 14px;
+    }
+  }
+
+  .slot-input {
+    font-size: 14px;
+    padding: 12px 14px;
+  }
+
+  .slot-label {
+    font-size: 14px;
   }
 
   .form-row-colors {
@@ -4439,6 +4708,62 @@ body {
 
   .btn-footer {
     width: 100%;
+  }
+
+  // === Preview отдельная карточка на мобильных ===
+  .slot-preview-card-mobile {
+    display: none;
+    background: linear-gradient(135deg, #F8F5FF 0%, #fff 100%);
+    border-radius: 20px;
+    padding: 24px 20px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(124, 84, 232, 0.12);
+
+    &.is-active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .preview-title {
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+  }
+
+  .slot-preview-back {
+    display: block;
+    align-self: flex-start;
+    background: none;
+    border: none;
+    color: #7C54E8;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 0;
+    margin-bottom: 16px;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  // Кнопка предпросмотра для мобильных
+  .slot-preview-toggle {
+    display: inline-block;
+  }
+
+  // Скрыть форму когда preview активен
+  .slot-card.is-preview-hidden {
+    display: none;
+  }
+
+  // Скрыть десктопный preview на мобильных при активной форме
+  .slot-card.is-active .slot-preview-column {
+    .preview-title {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
   }
 }
 .low-balance-overlay {
@@ -4537,6 +4862,67 @@ body {
 .low-balance-modal .logo img {
     max-height: 40px;      
     width: auto;
+}
+
+/* Mobile responsive styles for low-balance modal */
+@media (max-width: 480px) {
+    .low-balance-modal {
+        width: calc(100% - 32px);
+        max-width: 400px;
+        margin: 16px;
+        padding: 30px 20px;
+        border-radius: 12px;
+    }
+
+    .low-balance-close {
+        top: 12px;
+        right: 12px;
+        font-size: 16px;
+    }
+
+    .low-balance-modal .logo {
+        margin-bottom: 25px;
+    }
+
+    .low-balance-modal .logo img {
+        max-height: 32px;
+    }
+
+    .low-balance-text {
+        font-size: 15px;
+        margin-bottom: 8px;
+    }
+
+    .low-balance-subtext {
+        font-size: 14px;
+        margin-bottom: 25px;
+    }
+
+    .low-balance-btn {
+        width: 100%;
+        padding: 14px 24px;
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 360px) {
+    .low-balance-modal {
+        padding: 25px 16px;
+    }
+
+    .low-balance-text {
+        font-size: 14px;
+    }
+
+    .low-balance-subtext {
+        font-size: 13px;
+        margin-bottom: 20px;
+    }
+
+    .low-balance-btn {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
 }
 
 .ads__status-container {
@@ -4670,4 +5056,18 @@ input:disabled + .slider {
 
 .copy-notification.error {
     background-color: #E53E3E;
+}
+
+.ads__input-group {
+  align-items: center;
+}
+
+.add-budget-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

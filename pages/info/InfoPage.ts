@@ -171,7 +171,7 @@ export default class InfoPage implements PageComponent {
 
         (contactForm as HTMLFormElement).reset();
         new ConfirmationModal({
-          message: 'Спасибо! Ваше сообщение отправлено. Мы свяжемся с вами в ближайшее время.',
+          message: 'Спасибо! Ваше сообщение отправлено. Мы свяжемся с вами в ближайшее время',
           onConfirm: () => {},
         }).show();
       });
