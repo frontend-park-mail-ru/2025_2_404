@@ -145,7 +145,10 @@ export default class CreateProjectPage implements PageComponent {
       
       const imgFile = imgInput?.files?.[0] || null;
 
-      document.querySelectorAll('.error-message').forEach((el) => el.remove());
+      // Очищаем предыдущие ошибки
+      document.querySelectorAll('.error-message').forEach((el) => {
+        el.textContent = '';
+      });
       document.querySelectorAll('.input--error').forEach((el) => el.classList.remove('input--error'));
       
       // 4. Валидация формы
@@ -193,13 +196,14 @@ export default class CreateProjectPage implements PageComponent {
       if (Object.keys(errors).length > 0) {
         console.warn('Ошибки валидации:', errors);
         for (const [key, msg] of Object.entries(errors)) {
-          const input = document.getElementById(fieldMap[key]);
+          const inputId = fieldMap[key];
+          const input = document.getElementById(inputId);
+          const errorEl = document.getElementById(`error-${inputId}`);
           if (input && msg) {
             input.classList.add('input--error');
-            const err = document.createElement('small');
-            err.textContent = msg;
-            err.classList.add('error-message');
-            input.insertAdjacentElement('afterend', err);
+            if (errorEl) {
+              errorEl.textContent = msg;
+            }
           }
         }
         return;

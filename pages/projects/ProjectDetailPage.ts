@@ -322,7 +322,10 @@ export default class ProjectDetailPage implements PageComponent {
 
         const imgFile = this.selectedFile;
 
-        document.querySelectorAll('.error-message').forEach((el) => el.remove());
+        // Очищаем предыдущие ошибки
+        document.querySelectorAll('.error-message').forEach((el) => {
+          el.textContent = '';
+        });
         document.querySelectorAll('.input--error').forEach((el) =>
           el.classList.remove('input--error')
         );
@@ -349,13 +352,14 @@ export default class ProjectDetailPage implements PageComponent {
 
         if (Object.keys(errors).length > 0) {
           for (const [key, msg] of Object.entries(errors)) {
-            const input = document.getElementById(fieldMap[key]);
+            const inputId = fieldMap[key];
+            const input = document.getElementById(inputId);
+            const errorEl = document.getElementById(`error-${inputId}`);
             if (input && msg) {
               input.classList.add('input--error');
-              const err = document.createElement('small');
-              err.textContent = msg;
-              err.classList.add('error-message');
-              input.insertAdjacentElement('afterend', err);
+              if (errorEl) {
+                errorEl.textContent = msg;
+              }
             }
           }
           console.warn('Ошибки валидации:', errors);
