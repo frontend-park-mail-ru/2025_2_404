@@ -179,7 +179,7 @@ async render() {
                 return false;
             }
             
-            if (value > 100) {
+            if (value > 100000) {
                 minPriceInput.style.borderColor = '#E53E3E';
                 showPriceError('Максимальная стоимость - 100');
                 return false;

@@ -206,16 +206,14 @@
           <h3 class="preview-title">Предпросмотр</h3>
           <div id="preview-card" class="preview-card {{#if (eq slot.format 'horizontal')}}preview-card--horizontal{{/if}}">
               <div class="preview-image-container">
-                  <img src="/public/assets/cat_meme.png" alt="Preview" class="preview-img">
+                  <img src="/public/assets/default.jpg" alt="Preview" class="preview-img">
                   <button class="preview-close">✕</button>
               </div>
               <div class="preview-content" style="background-color: {{slot.bgColor}};">
-                  <h4 id="preview-title" style="color: {{slot.textColor}};">Лучшая реклама</h4>
+                  <h4 id="preview-title" style="color: {{slot.textColor}};">Моя реклама</h4>
                   <p id="preview-desc" style="color: {{slot.textColor}};">
-                      Описание, много текста. Описание, много текста. 
-                      Описание, много текста. Описание, много текста...
+                      Тут будет текст вашей рекламной кампании
                   </p>
-                  <span class="preview-link">luchshayareklama.ru</span>
               </div>
           </div>
       </div>

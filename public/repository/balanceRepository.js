@@ -10,36 +10,49 @@ class BalanceRepository {
 
       const balance = res.data.balance || 0;
       const rawPayments = res.data.payments || [];
-      const transactions = rawPayments.map(p => {
-        const amount = p.amount || 0;
-        const isPositive = amount > 0; 
-        let description = 'Операция';
-        if (p.payment_method === 'yooKassa') {
-            description = 'Пополнение счета (ЮKassa)';
-        } 
-        else if (p.ad_title) {
-            description = `Списание по «${p.ad_title}»`;
-        }
-        else if (amount < 0) {
-             description = 'Списание со счета';
-        }
-        else if (isPositive) {
-            description = 'Пополнение счета';
-        }
+const transactions = rawPayments.map(p => {
+  const amount = p.amount || 0;
+  let description = 'Операция';
+  let type = 'positive'; // по умолчанию
 
-        const dateStr = p.created_at || p.date || new Date().toISOString();
-        const dateObj = new Date(dateStr);
+  if (p.payment_method === 'ad_subtract') {
+    type = 'negative'; // ← 🔥 Вот эта строка решает всё!
+    description = 'Списание по рекламной кампании';
+  } 
+  else if (p.payment_method === 'yooKassa') {
+    type = 'positive';
+    description = 'Пополнение счета (ЮKassa)';
+  }
+  else if (p.payment_method === 'ad_plus') {
+    type = 'positive';
+    description = 'Возврат по рекламной кампании';
+  }
+    else if (p.payment_method === 'subtract_balance') {
+    type = 'negative';
+    description = 'Вывод средств';
+  }
+  else if (amount < 0) {
+    type = 'negative';
+    description = 'Списание со счета';
+  }
+  else {
+    type = 'positive';
+    description = 'Пополнение счета';
+  }
 
-        return {
-          id: p.ID, 
-          date: dateStr,
-          description: description,
-          amount: Math.abs(amount), 
-          type: isPositive ? 'positive' : 'negative',
-          time: dateObj.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'}),
-          status: p.status
-        };
-      });
+  const dateStr = p.created_at || p.date || new Date().toISOString();
+  const dateObj = new Date(dateStr);
+
+  return {
+    id: p.ID, 
+    date: dateStr,
+    description: description,
+    amount: Math.abs(amount),
+    type: type,
+    time: dateObj.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'}),
+    status: p.status
+  };
+});
 
       transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
 

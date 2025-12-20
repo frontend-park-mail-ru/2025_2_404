@@ -29,13 +29,13 @@
         <div class="project-card" data-id="{{this.id}}" data-type="{{../activeTab}}">
           <div class="project-card__header">
             <h3 class="project-card__title">
-              {{#if (eq ../activeTab 'ads')}}
-                Рекламное объявление №{{this.displayNumber}}
+              {{#if this.title}}
+                {{this.title}}
               {{else}}
-                {{#if this.title}}
-                    {{this.title}}
+                {{#if (eq ../activeTab 'ads')}}
+                  Рекламное объявление №{{this.displayNumber}}
                 {{else}}
-                    Слот №{{this.displayNumber}}
+                  Слот №{{this.displayNumber}}
                 {{/if}}
               {{/if}}
             </h3>
