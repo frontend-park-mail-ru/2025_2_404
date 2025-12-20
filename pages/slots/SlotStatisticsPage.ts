@@ -71,8 +71,9 @@ export default class SlotStatisticsPage implements PageComponent {
 
     periodSelect?.addEventListener('change', () => {
       this.currentPeriod = parseInt(periodSelect.value);
-      // Перезагружаем данные с бэкенда при смене периода
-      this.loadStatistics();
+      // Обновляем отображение с локальной фильтрацией
+      this.updateTotals();
+      this.updateChart();
     });
     document.getElementById('stats-retry-btn')?.addEventListener('click', () => {
       this.loadStatistics();
@@ -122,18 +123,8 @@ export default class SlotStatisticsPage implements PageComponent {
 
   async loadStatistics(): Promise<void> {
     try {
-      // Вычисляем даты для выбранного периода
-      const now = new Date();
-      const dateFrom = new Date();
-      dateFrom.setDate(now.getDate() - this.currentPeriod);
-      
-      const formatDate = (d: Date) => d.toISOString().split('T')[0];
-      
-      this.statistics = await statisticsRepository.getSlotStatistics(
-        this.slotId,
-        formatDate(dateFrom),
-        formatDate(now)
-      );
+      // Загружаем все данные, фильтрация по периоду делается локально
+      this.statistics = await statisticsRepository.getSlotStatistics(this.slotId);
       
       const hasData = this.statistics && 
         (this.statistics.total_impressions > 0 || 
@@ -154,11 +145,30 @@ export default class SlotStatisticsPage implements PageComponent {
     }
   }
 
+  private getFilteredStats(): DailyStats[] {
+    if (!this.statistics) return [];
+    
+    const { daily_stats } = this.statistics;
+    if (!daily_stats || daily_stats.length === 0) return [];
+    
+    // Фильтруем по выбранному периоду (на случай если бэкенд не фильтрует)
+    const now = new Date();
+    now.setHours(23, 59, 59, 999);
+    const cutoffDate = new Date();
+    cutoffDate.setDate(now.getDate() - this.currentPeriod);
+    cutoffDate.setHours(0, 0, 0, 0);
+    
+    return daily_stats.filter(stat => {
+      const statDate = new Date(stat.date);
+      return statDate >= cutoffDate && statDate <= now;
+    });
+  }
+
   private updateTotals(): void {
     if (!this.statistics) return;
 
-    // Используем данные напрямую (фильтрация на бэкенде)
-    const stats = this.statistics.daily_stats || [];
+    // Фильтруем данные по периоду
+    const stats = this.getFilteredStats();
     
     // Считаем итоги
     const totalImpressions = stats.reduce((sum, d) => sum + d.impressions, 0);
@@ -191,8 +201,8 @@ export default class SlotStatisticsPage implements PageComponent {
       this.chart = null;
     }
 
-    // Используем данные напрямую (фильтрация на бэкенде)
-    const stats = this.statistics.daily_stats || [];
+    // Фильтруем данные по периоду
+    const stats = this.getFilteredStats();
     
     // Форматируем даты для отображения
     const labels = stats.map(d => {
