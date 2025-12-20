@@ -179,9 +179,9 @@ async render() {
                 return false;
             }
             
-            if (value > 100) {
+            if (value > 100000) {
                 minPriceInput.style.borderColor = '#E53E3E';
-                showPriceError('Максимальная стоимость - 100');
+                showPriceError('Максимальная стоимость - 100000');
                 return false;
             }
             
@@ -327,9 +327,9 @@ async render() {
         }
         
         // Проверка на максимальное значение
-        if (minPriceValue > 100) {
+        if (minPriceValue > 100000) {
             if (minPriceEl) minPriceEl.style.borderColor = '#E53E3E';
-            showPriceError('Максимальная стоимость - 100');
+            showPriceError('Максимальная стоимость - 100000');
             return;
         }
 
