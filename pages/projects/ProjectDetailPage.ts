@@ -69,6 +69,15 @@ export default class ProjectDetailPage implements PageComponent {
       }
     });
 
+    Handlebars.registerHelper('divide', (a: number, b: number) => {
+      if (b === 0) return '0.00';
+      return (a / b).toFixed(2);
+    });
+
+    Handlebars.registerHelper('multiply', (a: number, b: number) => {
+      return a * b;
+    });
+
     try {
       const response = await fetch('/pages/projects/ProjectDetailPage.hbs');
       if (!response.ok) throw new Error('Не удалось загрузить шаблон ProjectDetailPage');
