@@ -25,7 +25,7 @@ export default class CreateProjectPage implements PageComponent {
 
   private _togglePreview(show: boolean): void {
     const formCard = document.getElementById('ads-edit-mode');
-    const previewCard = document.getElementById('ad-preview-card'); // ← Исправлен ID
+    const previewCard = document.getElementById('ad-preview-card');
 
     if (formCard && previewCard) {
       if (show) {
@@ -40,8 +40,6 @@ export default class CreateProjectPage implements PageComponent {
 
   async loadTemplate(): Promise<void> {
     if (this.template) return;
-
-    // Хелпер для форматирования даты
     Handlebars.registerHelper('formatDate', (dateStr: string, format: string) => {
       if (!dateStr) return '';
       try {
@@ -71,8 +69,6 @@ export default class CreateProjectPage implements PageComponent {
 
 async render(): Promise<string> {
   await this.loadTemplate();
-
-  // Получаем список всех объявлений, чтобы узнать их количество
   let totalCount = 0;
   try {
     const adsResponse = await adsRepository.getAll();
@@ -80,7 +76,6 @@ async render(): Promise<string> {
     totalCount = adsList.length;
   } catch (err) {
     console.warn('Не удалось загрузить список объявлений для генерации имени:', err);
-    // Оставляем totalCount = 0 → будет "№1"
   }
 
   const nextNumber = totalCount + 1;
@@ -109,8 +104,7 @@ async render(): Promise<string> {
 }
 
 attachEvents(): void {
-  // === СЕЛЕКТОРЫ — ТОЧНО ПО ТВОЕЙ РАЗМЕТКЕ ===
-  const headlineInput = document.getElementById('headline-input') as HTMLInputElement | null; // ← ЗАГОЛОВОК ОБЪЯВЛЕНИЯ
+  const headlineInput = document.getElementById('headline-input') as HTMLInputElement | null;
   const descInput = document.getElementById('desc-input') as HTMLTextAreaElement | null;
   const siteInput = document.getElementById('site-input') as HTMLInputElement | null;
   const budgetInput = document.getElementById('budget-input') as HTMLInputElement | null;
@@ -124,18 +118,14 @@ attachEvents(): void {
   const fileTypeEl = document.getElementById('uploaded-file-type');
   const removeBtn = document.getElementById('remove-uploaded-file');
   const errorEl = document.getElementById('error-img-file');
-  // === ПРЕВЬЮ — ID ИЗ ТВОЕЙ РАЗМЕТКИ ===
-  const previewTitle = document.getElementById('ad-preview-title');     // ← h4 id="ad-preview-title"
-  const previewDesc = document.getElementById('ad-preview-desc');       // ← p id="ad-preview-desc"
-  const previewLink = document.getElementById('ad-preview-link');       // ← span id="ad-preview-link"
-  const previewImg = document.getElementById('ad-preview-img') as HTMLImageElement | null; // ← img id="ad-preview-img"
+  const previewTitle = document.getElementById('ad-preview-title');     
+  const previewDesc = document.getElementById('ad-preview-desc');     
+  const previewLink = document.getElementById('ad-preview-link');      
+  const previewImg = document.getElementById('ad-preview-img') as HTMLImageElement | null;
   const showFilePreview = (file: File) => {
-  // Имя и расширение
   const name = file.name;
   const ext = name.split('.').pop()?.toLowerCase() || '';
   const mime = file.type;
-
-  // Тип для отображения
   let typeText = 'Файл';
   if (mime.startsWith('image/')) {
     typeText = ext.toUpperCase() + ' изображение';
@@ -143,8 +133,6 @@ attachEvents(): void {
 
   if (fileNameEl) fileNameEl.textContent = name;
   if (fileTypeEl) fileTypeEl.textContent = typeText;
-
-  // Превью изображения
   if (fileThumb && mime.startsWith('image/')) {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -152,15 +140,11 @@ attachEvents(): void {
     };
     reader.readAsDataURL(file);
   }
-
-  // Показать карточку
   if (filePreview && uploadBox) {
     filePreview.style.display = 'flex';
-    uploadBox.classList.add('hidden');// скрыть кнопку загрузки
+    uploadBox.classList.add('hidden');
   }
 };
-
-// Функция сброса
 const resetFilePreview = () => {
   this.selectedFile = null;
   if (filePreview && uploadBox) {
@@ -171,14 +155,11 @@ const resetFilePreview = () => {
   if (errorEl) errorEl.textContent = '';
 };
 
-
-// Обработчик удаления
 removeBtn?.addEventListener('click', (e) => {
   e.preventDefault();
   e.stopPropagation();
   resetFilePreview();
 });
-  // 🔥 ПРЯМАЯ СВЯЗЬ: ВВОД → ПРЕВЬЮ
   headlineInput?.addEventListener('input', () => {
     if (previewTitle) {
       previewTitle.textContent = headlineInput.value.trim() || 'Заголовок объявления';
@@ -191,17 +172,12 @@ removeBtn?.addEventListener('click', (e) => {
     }
   });
 
-
-  // === ЗАГРУЗКА ИЗОБРАЖЕНИЯ ===
-
     imgInput?.addEventListener('change', (e) => {
     const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) {
       resetFilePreview();
       return;
     }
-
-    // Базовая валидация по типу и размеру
     const allowedTypes = ['image/jpeg', 'image/png'];
     const maxSize = 10 * 1024 * 1024;
 
@@ -216,29 +192,21 @@ removeBtn?.addEventListener('click', (e) => {
       resetFilePreview();
       return;
     }
-
-    // ✅ ПРОВЕРКА: ЯВЛЯЕТСЯ ЛИ ФАЙЛ ИЗОБРАЖЕНИЕМ
     const img = new Image();
     const reader = new FileReader();
-
-    // Ошибка чтения файла (редко, но бывает)
     reader.onerror = () => {
       if (errorEl) errorEl.textContent = 'Ошибка чтения файла. Попробуйте другой.';
       resetFilePreview();
     };
-
-    // Успешное чтение → пробуем загрузить как изображение
     reader.onload = (event) => {
       img.src = event.target?.result as string;
 
       img.onload = () => {
-        // ✅ Успешно загрузилось → файл действительно изображение
         this.selectedFile = file;
         showFilePreview(file);
       };
 
       img.onerror = () => {
-        // ❌ Не удалось загрузить → не изображение
         if (errorEl) errorEl.textContent = 'Ошибка загрузки: файл не является изображением.';
         resetFilePreview();
       };
@@ -246,7 +214,6 @@ removeBtn?.addEventListener('click', (e) => {
 
     reader.readAsDataURL(file);
   });
-  // === КНОПКИ НАЗАД ===
   ['#back-btn', '#breadcrumb-ads'].forEach(sel => {
     document.querySelector(sel)?.addEventListener('click', e => {
       e.preventDefault();
@@ -254,31 +221,22 @@ removeBtn?.addEventListener('click', (e) => {
       routerInstance?.navigate('/projects');
     });
   });
-
-  // === КНОПКА "СОЗДАТЬ" ===
   document.querySelector('#edit-btn')?.addEventListener('click', async (e) => {
     e.preventDefault();
 
     const headline = headlineInput?.value.trim() || '';
-    const projectName = headline; // ← используем тот же текст  // ← БЕРЁМ ЗНАЧЕНИЕ ИЗ ПОЛЯ!
+    const projectName = headline;
     const desc = descInput?.value.trim() || '';
     const site = siteInput?.value.trim() || '';
     const budget = budgetInput?.value.trim() || '';
     const startDate = startDateInput?.value || '';
     const endDate = endDateInput?.value || '';
-
-    // ОЧИЩАЕМ ОШИБКИ
     document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
     document.querySelectorAll('.input--error').forEach(el => el.classList.remove('input--error'));
-
-    // 🔥 ВАЛИДАЦИЯ ЗАГОЛОВКА ОБЪЯВЛЕНИЯ — ОБЯЗАТЕЛЬНОЕ ПОЛЕ
     let hasError = false;
-    // === ВАЛИДАЦИЯ ДАТ (копия из ProjectDetailPage) ===
-
-// Проверка: обе даты обязательны
 if (!startDate) {
   startDateInput?.classList.add('input--error');
-  document.getElementById('error-start-date-input')?.remove(); // удаляем старую, если есть
+  document.getElementById('error-start-date-input')?.remove();
   const errorEl = document.createElement('div');
   errorEl.id = 'error-start-date-input';
   errorEl.className = 'error-message';
@@ -297,8 +255,6 @@ if (!endDate) {
   endDateInput?.parentNode?.appendChild(errorEl);
   hasError = true;
 }
-
-// Если обе даты есть — проверяем логику
 if (startDate && endDate) {
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -326,7 +282,6 @@ if (startDate && endDate) {
   }
 
   if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-    // Дата окончания не может быть раньше начала
     if (end < start) {
       endDateInput?.classList.add('input--error');
       document.getElementById('error-end-date-input')?.remove();
@@ -337,20 +292,15 @@ if (startDate && endDate) {
       endDateInput?.parentNode?.appendChild(errorEl);
       hasError = true;
     }
-    // === ПРОВЕРКА: МАКСИМУМ 365 ДНЕЙ (как в старом коде) ===
 if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-  // Добавляем 365 дней к дате начала
   const maxEndDate = new Date(start);
   maxEndDate.setDate(maxEndDate.getDate() + 365);
-
-  // Сравниваем: если end > start + 365 → ошибка
   if (end > maxEndDate) {
     endDateInput?.classList.add('input--error');
     const errorEl = document.getElementById('error-end-date-input');
     if (errorEl) {
       errorEl.textContent = 'Рекламу можно запустить максимум на 1 год';
     } else {
-      // fallback: создаём, если нет
       const newError = document.createElement('div');
       newError.id = 'error-end-date-input';
       newError.className = 'error-message';
@@ -360,7 +310,6 @@ if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
     hasError = true;
   }
 }
-    // Дата не может быть в прошлом (опционально — можно убрать)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const startClean = new Date(start);
@@ -392,8 +341,6 @@ if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
       document.getElementById('error-headline-input')!.textContent = 'Максимум 50 символов';
       hasError = true;
     }
-
-    // ОСТАЛЬНЫЕ ПОЛЯ
     if (!desc) {
       descInput?.classList.add('input--error');
       document.getElementById('error-desc-input')!.textContent = 'Описание обязательно';
@@ -421,7 +368,6 @@ if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
         document.getElementById('error-budget-input')!.textContent = 'Бюджет должен быть положительным числом';
         hasError = true;
       } else {
-        // ПРОВЕРКА БАЛАНСА
         try {
           const balanceData = await balanceRepository.getBalanceAndTransactions();
           if (b > balanceData.balance) {
@@ -450,11 +396,9 @@ if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
       console.warn('Есть ошибки валидации');
       return;
     }
-
-    // ✅ ФОРМИРУЕМ ДАННЫЕ — headline УХОДИТ НА СЕРВЕР
     const formData = new FormData();
-    formData.append('title', headline);         // ← для списка
-    formData.append('headline', headline);      // ← заголовок на баннере — ОБЯЗАТЕЛЬНО
+    formData.append('title', headline);      
+    formData.append('headline', headline);    
     formData.append('content', desc);
     formData.append('target_url', site);
     formData.append('budget', budget);

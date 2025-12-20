@@ -108,17 +108,10 @@ async render(): Promise<string> {
     } else if (rawImg) {
         imageUrl = `data:image/jpeg;base64,${rawImg}`;
     }
-
-    // Получаем статистику
     const clicks = adData.Clicks ?? adData.clicks ?? 0;
     const impressions = adData.Impressions ?? adData.impressions ?? 0;
-    
-    // Если статистики нет в основном объекте, можно попробовать получить отдельно
     let stats = { clicks, impressions };
     try {
-      // Попробовать получить статистику отдельным запросом, если есть такой метод
-      // const statsResponse = await adsRepository.getStats(this.projectId);
-      // if (statsResponse) stats = statsResponse;
     } catch (err) {
       console.warn('Не удалось получить статистику:', err);
     }
@@ -148,7 +141,7 @@ async render(): Promise<string> {
       isActive: isActive,
       isLowBudget: isLowBudget,
       lastUpdated: null,
-      hasStats: true  // Флаг для показа статистики
+      hasStats: true  
     }) : '';
 
   } catch (err) {
@@ -156,8 +149,6 @@ async render(): Promise<string> {
     return this.template ? this.template({ error: (err as Error).message || 'Не удалось загрузить проект' }) : '';
   }
 }
-
-  // === ФУНКЦИИ ДЛЯ РАБОТЫ С ЗАГРУЗКОЙ ФАЙЛОВ ===
   private showFilePreview(file: File): void {
     const filePreview = document.getElementById('uploaded-file-preview');
     const uploadBox = document.getElementById('upload-box');
@@ -265,16 +256,10 @@ async render(): Promise<string> {
     const previewDesc = document.getElementById('ad-preview-desc');
     const previewImg = document.getElementById('ad-preview-img') as HTMLImageElement | null;
     const errorEl = document.getElementById('error-img-file');
-
-    // === ИНИЦИАЛИЗАЦИЯ ПРЕВЬЮ ИЗОБРАЖЕНИЯ ===
     if (this.project && previewImg) {
       previewImg.src = this.project.image_url;
     }
-    
-    // === ИНИЦИАЛИЗАЦИЯ ОБЛАСТИ ЗАГРУЗКИ ФАЙЛА ===
     this.initFileUploadArea();
-
-    // === ПРЯМАЯ СВЯЗЬ: ВВОД → ПРЕВЬЮ ===
     headlineInput?.addEventListener('input', () => {
       if (previewTitle) {
         previewTitle.textContent = headlineInput.value.trim() || 'Заголовок объявления';
@@ -286,8 +271,6 @@ async render(): Promise<string> {
         previewDesc.textContent = descInput.value.trim() || 'Описание';
       }
     });
-
-    // === ЛОГИКА БЮДЖЕТА И СТАТУСА ===
     const checkBudgetAndLockStatus = () => {
         if (!statusToggle || !lockMsg || !budgetInput) return;
         const currentBudget = parseFloat(budgetInput.value) || 0;
@@ -364,8 +347,6 @@ async render(): Promise<string> {
             modal.show();
         });
     }
-
-    // === КНОПКИ НАЗАД ===
     document.querySelector('#back-btn')?.addEventListener('click', (e) => {
       e.preventDefault();
       routerInstance?.navigate('/projects');
@@ -386,8 +367,6 @@ async render(): Promise<string> {
     document.querySelector('#delete-btn')?.addEventListener('click', () => {
       this.handleDelete();
     });
-
-    // === ЗАГРУЗКА ИЗОБРАЖЕНИЯ С ПРОВЕРКОЙ ===
     const uploadBox = document.getElementById('upload-box');
     const DEFAULT_IMG = '/public/assets/default.jpg';
     let skipModalCheck = false;
@@ -465,8 +444,6 @@ async render(): Promise<string> {
 
       reader.readAsDataURL(file);
     });
-
-    // === КНОПКА УДАЛЕНИЯ ФАЙЛА ===
     const removeBtn = document.getElementById('remove-uploaded-file');
     removeBtn?.addEventListener('click', (e) => {
       e.preventDefault();
@@ -474,8 +451,6 @@ async render(): Promise<string> {
       this.resetFilePreview();
       if (previewImg) previewImg.src = DEFAULT_IMG;
     });
-
-    // === КНОПКА СОХРАНЕНИЯ ===
     const editBtn = document.querySelector('#edit-btn');
     if (editBtn) {
       editBtn.addEventListener('click', async (e) => {
@@ -576,8 +551,6 @@ async render(): Promise<string> {
         } else {
           console.log('Новый файл не выбран, изображение останется прежним');
         }
-
-        // Для отладки
         console.log('Отправляемые данные:');
         for (let [key, value] of formData.entries()) {
           if (value instanceof File) {

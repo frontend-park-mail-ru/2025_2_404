@@ -168,10 +168,10 @@ export interface RegisterPageProps {
   onSwitchToLogin: () => void;
 }
 
-interface Transaction {
+export interface Transaction {
   id: string;
   amount: number;
-  date: string; // ISO-дата
+  date: string; 
   type: 'positive' | 'negative';
   description: string;
 }

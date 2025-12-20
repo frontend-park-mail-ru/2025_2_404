@@ -1,5 +1,4 @@
 <div class="ads">
-  {{!-- Блок просмотра для старых проектов (скрыт при редактировании) --}}
   {{#unless isNew}}
   <div class="ads__view-mode" id="ads-view-mode">
     <div class="ads__view-card">
@@ -8,8 +7,6 @@
       <div class="ads__view-info">
         <div class="ads__view-row"><span class="ads__view-label">Бюджет:</span><span class="ads__view-value">{{project.budget}}₽</span></div>
         <div class="ads__view-row"><span class="ads__view-label">Клики:</span><span class="ads__view-value">{{project.clicks}}</span></div>
-        
-        {{!-- СТАТИСТИКА В РЕЖИМЕ ПРОСМОТРА --}}
         <div class="ads__view-stats" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
           <h4 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">Статистика кампании</h4>
           <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
@@ -57,11 +54,7 @@
     </div>
   </div>
   {{/unless}}
-
-  <!-- КАРТОЧКА РЕДАКТИРОВАНИЯ -->
   <div class="ads__form-card {{#if isNew}}is-create-mode{{/if}}" id="ads-edit-mode">
-    
-    <!-- 1. HEADER: Название кампании (ДЛЯ СПИСКА) -->
     <div class="ads__card-header">
       <div class="slot-title-group">
           <div class="slot-title-wrapper">
@@ -73,15 +66,9 @@
       <button class="ads__edit-back" id="ads-back-btn" style="margin: 0; font-size: 24px;">✕</button>
       {{/unless}}
     </div>
-
-    <!-- 2. BODY -->
     <div class="ads__card-body">
       <form id="{{#if isNew}}create-form{{else}}edit-form{{/if}}" style="display: contents;">
-        
-        <!-- ЛЕВАЯ КОЛОНКА: Настройки объявления -->
         <div class="ads__form-column-left">
-            
-            <!-- Поле для заголовка НА БАННЕРЕ -->
             <div class="form-group">
                 <label for="headline-input" class="slot-label">Заголовок объявления</label>
                 <input class="ads__item slot-input" id="headline-input" type="text" value="{{project.title}}" placeholder="Введите заголовок для рекламы">
@@ -124,7 +111,6 @@
             </div>
            
             {{#unless isNew}}
-              <!-- СТАТИСТИКА В РЕЖИМЕ РЕДАКТИРОВАНИЯ -->
               <div class="ads__stats-card" style="margin-top: 25px; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; border: 1px solid #dee2e6;">
                 <h4 style="margin: 0 0 15px 0; font-size: 16px; color: #333; display: flex; align-items: center; gap: 8px;">
                   <span>Статистика рекламной кампании</span>
@@ -192,20 +178,14 @@
 
             <div class="ads__img-upload">
               <div id="upload-container" class="upload-container">
-
-                <!-- Кнопка загрузки -->
                 <label for="img-file" class="ads__upload-box" id="upload-box">
                   <span class="ads__upload-icon">＋</span>
                   <span class="ads__upload-text">Загрузите изображение</span>
                   <input id="img-file" type="file" accept="image/jpeg, image/png" hidden />
                 </label>
-
-                <!-- Мелкий текст — ПОКАЗЫВАЕТСЯ ТОЛЬКО ДО ЗАГРУЗКИ -->
                 <small id="upload-hint" class="upload-hint">
                   Поддерживаются JPG, PNG. Максимум 10 МБ.
                 </small>
-
-                <!-- Карточка файла — скрыта по умолчанию -->
                 <div id="uploaded-file-preview" class="uploaded-file-preview" style="display: none;">
                   <div class="uploaded-file-preview__thumb">
                     <img id="uploaded-file-thumb" src="" alt="Preview" />
@@ -222,17 +202,13 @@
               <div class="error-message" id="error-img-file"></div>
             </div>
         </div>
-
-        <!-- ПРАВАЯ КОЛОНКА (Превью) -->
         <div class="ads__form-column-right">
             <h3 class="preview-title" style="margin-bottom: 20px;">Предпросмотр</h3>
             <div id="ad-preview-card" class="preview-card" style="position: sticky; top: 20px;">
                 <div class="preview-image-container">
                     <img id="ad-preview-img" src="{{project.image_url}}" alt="Preview" class="preview-img">
                 </div>
-                <!-- Фон меняется здесь -->
                 <div class="preview-content" id="preview-content-box" style="background-color: {{#if project.bg_color}}{{project.bg_color}}{{else}}#FFFFFF{{/if}};">
-                    <!-- Заголовок берется из headline-input -->
                     <h4 id="ad-preview-title">
                       {{project.title}}
                     </h4>
@@ -242,8 +218,6 @@
         </div>
       </form>
     </div>
-
-    <!-- 3. FOOTER -->
     <div class="ads__card-footer">
       <button id="back-btn" class="btn btn--secondary">Назад</button>
       <div class="ads__footer-actions">

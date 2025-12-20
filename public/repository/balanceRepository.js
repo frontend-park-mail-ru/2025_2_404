@@ -13,10 +13,10 @@ class BalanceRepository {
 const transactions = rawPayments.map(p => {
   const amount = p.amount || 0;
   let description = 'Операция';
-  let type = 'positive'; // по умолчанию
+  let type = 'positive'; 
 
   if (p.payment_method === 'ad_subtract') {
-    type = 'negative'; // ← 🔥 Вот эта строка решает всё!
+    type = 'negative';
     description = 'Списание по рекламной кампании';
   } 
   else if (p.payment_method === 'yooKassa') {

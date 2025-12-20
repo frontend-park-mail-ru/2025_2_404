@@ -61,35 +61,22 @@ export default class ProjectsPage implements PageComponent {
     }
   }
 
-// В файле ProjectsPage.ts
-
-// ProjectsPage.ts
-
   async fetchData(): Promise<void> {
     try {
       if (this.activeTab === 'ads') {
-        // 1. Получаем "сырой" ответ. Используем any, чтобы TS не мешал отладке
         const response: any = await adsRepository.getAll();
         console.log('Ответ от сервера (Ads):', response);
-
-        // 2. Извлекаем массив.
-        // Если пришло { data: [...] }, берем response.data.
-        // Если пришел сразу массив [...], берем response.
         const adsList = Array.isArray(response) ? response : (response.data || []);
-
-        // 3. Маппим данные
         this.allItems = adsList.map((item: any, index: number) => ({
           ...item,
-          // Принудительно ищем поле даты в разных вариантах написания
           createdAt: item.createdAt || item.created_at || item.timestamp,
           status: item.status || 'non-active', 
           displayNumber: index + 1
         }));
         
-        console.log('Обработанные данные (Ads):', this.allItems); // Проверьте это в консоли
+        console.log('Обработанные данные (Ads):', this.allItems); 
 
       } else {
-        // Аналогично для слотов
         const response: any = await slotsRepository.getAll();
         const slotsList = Array.isArray(response) ? response : (response.data || []);
         
