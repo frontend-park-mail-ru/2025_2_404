@@ -21,7 +21,6 @@ export default class SlotDetailPage {
       if (!response.ok) throw new Error('Не удалось загрузить шаблон');
       this.template = Handlebars.compile(await response.text());
     } catch (error) {
-      console.error(error);
       this.template = Handlebars.compile('<h1>Ошибка загрузки</h1>');
     }
   }
@@ -179,7 +178,7 @@ async render() {
                 return false;
             }
             
-            if (value > 100) {
+            if (value > 100000) {
                 minPriceInput.style.borderColor = '#E53E3E';
                 showPriceError('Максимальная стоимость - 100');
                 return false;
@@ -343,7 +342,6 @@ async render() {
                 }
             }).show();
         } catch (e) {
-            console.error(e);
         }
     };
     
@@ -399,7 +397,6 @@ async render() {
         
         
     } catch (error) {
-        console.error('Ошибка при обновлении кода:', error);
         showCopyNotification('Ошибка при обновлении кода', 'error');
     } finally {
         // Восстанавливаем кнопку
@@ -454,7 +451,6 @@ async render() {
                         }, 2000);
                     })
                     .catch(err => {
-                        console.error('Ошибка при копировании:', err);
                         showCopyNotification('Не удалось скопировать', 'error');
                     });
             });

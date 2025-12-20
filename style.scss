@@ -4268,6 +4268,8 @@ body {
       display: flex;
       flex-direction: column;
       justify-content: center;
+      word-wrap: break-word;
+      word-break: break-word;
       padding: 20px;
       padding-right: 30px;
     }
@@ -5187,4 +5189,286 @@ input:disabled + .slider {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+
+/* Основная карточка */
+.ads__form-card {
+  grid-column: 1 / -1 !important;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 0 !important; /* Убираем внутренние отступы, они будут в секциях */
+  overflow: hidden;
+  border: 1px solid #E2E8F0; /* Легкая рамка вокруг всей карточки */
+}
+
+/* 1. Header */
+.ads__card-header {
+  padding: 30px 40px;
+  border-bottom: 1px solid #E2E8F0; /* Линия снизу заголовка */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #F8F5FF;
+}
+
+/* 2. Body Container */
+.ads__card-body {
+  display: flex;
+  align-items: stretch; /* Растягиваем колонки по высоте */
+}
+
+/* Левая колонка */
+.ads__form-column-left {
+  flex: 1.4;
+  padding: 40px;
+  border-right: 1px solid #E2E8F0; /* ВЕРТИКАЛЬНАЯ ЛИНИЯ СПРАВА */
+  background-color: #F8F5FF;
+}
+
+/* Правая колонка */
+.ads__form-column-right {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Можно добавить легкий фон, если как на слотах */
+  background-color: #F8F5FF; 
+}
+
+/* 3. Footer */
+.ads__card-footer {
+  padding: 30px 40px;
+  border-top: 1px solid #E2E8F0; /* Линия сверху кнопок */
+  background-color: #F8F5FF; /* Слегка фиолетовый фон футера как в слотах */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Инпуты как в слотах */
+.slot-label {
+  display: block;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 10px;
+  color: #2D3748;
+}
+
+.slot-input {
+  width: 100%;
+  padding: 14px 16px;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  font-size: 16px;
+  color: #2D3748;
+  outline: none;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.slot-input:focus {
+  border-color: #7C54E8;
+  box-shadow: 0 0 0 3px rgba(124, 84, 232, 0.1);
+}
+
+
+/* Адаптив для мобильных */
+@media (max-width: 1000px) {
+  .ads__card-body {
+    flex-direction: column;
+  }
+  
+  .ads__form-column-left {
+    border-right: none;
+    border-bottom: 1px solid #E2E8F0;
+    padding: 20px;
+  }
+  
+  .ads__form-column-right {
+    padding: 20px;
+    background-color: #FAFAFA;
+  }
+
+  .ads__card-footer {
+    flex-direction: column-reverse;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .ads__footer-actions, #back-btn {
+    width: 100%;
+  }
+  
+  .ads__footer-actions .btn {
+    width: 100%;
+  }
+}
+/* Стили для инпута в хедере */
+.slot-title-input {
+    font-size: 24px;
+    font-weight: 600;
+    color: #2D3748;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 4px 10px;
+    background: transparent;
+    outline: none;
+    min-width: 150px;
+    max-width: 100%;
+    margin-left: -10px;
+}
+.slot-title-input:focus {
+    color: #7C54E8;
+    border-color: #D6BCFA;
+    background-color: #F8F5FF;
+}
+
+.preview-content h4 {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0 0 8px;
+  /* Максимум 3 строки */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.uploaded-file-preview {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #f8fafc;
+  position: relative;
+  max-width: 100%;
+}
+
+.uploaded-file-preview__thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.uploaded-file-preview__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.uploaded-file-preview__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.uploaded-file-preview__name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2d3748;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.uploaded-file-preview__type {
+  font-size: 12px;
+  color: #718096;
+}
+
+.uploaded-file-preview__remove {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #a0aec0;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-left: 8px;
+}
+
+.uploaded-file-preview__remove:hover {
+  background: #e2e8f0;
+  color: #e53e3e;
+}
+
+.ads__upload-box {
+  visibility: visible;
+  position: static;
+}
+
+.ads__upload-box.hidden {
+  visibility: hidden;
+  position: absolute;
+  left: -9999px;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: #718096;
+  margin-top: 4px;
+  text-align: center;
+  width: 100%;
+}
+
+/* Скрываем текст при загрузке */
+.upload-container .upload-hint.hidden {
+  display: none;
+}
+/* Стили для предпросмотра рекламного объявления */
+#ad-preview-card .preview-content {
+  padding: 20px;
+  background-color: #fff;
+  transition: background-color 0.2s;
+}
+
+#ad-preview-card .preview-content h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: inherit;
+  
+  /* 🔥 ВАЖНО: разрешить перенос */
+  white-space: normal !important;
+  word-wrap: break-word;
+  word-break: break-word;
+  
+  /* Ограничение до 3 строк */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#ad-preview-card .preview-content p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: inherit;
+  opacity: 0.9;
+  margin-bottom: 15px;
+  
+  /* Перенос и ограничение до 4 строк */
+  white-space: normal !important;
+  word-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

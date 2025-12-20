@@ -112,7 +112,6 @@ export default class Router {
           page.attachEvents();
         }
       } catch (error) {
-        console.error("Ошибка при рендеринге маршрута:", error);
         this.rootElement.innerHTML = '<h1>Произошла ошибка при загрузке страницы</h1>';
       }
     } else {

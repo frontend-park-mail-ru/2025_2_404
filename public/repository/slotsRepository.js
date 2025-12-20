@@ -19,7 +19,6 @@ class SlotsRepository {
         displayNumber: 0 
       }));
     } catch (err) {
-      console.error('Ошибка загрузки слотов:', err);
       return [];
     }
   }
@@ -28,7 +27,6 @@ async getById(id) {
     try {
       const res = await http.get(`/api/slots/${id}`);
       if (!res) {
-          console.error(`Слот с id=${id} не найден (пустой ответ)`);
           return null;
       }
       const slot = res.data || res;
@@ -45,7 +43,6 @@ async getById(id) {
         createdAt: slot.created_at
       };
     } catch (err) {
-      console.error('Ошибка загрузки слота:', err);
       return null;
     }
   }
@@ -76,7 +73,6 @@ async getById(id) {
         feedLink: link
       };
     } catch (err) {
-      console.error('Ошибка создания:', err);
       throw err;
     }
   }
@@ -95,7 +91,6 @@ async getById(id) {
       await http.put(`/api/slots/${id}`, payload);
       return { id, ...slotData };
     } catch (err) {
-      console.error('Ошибка обновления:', err);
       throw err;
     }
   }
@@ -105,7 +100,6 @@ async getById(id) {
       await http.delete(`/api/slots/${id}`);
       return true;
     } catch (err) {
-      console.error('Ошибка удаления:', err);
       throw err;
     }
   }

@@ -16,7 +16,6 @@ export default class CreateSlotPage {
       if (!response.ok) throw new Error('Не удалось загрузить шаблон');
       this.template = Handlebars.compile(await response.text());
     } catch (error) {
-        console.error(error);
     }
   }
 
@@ -27,7 +26,6 @@ export default class CreateSlotPage {
         const existingSlots = await slotsRepository.getAll();
         nextNum = existingSlots.length + 1;
     } catch (e) {
-        console.warn("Не удалось получить список слотов для нумерации", e);
     }
 
     const context = {
@@ -164,7 +162,6 @@ export default class CreateSlotPage {
                 codeDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
             } catch (err) {
-                console.error(err);
                 generateBtn.disabled = false;
                 generateBtn.textContent = 'Сгенерировать код для вставки';
             }
@@ -253,8 +250,6 @@ export default class CreateSlotPage {
                     }, 2000);
                 })
                 .catch(err => {
-                    console.error('Ошибка при копировании:', err);
-                    
                     // Fallback для старых браузеров
                     const textArea = document.createElement('textarea');
                     textArea.value = codeText;
@@ -303,7 +298,7 @@ export default class CreateSlotPage {
                         router.navigate('/projects');
                     },
                 }).show();
-             } catch(e) { console.error(e); }
+             } catch(e) { }
         });
     }
     

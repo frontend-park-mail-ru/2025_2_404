@@ -64,7 +64,6 @@ export default class LoginPage {
       const templateText = await response.text();
       this.template = Handlebars.compile(templateText);
     } catch (error) {
-      console.error("Не удалось загрузить шаблон для LoginPage:", error);
     }
   }
 

@@ -73,7 +73,6 @@ export default class BalancePage implements PageComponent {
         {{/each}}`;
       this.transactionTemplate = Handlebars.compile(transactionTemplateString);
     } catch (error) {
-      console.error(error);
       this.template = Handlebars.compile('<h1>Ошибка загрузки страницы баланса</h1>');
     }
   }
@@ -99,7 +98,6 @@ export default class BalancePage implements PageComponent {
       this.allTransactions = await DBService.getAllTransactions() || [];
       this.updateDisplay();
     } catch (e) {
-      console.error("Ошибка чтения кэша", e);
     }
 
     await this.refreshData();
@@ -118,7 +116,6 @@ export default class BalancePage implements PageComponent {
       
       this.updateDisplay();
     } catch (e) {
-      console.error("Не удалось обновить данные после операции", e);
     }
   }
 
@@ -136,7 +133,6 @@ export default class BalancePage implements PageComponent {
             } else {
             }
           } catch (error) {
-            console.error(error);
           }
         },
       });
@@ -152,7 +148,6 @@ export default class BalancePage implements PageComponent {
             await balanceRepository.subtractBalance(amount);
             await this.refreshData();
           } catch (error) {
-            console.error(error);
           }
         },
       });

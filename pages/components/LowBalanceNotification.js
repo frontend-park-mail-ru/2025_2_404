@@ -22,7 +22,6 @@ export default class LowBalanceNotification {
       if (!response.ok) throw new Error('Failed to load notification template');
       this.template = Handlebars.compile(await response.text());
     } catch (e) {
-      console.error(e);
     }
   }
 
@@ -69,7 +68,6 @@ export default class LowBalanceNotification {
                 return;
             }
         } catch (err) {
-            console.warn("Не удалось проверить объявления, пропускаем уведомление", err);
             return;
         }
 
@@ -80,7 +78,6 @@ export default class LowBalanceNotification {
         }
       }
     } catch (error) {
-      console.warn("Ошибка проверки баланса для уведомления:", error);
     }
   }
 

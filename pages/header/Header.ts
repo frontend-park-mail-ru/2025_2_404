@@ -37,7 +37,6 @@ export default class Header {
       if (!response.ok) throw new Error('Failed to load header');
       this.template = Handlebars.compile(await response.text());
     } catch (error) {
-      console.error(error);
       this.header.innerHTML = '<p>Ошибка загрузки хедера</p>';
     }
   }
@@ -116,7 +115,6 @@ export default class Header {
       this.header.innerHTML = this.template({ isAuthenticated, user, navItems });
 
     } catch (error) {
-      console.log(error);
     } finally {
       this.#updating = false;
     }

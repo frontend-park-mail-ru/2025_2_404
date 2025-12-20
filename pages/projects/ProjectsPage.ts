@@ -57,39 +57,22 @@ export default class ProjectsPage implements PageComponent {
       if (!response.ok) throw new Error('Error loading template');
       this.template = Handlebars.compile(await response.text());
     } catch (error) {
-      console.error(error);
     }
   }
-
-// В файле ProjectsPage.ts
-
-// ProjectsPage.ts
 
   async fetchData(): Promise<void> {
     try {
       if (this.activeTab === 'ads') {
-        // 1. Получаем "сырой" ответ. Используем any, чтобы TS не мешал отладке
         const response: any = await adsRepository.getAll();
-        console.log('Ответ от сервера (Ads):', response);
-
-        // 2. Извлекаем массив.
-        // Если пришло { data: [...] }, берем response.data.
-        // Если пришел сразу массив [...], берем response.
         const adsList = Array.isArray(response) ? response : (response.data || []);
-
-        // 3. Маппим данные
         this.allItems = adsList.map((item: any, index: number) => ({
           ...item,
-          // Принудительно ищем поле даты в разных вариантах написания
           createdAt: item.createdAt || item.created_at || item.timestamp,
           status: item.status || 'non-active', 
           displayNumber: index + 1
-        }));
-        
-        console.log('Обработанные данные (Ads):', this.allItems); // Проверьте это в консоли
+        })); 
 
       } else {
-        // Аналогично для слотов
         const response: any = await slotsRepository.getAll();
         const slotsList = Array.isArray(response) ? response : (response.data || []);
         
@@ -100,7 +83,6 @@ export default class ProjectsPage implements PageComponent {
         }));
       }
     } catch (err) {
-      console.error('Ошибка при загрузке данных:', err);
       this.allItems = [];
     }
   }

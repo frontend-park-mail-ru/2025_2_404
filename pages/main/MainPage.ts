@@ -29,7 +29,6 @@ export default class MainPage implements PageComponent {
       }
       this.template = Handlebars.compile(await response.text());
     } catch (error) {
-      console.error(error);
       this.template = Handlebars.compile('<h1>Не удалось загрузить страницу</h1>');
     }
   }

@@ -39,7 +39,6 @@ export default class SlotStatisticsPage implements PageComponent {
       if (!response.ok) throw new Error('Не удалось загрузить шаблон');
       this.template = Handlebars.compile(await response.text());
     } catch (error) {
-      console.error(error);
       this.template = Handlebars.compile('<h1>Ошибка загрузки шаблона</h1>');
     }
   }
@@ -140,7 +139,6 @@ export default class SlotStatisticsPage implements PageComponent {
       this.updateTotals();
       this.updateChart();
     } catch (err) {
-      console.error('Ошибка при загрузке статистики:', err);
       this.showMessage('Ошибка сервера. Пожалуйста, попробуйте зайти позже', true);
     }
   }

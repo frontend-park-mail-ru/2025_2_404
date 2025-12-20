@@ -48,7 +48,6 @@ export default class MainAdvertisementView {
         )
         .join('');
     } catch (e) {
-      console.warn('GET /ads error:', e);
       box.innerHTML =
         '<div style="color:red">Не удалось загрузить объявления</div>';
     }

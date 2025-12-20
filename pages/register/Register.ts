@@ -184,7 +184,6 @@ export default class RegisterPage {
       
       this.onSuccess();
     } catch (error) {
-      console.error("Ошибка регистрации:", error);
       const httpError = error as HttpError;
       if (httpError && httpError.status === 409) {
         this.emailInput.showError('Пользователь с таким email уже существует');

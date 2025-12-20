@@ -70,7 +70,6 @@ const keyPath = path.join(__dirname, 'cert', 'key.pem');
 let server;
 let protocol = 'http';
 if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
-    console.log('Найдены сертификаты. Запуск в режиме HTTPS.');
     try {
         const options = {
             key: fs.readFileSync(keyPath),
@@ -79,15 +78,11 @@ if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
         server = https.createServer(options, requestHandler);
         protocol = 'https';
     } catch (e) {
-        console.error("Ошибка чтения сертификатов, откат на HTTP:", e.message);
         server = http.createServer(requestHandler);
     }
 } else {
-    console.log('Сертификаты не найдены. Запуск в режиме HTTP (для Nginx).');
     server = http.createServer(requestHandler);
 }
 
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Сервер запущен: ${protocol}://localhost:${PORT}`);
-    console.log(`Раздача файлов из: ${ROOT}`);
 });

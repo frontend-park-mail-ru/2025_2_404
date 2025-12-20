@@ -10,14 +10,12 @@ const adsRepository = {
       const list = Array.isArray(freshAds) ? freshAds : (freshAds as any).data || [];
       
       if (!Array.isArray(list)) {
-         console.warn("API не вернул массив объявлений", freshAds);
          return [];
       }
 
       await DBService.saveAllAds(list.map((ad: any) => ({ ...ad, timestamp: new Date().toISOString() })));
       return list;
     } catch (error) {
-      console.warn("Ошибка загрузки, пробуем кэш...", error);
       const localData = await DBService.getAllAds();
       return localData || [];
     }
@@ -30,7 +28,6 @@ const adsRepository = {
       await DBService.saveAd({ ...freshAd, timestamp: new Date().toISOString() });
       return freshAd;
     } catch (error) {
-      console.warn(`Ошибка сети ID=${id}, ищем в кэше.`);
       return await DBService.getAdById(id) || null;
     }
   },

@@ -18,6 +18,7 @@
                     <div class="form-group">
                         <label class="slot-label">Минимальная стоимость показа объявления</label>
                         <input type="number" id="min-price" class="slot-input" placeholder="Введите число" value="{{slot.minPrice}}">
+                        <div class="error-message" id="error-min-price"></div>
                     </div>
 
                     <div class="form-group">
@@ -81,15 +82,14 @@
                 <h3 class="preview-title">Предпросмотр</h3>
                 <div class="preview-card" id="preview-card">
                     <div class="preview-image-container">
-                        <img src="/public/assets/cat_meme.png" alt="Реклама" class="preview-img">
+                        <img src="/public/assets/default.jpg" alt="Реклама" class="preview-img">
                         <button class="preview-close">×</button>
                     </div>
                     <div class="preview-content">
-                        <h4 id="preview-title">Лучшая реклама</h4>
+                        <h4 id="preview-title">Моя реклама</h4>
                         <p id="preview-desc">
-                            Описание, много текста Описание, много текста. Описание, много текста...
+                            Тут будет описание вашей рекламной кампании
                         </p>
-                        <span class="preview-link">luchshayareklama.ru</span>
                     </div>
                 </div>
             </div>

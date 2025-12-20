@@ -58,6 +58,7 @@ export interface Ad {
 
 export interface AdFormData {
   title: string;
+  headline: string; 
   description: string;
   domain: string;
   budget: string | number;
@@ -168,12 +169,11 @@ export interface RegisterPageProps {
 }
 
 export interface Transaction {
-  id?: number;
-  date: string;
-  description: string;
-  time: string;
-  amount: string | number;
+  id: string;
+  amount: number;
+  date: string; 
   type: 'positive' | 'negative';
+  description: string;
 }
 
 export interface TransactionGroup {

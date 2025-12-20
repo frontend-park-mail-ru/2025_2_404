@@ -46,7 +46,6 @@ export default class ProfilePage implements PageComponent {
       if (!response.ok) throw new Error('Не удалось загрузить шаблон страницы профиля');
       this.template = Handlebars.compile(await response.text());
     } catch (error) {
-      console.error(error);
       this.template = Handlebars.compile('<h1>Ошибка загрузки профиля</h1>');
     }
   }
@@ -209,7 +208,6 @@ export default class ProfilePage implements PageComponent {
         onClick: () => this.handleLogout(),
       });
     } catch (error) {
-      console.error('Ошибка при инициализации компонентов:', error);
     }
   }
 
@@ -221,7 +219,6 @@ export default class ProfilePage implements PageComponent {
       try {
         this.user = await AuthService.loadProfile();
       } catch (e) {
-        console.error("Не удалось загрузить профиль", e);
       }
     }
 
@@ -410,7 +407,6 @@ export default class ProfilePage implements PageComponent {
       this.user = updatedUser;
       new ConfirmationModal({ message: "Данные сохранены!", onConfirm: () => {} }).show();
     } catch (error) {
-      console.error('Ошибка при обновлении профиля:', error);
       this.components.loginInput?.showError('Не удалось сохранить изменения. Попробуйте позже');
     }
   }
