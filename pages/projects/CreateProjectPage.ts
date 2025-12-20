@@ -170,48 +170,65 @@ removeBtn?.addEventListener('click', (e) => {
     }
   });
 
-    imgInput?.addEventListener('change', (e) => {
-    const file = (e.target as HTMLInputElement).files?.[0];
-    if (!file) {
-      resetFilePreview();
-      return;
-    }
-    const allowedTypes = ['image/jpeg', 'image/png'];
-    const maxSize = 10 * 1024 * 1024;
+imgInput?.addEventListener('change', (e) => {
+  const file = (e.target as HTMLInputElement).files?.[0];
+  if (!file) {
+    resetFilePreview();
+    if (previewImg) previewImg.src = '/public/assets/default.jpg';
+    return;
+  }
+  
+  const allowedTypes = ['image/jpeg', 'image/png'];
+  const maxSize = 10 * 1024 * 1024;
 
-    if (!allowedTypes.includes(file.type)) {
-      if (errorEl) errorEl.textContent = 'Поддерживаются только JPG или PNG';
-      resetFilePreview();
-      return;
-    }
+  if (errorEl) errorEl.textContent = '';
+  imgInput?.classList.remove('input--error');
 
-    if (file.size > maxSize) {
-      if (errorEl) errorEl.textContent = 'Максимум размер — 10 МБ';
-      resetFilePreview();
-      return;
-    }
-    const img = new Image();
-    const reader = new FileReader();
-    reader.onerror = () => {
-      if (errorEl) errorEl.textContent = 'Ошибка чтения файла. Попробуйте другой.';
-      resetFilePreview();
+  if (!allowedTypes.includes(file.type)) {
+    if (errorEl) errorEl.textContent = 'Поддерживаются только JPG или PNG';
+    imgInput?.classList.add('input--error');
+    resetFilePreview();
+    if (previewImg) previewImg.src = '/public/assets/default.jpg';
+    return;
+  }
+
+  if (file.size > maxSize) {
+    if (errorEl) errorEl.textContent = 'Максимум размер — 10 МБ';
+    imgInput?.classList.add('input--error');
+    resetFilePreview();
+    if (previewImg) previewImg.src = '/public/assets/default.jpg';
+    return;
+  }
+  
+  const img = new Image();
+  const reader = new FileReader();
+  
+  reader.onerror = () => {
+    if (errorEl) errorEl.textContent = 'Ошибка чтения файла. Попробуйте другой.';
+    resetFilePreview();
+    if (previewImg) previewImg.src = '/public/assets/default.jpg';
+  };
+  
+  reader.onload = (event) => {
+    img.src = event.target?.result as string;
+
+    img.onload = () => {
+      this.selectedFile = file;
+      showFilePreview(file);
+      if (previewImg) {
+        previewImg.src = img.src;
+      }
     };
-    reader.onload = (event) => {
-      img.src = event.target?.result as string;
 
-      img.onload = () => {
-        this.selectedFile = file;
-        showFilePreview(file);
-      };
-
-      img.onerror = () => {
-        if (errorEl) errorEl.textContent = 'Ошибка загрузки: файл не является изображением.';
-        resetFilePreview();
-      };
+    img.onerror = () => {
+      if (errorEl) errorEl.textContent = 'Ошибка загрузки: файл не является изображением.';
+      resetFilePreview();
+      if (previewImg) previewImg.src = '/public/assets/default.jpg';
     };
+  };
 
-    reader.readAsDataURL(file);
-  });
+  reader.readAsDataURL(file);
+});
   ['#back-btn', '#breadcrumb-ads'].forEach(sel => {
     document.querySelector(sel)?.addEventListener('click', e => {
       e.preventDefault();
